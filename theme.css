@@ -1,0 +1,20 @@
+body {background-color:#b0c4de;}
+
+div {
+    background: #ccc;
+    margin: 20px;
+    outline: 1px solid black;
+}
+
+ul {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+h2 {text-align:right}
+
+body {
+   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+   font-weight: 300;
+}
