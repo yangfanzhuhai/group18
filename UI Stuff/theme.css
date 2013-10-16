@@ -1,20 +1,42 @@
-body {background-color:#b0c4de;}
+body {
+	background-color:#b0c4de;
+}
 
-div {
-    background: #ccc;
+.post {
+    background: #3399FF;
+    margin: 10px;
+    border:2px solid;
+    border-color:#66CCFF;
+	border-radius:25px;
+
+	padding: 10px;
+}
+
+.post_options {
+	background: #3399FF;
     margin: 20px;
-    outline: 1px solid black;
+    border:2px solid;
+    border-color:#66CCFF;
+	border-radius:25px;
+	box-shadow: 5px 5px 2px #888888;
+	padding: 5px;
+	
 }
 
-ul {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
+.stream {
+	background: #33CCFF;
+    margin: 2px;
+    border:2px solid;
+    border-color:#66CCFF;
+	border-radius:25px;
+	box-shadow: 5px 5px 2px #888888;
+	padding: 1px;
+	
 }
 
-h2 {text-align:right}
+h1 {text-align:right}
 
 body {
-   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue";
    font-weight: 300;
 }
