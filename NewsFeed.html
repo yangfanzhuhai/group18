@@ -49,7 +49,7 @@ function postToFeed() {
 	if (name_text != "" && message_text != "") {
 		
 		var post = document.createElement("div");
-		post.id = "post1"
+		post.id = "post" + post_count.toString();
 		
 		var text = document.createElement("input");
 		text.type = "text";
@@ -76,9 +76,9 @@ function postToFeed() {
 			
 			if (user != "" && message != "") {
 			
-				var response = document.createTextNode(user + " said:    " + 						message);
+				var response = document.createTextNode(user + " said:    " + message + "\n");
 		
-				document.getElementById("post1").appendChild(response);
+				document.getElementById(post.id).appendChild(response);
 			}
 	
 		};
