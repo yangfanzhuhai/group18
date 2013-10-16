@@ -1,108 +1,103 @@
 <link rel="stylesheet" type="text/css" href ="theme.css">
 <html>
-<head>
-<style>
+    <head>
+        <style>
+        </style>
+    </head>
 
-</style>
-</head>
+    <body>
 
-<body>
+        <h1>News Feed</h1>
 
+        <div id = "post_options">
 
-<h1>News Feed</h1>
+            <input name="name" type="text" maxlength="512"
+            placeholder="Your name" id="name"/>
 
-<div id = "post_options">
+            <input name="txt" type="text" maxlength="512"
+            placeholder="Your message" id="txt"/>
 
-	<input name="name" type="text" maxlength="512"
-		placeholder="Your name" id="name"/>
+            <button type="button" onclick="postToFeed()">
+                Post to Feed
+            </button>
 
-	<input name="txt" type="text" maxlength="512"
-		placeholder="Your message" id="txt"/>
-		 
-		
-	<button type="button" onclick="postToFeed()">Post to Feed</button>
-	
-</div>
+        </div>
 
+        <div id = "posts" class = "float">
+            <p class="posts_title">
+                Posts:
+            </p>
+        </div>
 
-<div id = "posts" class = "float">
-	<p class="posts_title">Posts:</p>
-</div>
+        <div id = "stream" class = "container">
 
-<div id = "stream" class = "container">
+        </div>
 
-</div>
+        <script>
+            var posts = new Array();
+            var post_count = 0;
 
-<script>
+            function validateMessage(name_text, message_text) {
+                if (name_text == "" || message_text == "") {
+                    alert("Enter your name and a message.");
+                    return false;
+                }
+                return true;
+            }
 
-var posts = new Array();
-var post_count = 0;
+            function postToFeed() {
 
+                var currentdate = new Date();
 
-function postToFeed() {
+                var name_text = document.getElementById("name").value;
+                var message_text = document.getElementById("txt").value;
 
-	var currentdate = new Date();
-	
-	var name_text = document.getElementById("name").value;
-	var message_text = document.getElementById("txt").value;
-	
-	if (name_text != "" && message_text != "") {
-		
-		var post = document.createElement("div");
-		post.id = "post" + post_count.toString();
-		
-		var text = document.createElement("input");
-		text.type = "text";
-		
-		document.getElementById("stream").appendChild(post);	
+                if (validateMessage (name_text, message_text)) {
 
-	
-		var date_and_time = document.createTextNode(currentdate.getDate() + "/"
-					+ (currentdate.getMonth()+1)  + "/" 
-					+ currentdate.getFullYear() + " at "  
-					+ currentdate.getHours() + ":"  
-					+ currentdate.getMinutes() + ":" 
-					+ currentdate.getSeconds() + "        ");
-					
-					
-		var user = document.createTextNode(name_text + ":   ");
-		var message = document.createTextNode(message_text);
-					
-		var reply_button = document.createElement("button");
-		reply_button.innerHTML = 'Reply';
-		reply_button.onclick = function() {
-			var user = prompt('What is your name?');
-			var message = prompt("What would you like to say?");
-			
-			if (user != "" && message != "") {
-			
-				var response = document.createTextNode(user + " said:    " + message + "\n");
-		
-				document.getElementById(post.id).appendChild(response);
-			}
-	
-		};
-	
-					
-		post.appendChild(date_and_time);
-		post.appendChild(user);
-		post.appendChild(message);
-		post.appendChild(reply_button);
-						
-		document.getElementById("name").value = "";
-		document.getElementById("txt").value = "";
-		
-		posts[post_count] = post;
-		
-		post_count += 1;
-					
-	} else {
-		
-		alert("Enter your name and a message.");
-		
-	}
-}
-</script>
-</body>
+                    var post = document.createElement("div");
+                    post.id = "post" + post_count.toString();
+
+                    var text = document.createElement("input");
+                    text.type = "text";
+
+                    document.getElementById("stream").appendChild(post);
+
+                    var date_and_time = document.createTextNode(currentdate.getDate() + "/" + (currentdate.getMonth() + 1) + "/" + currentdate.getFullYear() + " at " + currentdate.getHours() + ":" + currentdate.getMinutes() + ":" + currentdate.getSeconds() + "        ");
+
+                    var user = document.createTextNode(name_text + ":   ");
+                    var message = document.createTextNode(message_text);
+
+                    var reply_button = document.createElement("button");
+                    reply_button.innerHTML = 'Reply';
+                    reply_button.onclick = function() {
+                        var user = prompt('What is your name?');
+                        var message = prompt("What would you like to say?");
+
+                        if (user != "" && message != "") {
+
+                            
+                            var response = document.createElement("div");
+                            var response_text = document.createTextNode(user + " said:    " + message);
+                            response.appendChild(response_text);
+                            document.getElementById(post.id).appendChild(response);
+                        }
+
+                    };
+
+                    post.appendChild(date_and_time);
+                    post.appendChild(user);
+                    post.appendChild(message);
+                    post.appendChild(reply_button);
+
+                    document.getElementById("name").value = "";
+                    document.getElementById("txt").value = "";
+
+                    posts[post_count] = post;
+
+                    post_count += 1;
+                }
+            }
+        </script>
+    </body>
 </html>
 
