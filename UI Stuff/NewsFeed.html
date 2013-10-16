@@ -70,7 +70,7 @@ function postToFeed() {
     if (name_text != "" && message_text != "") {
         
         var post = document.createElement("div");
-        post.id = "post" + post_count;
+        post.id = "post" + post_count.toString();
         post.className = "post";
         
         var text = document.createElement("input");
@@ -111,7 +111,7 @@ function postToFeed() {
                 var response = document.createElement("div");
                 response.innerHTML = "     " + user + " said:    " +                                            message;
         
-                document.getElementById("post0").appendChild(response);
+                document.getElementById(post.id).appendChild(response);
             }
         };
     
