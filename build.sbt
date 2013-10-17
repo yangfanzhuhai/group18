@@ -1,4 +1,4 @@
-name := "restLayer"
+name := "Progress"
 
 version := "1.0-SNAPSHOT"
 
