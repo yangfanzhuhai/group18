@@ -1,35 +1,36 @@
 body {
-	background-color:#b0c4de;
+	background-color:#FFFFFF;
 }
 
 .post {
-    background: #3399FF;
+    background: #FFFFFF;
     margin: 10px;
     border:2px solid;
-    border-color:#66CCFF;
-	border-radius:25px;
+    border-color:#AF3838;
+	border-radius:5px;
 
 	padding: 10px;
 }
 
+
 .post_options {
-	background: #3399FF;
+	background: #C0C0C0;
     margin: 20px;
     border:2px solid;
-    border-color:#66CCFF;
-	border-radius:25px;
-	box-shadow: 5px 5px 2px #888888;
+    border-color:#AF3838;
+	border-radius:5px;
+
 	padding: 5px;
 	
 }
 
 .stream {
-	background: #33CCFF;
+	background: #C0C0C0;
     margin: 2px;
     border:2px solid;
-    border-color:#66CCFF;
-	border-radius:25px;
-	box-shadow: 5px 5px 2px #888888;
+    border-color:#AF3838;
+	border-radius:5px;
+
 	padding: 1px;
 	
 }
