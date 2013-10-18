@@ -8,13 +8,18 @@ public class MessageObject extends ObjectModel {
 		return message;
 	}
 
-	private void setMessage(String message) {
+	public void setMessage(String message) {
 		this.message = message;
 	}
 
 	@Override
 	public ObjectType getType() {
 		return ObjectType.MESSAGE;
+	}
+
+	@Override
+	public String toJSON() {
+		return "{\"objectType\" : \"" + getType() + "\", \"message\" : \"" + getMessage() + "\"}";
 	}
 
 }

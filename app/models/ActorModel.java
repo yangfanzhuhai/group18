@@ -8,9 +8,11 @@ public abstract class ActorModel {
 	public String getDisplayName() {
 		return displayName;
 	}
-	protected void setDisplayName(String displayName) {
+	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
 	public abstract ActorType getType();
+	
+	public abstract String toJSON();
 
 }
