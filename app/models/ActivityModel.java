@@ -9,8 +9,9 @@ public class ActivityModel {
 	private String verb;
 	private ObjectModel object;
 	private TargetModel target;
-	
-	public ActivityModel(){}
+
+	public ActivityModel() {
+	}
 
 	public ActivityModel(String jsonString) {
 
