@@ -6,10 +6,9 @@ import models.ActivityModel;
 import models.MessageObject;
 import models.PersonActor;
 import models.TargetModel;
-import play.*;
-import play.mvc.*;
-
-import views.html.*;
+import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.index;
 
 public class Application extends Controller {
 
