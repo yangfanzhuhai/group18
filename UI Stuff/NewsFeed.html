@@ -1,6 +1,8 @@
 <link rel="stylesheet" type="text/css" href ="theme.css">
 <html>
 <head>
+
+
 <style>
 
 ul
@@ -17,22 +19,41 @@ li {
 }
 
 </style>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+<script language="javascript" type="text/javascript">
+function limitText(limitField, limitCount, limitNum) {
+	if (limitField.value.length > limitNum) {
+		limitField.value = limitField.value.substring(0, limitNum);
+	} else {
+		limitCount.value = limitNum - limitField.value.length;
+	}
+}
+</script>
+
+
 </head>
 
 <body>
 
 
-<img src="/Users/robertcox/Pictures/progress_all.jpg" alt="some_text"
+<img src="progress_all.jpg" alt="some_text"
 	width="200" >
 
 <div id = "post_options" class = "post_options" align = "center">
 
 	<input name="name" type="text" maxlength="512"
 		placeholder="Your name" id="name"/>
-
-	<input name="txt" type="text" maxlength="512"
-		placeholder="Your message" id="txt"/>
-		 
+		
+		
+<form name="myform">
+<textarea name="limitedtextarea" type="text" id = "limitedtextfield"
+onKeyDown="limitText(this.form.limitedtextfield,this.form.countdown,140);" 
+onKeyUp="limitText(this.form.limitedtextfield,this.form.countdown,140);" maxlength="140"> </textarea><br>
+<font size="1">(Maximum characters: 140)<br>
+You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
+</form>
+ 	
 		
 	<button type="button" onclick="postToFeed()">Post to Feed</button>
 	
@@ -49,10 +70,11 @@ li {
 
 
 <ul>
-<li><a href="whiteboard.asp">Whiteboard</a></li>
+<li><a href="whiteboard.asp">Build History</a></li>
 <li><a href="news.asp">Git Commits</a></li>
 <li><a href="contact.asp">Task List</a></li>
 <li><a href="about.asp">About</a></li>
+<li><a href="signout.asp">Log out</a></li>
 </ul>
 
 
@@ -67,7 +89,7 @@ function postToFeed() {
 	var currentdate = new Date();
 	
 	var name_text = document.getElementById("name").value;
-	var message_text = document.getElementById("txt").value;
+	var message_text = document.getElementById("limitedtextfield").value;
 	
 	if (name_text != "" && message_text != "") {
 		
@@ -78,7 +100,15 @@ function postToFeed() {
 		var text = document.createElement("input");
 		text.type = "text";
 		
-		document.getElementById("stream").insertBefore(post, "stream");	
+		if (post_count > 0) {
+
+			var stream = document.getElementById("stream");
+			stream.insertBefore(post, stream.childNodes[0]);
+			//post.before(document.getElementById(top_post));
+		} else {
+			document.getElementById("stream").insertBefore(post);
+		}
+		
 
 	
 		var date_and_time = document.createElement("div");
@@ -99,32 +129,55 @@ function postToFeed() {
 		var message = document.createElement("div");
 		message.id = "post0message";
 		message.innerHTML = message_text;
+		
+		var reply_name = document.createElement("input");
+		reply_name.placeholder="Your name";
+		
+		var reply_message = document.createElement("input");
+		reply_message.placeholder = "Your message"
+		reply_message.type = "text";
 					
 		var reply_button = document.createElement("button");
 		reply_button.innerHTML = 'Reply';
 		reply_button.align = "right";
 		
+		//reply_message.onkeydown(limitText(this.form.limitedtextfield,
+		//						this.form.countdown,140));
+		//reply_message.onkeyup(limitText(this.form.limitedtextfield,
+		//						this.form.countdown,140));		
+		
+		post.appendChild(date_and_time);
+		post.appendChild(user);
+		post.appendChild(message);
+		post.appendChild(reply_name);
+		post.appendChild(reply_message);
+		post.appendChild(reply_button);
+
+		
 		reply_button.onclick = function() {
-			var user = prompt('What is your name?');
-			var message = prompt("What would you like to say?");
+			var user = reply_button.parentNode.childNodes[3].value;
+			var message = reply_button.parentNode.childNodes[4].value;
 			
 			if (user != null && message != null) {
 			
 				var response = document.createElement("div");
 				response.innerHTML = "     " + user + " said:    " + 											message;
-		
-				document.getElementById("post0").appendChild(response);
+				
+				var postname = reply_button.parentNode.id;
+				document.getElementById(postname).appendChild(response);
+				
+				reply_button.parentNode.childNodes[3].value = "";
+				reply_button.parentNode.childNodes[4].value = "";
+				
 			}
 		};
+		
+		
+		//CODE HERE TO SEND POST INFORMATION TO REST SERVICE
 	
-					
-		post.appendChild(date_and_time);
-		post.appendChild(user);
-		post.appendChild(message);
-		post.appendChild(reply_button);
 						
 		document.getElementById("name").value = "";
-		document.getElementById("txt").value = "";
+		document.getElementById("limitedtextfield").value = "";
 		
 		posts[post_count] = post;
 		
