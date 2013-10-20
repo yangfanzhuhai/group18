@@ -27,66 +27,27 @@ public class MongoLink {
 	private static DB db;
 	private static DBCollection newsFeed;
 	
-	
+	//a link from Java to the MongoDB
 	public MongoLink() throws UnknownHostException {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		newsFeed = db.getCollection("newsFeed");
-		System.out.println("Complete");
-		
-		/*Set<String> colls = db.getCollectionNames();
-
-		for (String s : colls) {
-		    System.out.println(s);
-		}
-		
-		DBCursor cursor = newsFeed.find();
-		try {
-		   while(cursor.hasNext()) {
-		       System.out.println(cursor.next());
-		   }
-		} 
-		finally {
-			   cursor.close();
-		   }
-		
-		
-		BasicDBObject testNews = new BasicDBObject("published", "Now");
-		testNews.append("actor", new BasicDBObject("objectType", "PERSON").append("displayName", "Piotr"));
-		testNews.append("verb", "shouted");
-		testNews.append("object", new BasicDBObject("objectType", "MESSAGE").append("message", "MONGOMONGO" ));
-		testNews.append("target", "");
-		
-		newsFeed.insert(testNews);
-		
-		System.out.println("\n Inserted");
-		
-		cursor=newsFeed.find();
-		
-		cursor = newsFeed.find().skip((int) (newsFeed.getCount() - 1));
-		
-		try {
-		   while(cursor.hasNext()) {
-		       System.out.println(cursor.next());
-		   }
-		} finally {
-		   cursor.close();
-		} */
-		
-		
+		System.out.println("Connection Complete");
 	}
 
-	
+	//for testing
 	public static void main(String[] args) throws UnknownHostException {
 		MongoLink ml = new MongoLink();
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
+
+		//Prints last 20 items of newsFeed
 		ArrayList<DBObject> list = ml.getNewsFeed(20);
-		
 		for(DBObject o : list) {
 			System.out.println(o);
 		}
 		
-		boolean insertSuccess = ml.insertNews(ml.dbFormat("Today", "PERSON", "Rob", "yelled", "MESSAGE", "Databases!!", ""));
+		//Checks inserting into newsFeed and prints new latest 20
+		boolean insertSuccess = ml.insertNews(ml.dbFormat("Today", "PERSON", "Yangfan", "whispered", "MESSAGE", "im replying", "notthewall"));
 		if(insertSuccess) {
 			System.out.println("\n Insert Success");
 			list = ml.getNewsFeed(20);
@@ -97,7 +58,8 @@ public class MongoLink {
 			System.out.println("insert failed");
 		}
 	}
-	
+
+	//returns the last postLimit posts
 	public ArrayList<DBObject> getNewsFeed(int postLimit) {
 		int postCount = (int) newsFeed.getCount();
 		if(postLimit > postCount) {
@@ -106,6 +68,7 @@ public class MongoLink {
 		return (ArrayList<DBObject>) newsFeed.find().skip(postCount - postLimit).toArray();
 	}
 	
+	//use dbFormat to insert a formed message into the newsFeed DB
 	public boolean insertNews(DBObject obj) {
 		int oldCount = (int) newsFeed.getCount();
 		
@@ -119,6 +82,7 @@ public class MongoLink {
 			return false;
 	}
 	
+	//shortcut for testing inserting in correct form
 	public BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
 		BasicDBObject news = new BasicDBObject("published", published);
 		news.append("actor", new BasicDBObject("objectType", actorType).append("displayName", dispName));
