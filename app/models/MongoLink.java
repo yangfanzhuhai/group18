@@ -5,6 +5,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Set;
 
+import org.bson.BasicBSONObject;
+
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
@@ -61,11 +63,21 @@ public class MongoLink {
 
 	//returns the last postLimit posts
 	public ArrayList<DBObject> getNewsFeed(int postLimit) {
-		int postCount = (int) newsFeed.getCount();
-		if(postLimit > postCount) {
-			postLimit = postCount;
+
+	//	DBCursor cursor = newsFeed.find(new BasicDBObject("target", ""));
+	//	cursor.
+	//	cursor.length();
+	//	int postCount = (int) newsFeed.getCount();
+	//	if(postLimit > postCount) {
+	//		postLimit = postCount;
+	//	}
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", "")).sort(new BasicDBObject("_id", -1)).toArray();
+		for(DBObject x: list)
+		{
+			list.addAll(list.indexOf(x) + 1, getReply((Integer) ((DBObject) x.get("_id")).get("$oid")));
 		}
-		return (ArrayList<DBObject>) newsFeed.find().skip(postCount - postLimit).toArray();
+		
+		return list;
 	}
 	
 	//use dbFormat to insert a formed message into the newsFeed DB
@@ -90,5 +102,15 @@ public class MongoLink {
 		news.append("object", new BasicDBObject("objectType", objType).append("message", msg ));
 		news.append("target", tar);
 		return news;
+	}
+	
+	private ArrayList<DBObject> getReply(int id) {
+		
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", id)).toArray();
+		
+		if(!list.isEmpty())
+			list.addAll(getReply((Integer) ((DBObject) list.get(0).get("_id")).get("$oid")));
+		
+		return list;
 	}
 }
