@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import org.bson.BasicBSONObject;
+import org.bson.types.ObjectId;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -49,16 +50,16 @@ public class MongoLink {
 		}
 		
 		//Checks inserting into newsFeed and prints new latest 20
-		boolean insertSuccess = ml.insertNews(ml.dbFormat("Today", "PERSON", "Yangfan", "whispered", "MESSAGE", "im replying", "notthewall"));
-		if(insertSuccess) {
-			System.out.println("\n Insert Success");
-			list = ml.getNewsFeed(20);
-			for(DBObject o : list) {
-				System.out.println(o);
-			}
-		} else {
-			System.out.println("insert failed");
-		}
+//		boolean insertSuccess = ml.insertNews(ml.dbFormat("Today", "PERSON", "Yangfan", "whispered", "MESSAGE", "im replying", "notthewall"));
+//		if(insertSuccess) {
+//			System.out.println("\n Insert Success");
+//			list = ml.getNewsFeed(20);
+//			for(DBObject o : list) {
+//				System.out.println(o);
+//			}
+//		} else {
+//			System.out.println("insert failed");
+//		}
 	}
 
 	//returns the last postLimit posts
@@ -71,10 +72,13 @@ public class MongoLink {
 	//	if(postLimit > postCount) {
 	//		postLimit = postCount;
 	//	}
-		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", "")).sort(new BasicDBObject("_id", -1)).toArray();
-		for(DBObject x: list)
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", "")).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
+		int i = 0;
+		while(i < list.size())
 		{
-			list.addAll(list.indexOf(x) + 1, getReply((Integer) ((DBObject) x.get("_id")).get("$oid")));
+			ArrayList<DBObject> temp = getReply(list.get(i).get("_id").toString());
+			list.addAll(i + 1, temp);
+			i += temp.size() + 1;
 		}
 		
 		return list;
@@ -104,12 +108,12 @@ public class MongoLink {
 		return news;
 	}
 	
-	private ArrayList<DBObject> getReply(int id) {
+	private ArrayList<DBObject> getReply(String id) {
 		
 		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", id)).toArray();
 		
 		if(!list.isEmpty())
-			list.addAll(getReply((Integer) ((DBObject) list.get(0).get("_id")).get("$oid")));
+			list.addAll(getReply(list.get(0).get("_id").toString()));
 		
 		return list;
 	}
