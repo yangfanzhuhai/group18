@@ -32,12 +32,14 @@ public class MongoLink {
 	private MongoClient mongoClient;
 	private static DB db;
 	private static DBCollection newsFeed;
+	private static DBCollection users;
 	
 	//a link from Java to the MongoDB
 	public MongoLink() throws UnknownHostException {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		newsFeed = db.getCollection("newsFeed");
+		users = db.getCollection("userAccounts");
 		System.out.println("Connection Complete");
 	}
 
@@ -54,6 +56,14 @@ public class MongoLink {
 			}
 		}
 		
+		if(ml.checkLogin("Piotr","pass"))
+			System.out.println("Success");
+		
+	/*	ml.registerNewUser(new BasicDBObject("username", "Rob").append("password", "pass2"));
+		
+		if(ml.checkLogin("Rob", "pass2"))
+			System.out.println("Success2");
+		
 		//Checks inserting into newsFeed and prints new latest 20
 //		boolean insertSuccess = ml.insertNews(ml.dbFormat("Today", "PERSON", "Yangfan", "whispered", "MESSAGE", "im replying", "notthewall"));
 //		if(insertSuccess) {
@@ -64,7 +74,7 @@ public class MongoLink {
 //			}
 //		} else {
 //			System.out.println("insert failed");
-//		}
+//		}*/
 	}
 
 	//returns the last postLimit posts with replies
@@ -95,7 +105,8 @@ public class MongoLink {
 	}
 	
 	//use dbFormat to insert a formed message into the newsFeed DB
-	public static boolean insertNews(DBObject obj) {
+	public boolean insertNews(DBObject obj) {
+		
 		int oldCount = (int) newsFeed.getCount();
 		
 		newsFeed.insert(obj);
@@ -103,8 +114,21 @@ public class MongoLink {
 		return (int) newsFeed.getCount() == oldCount + 1;
 	}
 	
+	public boolean registerNewUser(DBObject obj) {
+		
+		int oldCount = (int) users.getCount();
+		
+		users.insert(obj);
+		
+		return (int) users.getCount() == oldCount + 1;
+	}
+	
+	public boolean checkLogin(String username, String pass) {
+		return users.find(new BasicDBObject("username", username).append("password", pass)).hasNext();
+	}
+	
 	//shortcut for testing inserting in correct form
-	public BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
+	private BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
 		BasicDBObject news = new BasicDBObject("published", published);
 		news.append("actor", new BasicDBObject("objectType", actorType).append("displayName", dispName));
 		news.append("verb", verb);
