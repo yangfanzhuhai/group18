@@ -56,8 +56,12 @@ onKeyUp="limitText(this.form.limitedtextfield,this.form.countdown,140);" maxleng
 <font size="1">(Maximum characters: 140)<br>
 You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
 </form>
- 	
-		
+
+<select id="post_type">
+  <option value="text_post">Text Post</option>
+  <option value="task">Task</option>
+</select>
+ 		
 	<button type="button" onclick="postToFeed()">Post to Feed</button>
 	
 </div>
@@ -167,9 +171,6 @@ function generateFeed(stream_array) {
 }
 
 
-
-
-
 function postToFeed() {
 
 	var currentdate = new Date();
@@ -177,131 +178,78 @@ function postToFeed() {
 	var name_text = document.getElementById("name").value;
 	var message_text = document.getElementById("limitedtextfield").value;
 	
-	if (name_text != "" && message_text != "") {
+	var dropdown = document.getElementById("post_type");
+	var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
 	
-			var json_post = "{\"published\" : \""
-				  +"Mon Oct 24 19:32:56 UTC 2013"
-				  + "\", "
-				  + "\"actor\" : "
-				  + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-				  + "\"" + "Martin Smith" + "\"}, "
-				  + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-				  + " : \"MESSAGE\" : \"message\" : " 
-				  + "\"" + "Hello JSON" + "\"}, \"target\" : \"\"} ";
-				  
-		//var json_object_post = JSON.parse(json_post);
-				  
-	
-	
-	
-		
-		var post = document.createElement("div");
-		post.id = "post" + post_count;
-		post.className = "post";
-		
-		var text = document.createElement("input");
-		text.type = "text";
-		
-		if (post_count > 0) {
-
-			var stream = document.getElementById("stream");
-			stream.insertBefore(post, stream.childNodes[0]);
-			//post.before(document.getElementById(top_post));
-		} else {
-			document.getElementById("stream").insertBefore(post);
-		}
-		
-
-	
-		var date_and_time = document.createElement("div");
-		date_and_time.id = "post0time";
-		date_and_time.align = "center";
-		date_and_time.innerHTML = "" + currentdate.getDate() + "/"
+	var date_and_time_stamp = "" + currentdate.getDate() + "/"
 					+ (currentdate.getMonth()+1)  + "/" 
 					+ currentdate.getFullYear() + " at "  
 					+ currentdate.getHours() + ":"  
 					+ currentdate.getMinutes() + ":" 
 					+ currentdate.getSeconds() + "        ";
-					
-					
-		var user = document.createElement("div");
-		user.id = "post0user";
-		user.innerHTML = name_text  + ":";
-		
-		var message = document.createElement("div");
-		message.id = "post0message";
-		message.innerHTML = message_text;
-		
-		var reply_name = document.createElement("input");
-		reply_name.placeholder="Your name";
-		
-		var reply_message = document.createElement("input");
-		reply_message.placeholder = "Your message"
-		reply_message.type = "text";
-					
-		var reply_button = document.createElement("button");
-		reply_button.innerHTML = 'Reply';
-		reply_button.align = "right";
-		
-		//reply_message.onkeydown(limitText(this.form.limitedtextfield,
-		//						this.form.countdown,140));
-		//reply_message.onkeyup(limitText(this.form.limitedtextfield,
-		//						this.form.countdown,140));		
-		
-		post.appendChild(date_and_time);
-		post.appendChild(user);
-		post.appendChild(message);
-		post.appendChild(reply_name);
-		post.appendChild(reply_message);
-		post.appendChild(reply_button);
+	
+	if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
+	
+		alert("text post");
+	
+			var post = "{\"published\" : \""
+				  + date_and_time_stamp
+				  + "\", "
+				  + "\"actor\" : "
+				  + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+				  + "\"" + name_text + "\"}, "
+				  + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+				  + " : \"MESSAGE\" : \"message\" : " 
+				  + "\"" + message_text + "\"}, \"target\" : \"\"} ";
+			
+			alert(post);	  
+			
+			var json_post = JSON.stringify(eval('(' + post + ')'));
+			var obj = JSON.parse(json_post);
+			
+			alert("OK");
+				  
+				  
+			$.ajax({
+				type: "POST",
+				url: "http://floating-dawn-7087.herokuapp.com/rest/feed",
+				dataType: "json",
+				data: obj,
+				success: function(data){		
+					alert("Posted");
 
-		
-		reply_button.onclick = function() {
-			var user = reply_button.parentNode.childNodes[3].value;
-			var message = reply_button.parentNode.childNodes[4].value;
-			
-			if (user != null && message != null) {
-			
-				var response = document.createElement("div");
-				response.innerHTML = "     " + user + " said:    " + 											message;
-				
-				var postname = reply_button.parentNode.id;
-				document.getElementById(postname).appendChild(response);
-				
-				reply_button.parentNode.childNodes[3].value = "";
-				reply_button.parentNode.childNodes[4].value = "";
-				
-			}
-		};
-		
-		
-		//CODE HERE TO SEND POST INFORMATION TO REST SERVICE
-//		var data = {};
-//		data[0] = date_and_time.value;
-//		data[1] = user.value;
-//		data[2] = message_text.value;
-//		
-//		$.ajax({
-//			type: "POST",
-//			url: "rest/feed",
-//			data: data;
-//			dataType: "json",
-//			success: function(data){
-//		});
+				}
+			});
 						
-		document.getElementById("name").value = "";
-		document.getElementById("limitedtextfield").value = "";
+	   	    document.getElementById("name").value = "";
+			document.getElementById("limitedtextfield").value = "";
+			
 		
-		posts[post_count] = post;
+	} else if (name_text != "" && message_text != "" && dropdown_value == "task") {
 		
-		post_count += 1;
-					
+			alert("task post");
+	
+			var json_post = "{\"published\" : \""
+				  + date_and_time_stamp
+				  + "\", "
+				  + "\"actor\" : "
+				  + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+				  + "\"" + name_text + "\"}, "
+				  + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+				  + " : \"MESSAGE\" : \"message\" : " 
+				  + "\"" + message_text + "\"}, \"target\" : \"\"} ";
+		
+						
+	   	    document.getElementById("name").value = "";
+			document.getElementById("limitedtextfield").value = "";
+		
 	} else {
-		
-		alert("Enter your name and a message.");
-		
+		   alert("Enter your name and a message.");	
 	}
+	
 }
+
+
 </script>
 </body>
 </html>
