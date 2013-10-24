@@ -13,8 +13,7 @@ public class PersonActorTest {
 
 	@Test
 	public void testToJson() throws JSONException {
-		PersonActor personActor = new PersonActor();
-		personActor.setDisplayName(DISPLAY_NAME);
+		PersonActor personActor = new PersonActor(DISPLAY_NAME);
 
 		String expectedJSON = "{\"objectType\" : \"PERSON\", \"displayName\" : \""
 				+ DISPLAY_NAME + "\"}";
