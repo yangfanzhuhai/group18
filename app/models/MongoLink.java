@@ -2,11 +2,14 @@ package models;
 
 import java.awt.List;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Set;
 
 import org.bson.BasicBSONObject;
 import org.bson.types.ObjectId;
+
+import play.api.libs.json.Json;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -29,12 +32,14 @@ public class MongoLink {
 	private MongoClient mongoClient;
 	private static DB db;
 	private static DBCollection newsFeed;
+	private static DBCollection users;
 	
 	//a link from Java to the MongoDB
 	public MongoLink() throws UnknownHostException {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		newsFeed = db.getCollection("newsFeed");
+		users = db.getCollection("userAccounts");
 		System.out.println("Connection Complete");
 	}
 
@@ -44,12 +49,20 @@ public class MongoLink {
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
 		//Prints last 20 items of newsFeed
-		ArrayList<ArrayList<DBObject>> list = ml.getNewsFeed(20);
-		for(ArrayList<DBObject> a : list) {
-			for(DBObject o : a) {
+		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
+		for(ArrayList<String> a : list) {
+			for(String o : a) {
 				System.out.println(o);
 			}
 		}
+		
+		if(ml.checkLogin("Piotr","pass"))
+			System.out.println("Success");
+		
+	/*	ml.registerNewUser(new BasicDBObject("username", "Rob").append("password", "pass2"));
+		
+		if(ml.checkLogin("Rob", "pass2"))
+			System.out.println("Success2");
 		
 		//Checks inserting into newsFeed and prints new latest 20
 //		boolean insertSuccess = ml.insertNews(ml.dbFormat("Today", "PERSON", "Yangfan", "whispered", "MESSAGE", "im replying", "notthewall"));
@@ -61,33 +74,39 @@ public class MongoLink {
 //			}
 //		} else {
 //			System.out.println("insert failed");
-//		}
+//		}*/
 	}
 
 	//returns the last postLimit posts with replies
-	public ArrayList<ArrayList<DBObject>> getNewsFeed(int postLimit) {
+	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
 
 		ArrayList<DBObject> posts = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", "")).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
-		ArrayList<ArrayList<DBObject>> list = new ArrayList<ArrayList<DBObject>>();
+		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
 		
-		int i = 0;
-		while(i < posts.size())
-		{
-			ArrayList<DBObject> replies = getReply(posts.get(i).get("_id").toString());
-			replies.add(0, posts.get(i));
-			list.add(i, replies);
-			i++;
+		try {
+			int i = 0;
+			while(i < posts.size())
+			{
+				ArrayList<String> replies = getReply(posts.get(i).get("_id").toString());
+				replies.add(0, new ActivityModel(posts.get(i).toString()).toJSON());
+				list.add(i, replies);
+				i++;
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return list;
 	}
 	
-	public ArrayList<ArrayList<DBObject>> getNewsFeed(){
+	public ArrayList<ArrayList<String>> getNewsFeed(){
 		return getNewsFeed(20);
 	}
 	
 	//use dbFormat to insert a formed message into the newsFeed DB
-	public static boolean insertNews(DBObject obj) {
+	public boolean insertNews(DBObject obj) {
+		
 		int oldCount = (int) newsFeed.getCount();
 		
 		newsFeed.insert(obj);
@@ -95,8 +114,21 @@ public class MongoLink {
 		return (int) newsFeed.getCount() == oldCount + 1;
 	}
 	
+	public boolean registerNewUser(DBObject obj) {
+		
+		int oldCount = (int) users.getCount();
+		
+		users.insert(obj);
+		
+		return (int) users.getCount() == oldCount + 1;
+	}
+	
+	public boolean checkLogin(String username, String pass) {
+		return users.find(new BasicDBObject("username", username).append("password", pass)).hasNext();
+	}
+	
 	//shortcut for testing inserting in correct form
-	public BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
+	private BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
 		BasicDBObject news = new BasicDBObject("published", published);
 		news.append("actor", new BasicDBObject("objectType", actorType).append("displayName", dispName));
 		news.append("verb", verb);
@@ -105,13 +137,17 @@ public class MongoLink {
 		return news;
 	}
 	
-	private static ArrayList<DBObject> getReply(String id) {
+	private static ArrayList<String> getReply(String id) throws ParseException {
 		
 		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", id)).toArray();
+		ArrayList<String> retList = new ArrayList<String>();		
 		
-		if(!list.isEmpty())
-			list.addAll(getReply(list.get(0).get("_id").toString()));
 		
-		return list;
+		if(!list.isEmpty()) {
+			retList.add(new ActivityModel(list.get(0).toString()).toJSON());
+			retList.addAll(getReply(list.get(0).get("_id").toString()));
+		}
+		
+		return retList;
 	}
 }
