@@ -100,32 +100,45 @@ $(document).ready(function() {
 		success: function(data){	
 			//USE JSON DATA TO DISPLAY STREAM	
 			//alert("CONNECTED");
-			var stream_json = JSON.stringify(data);
+			//var stream_json = JSON.stringify(data);
+			//alert(data['published']);
+		//	alert(stream_json)
 			//alert(stream_json);
-			var stream_array = stream_json.split(",");
 
-			generateFeed(stream_array);
+			generateFeed(data);
 		}
 	});
 
 	
 });	
 
+function getPublished(string) {
+
+//	alert(string.split("published"));
+
+}
+
+
 
 function generateFeed(stream_array) {
 
-	var i = 0;
+	var post_no = 0;
 
-	while (stream_array[i] != null) {
 	
-		var published = stream_array[i].substring(14, stream_array[i].length-1);
-		//alert(published);
-		var publisher = stream_array[i+2].substring(15, stream_array[i+2].length-2);
+	var published = stream_array['published'];
+		
+	var publisher = stream_array['actor']["displayName"];
+			
+	var publisherType = stream_array['actor']["objectType"];
 	
-		var message_text = stream_array[i+5].substring(11, stream_array[i+5].length-2);
+	var verb = stream_array['verb'];
+		
+	var message_text = stream_array['object']["message"];
+		
+	var message_type = stream_array['object']["objectType"];
 	
 		var post = document.createElement("div");
-		post.id = "post0";
+		post.id = "post" + post_no;
 		post.className = "post";
 	
 			if (post_count > 0) {
@@ -165,8 +178,7 @@ function generateFeed(stream_array) {
 		post.appendChild(reply_message);
 		post.appendChild(reply_button);
 
-		i = i + 7;
-	} 
+		post_no = post_no + 1;
 	
 }
 
