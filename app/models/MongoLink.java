@@ -89,7 +89,7 @@ public class MongoLink {
 	}
 	
 	//use dbFormat to insert a formed message into the newsFeed DB
-	public boolean insertNews(DBObject obj) {
+	public static boolean insertNews(DBObject obj) {
 		int oldCount = (int) newsFeed.getCount();
 		
 		newsFeed.insert(obj);
