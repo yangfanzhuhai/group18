@@ -19,6 +19,8 @@ body {
     border:2px solid;
     border-color:#AF3838;
 	border-radius:5px;
+	margin-left: 500px;
+	margin-right: 500px;
 
 	padding: 5px;
 	
@@ -34,6 +36,8 @@ body {
 	padding: 1px;
 	
 }
+
+
 
 h1 {text-align:right}
 

@@ -2,6 +2,9 @@
 <html>
 <head>
 
+<script src="http://code.jquery.com/jquery-latest.min.js"
+        type="text/javascript"></script>
+
 
 <style>
 
@@ -19,9 +22,9 @@ li {
 }
 
 </style>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
 <script language="javascript" type="text/javascript">
+
 function limitText(limitField, limitCount, limitNum) {
 	if (limitField.value.length > limitNum) {
 		limitField.value = limitField.value.substring(0, limitNum);
@@ -53,8 +56,12 @@ onKeyUp="limitText(this.form.limitedtextfield,this.form.countdown,140);" maxleng
 <font size="1">(Maximum characters: 140)<br>
 You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
 </form>
- 	
-		
+
+<select id="post_type">
+  <option value="text_post">Text Post</option>
+  <option value="task">Task</option>
+</select>
+ 		
 	<button type="button" onclick="postToFeed()">Post to Feed</button>
 	
 </div>
@@ -70,11 +77,11 @@ You have <input readonly type="text" name="countdown" size="3" value="140"> char
 
 
 <ul>
-<li><a href="whiteboard.asp">Build History</a></li>
-<li><a href="news.asp">Git Commits</a></li>
-<li><a href="contact.asp">Task List</a></li>
-<li><a href="about.asp">About</a></li>
-<li><a href="signout.asp">Log out</a></li>
+<li><a href="builds.html">Build History</a></li>
+<li><a href="gits.html">Git Commits</a></li>
+<li><a href="tasks.html">Task List</a></li>
+<li><a href="about.html">About</a></li>
+<li><a href="login.html">Log out</a></li>
 </ul>
 
 
@@ -84,23 +91,44 @@ var posts = new Array();
 var post_count = 0;
 
 
-function postToFeed() {
+$(document).ready(function() {
+	//alert("hello");
+	$.ajax({
+		type: "GET",
+		url: "http://floating-dawn-7087.herokuapp.com/rest/feed",
+		dataType: "json",
+		success: function(data){	
+			//USE JSON DATA TO DISPLAY STREAM	
+			//alert("CONNECTED");
+			var stream_json = JSON.stringify(data);
+			//alert(stream_json);
+			var stream_array = stream_json.split(",");
 
-	var currentdate = new Date();
+			generateFeed(stream_array);
+		}
+	});
+
 	
-	var name_text = document.getElementById("name").value;
-	var message_text = document.getElementById("limitedtextfield").value;
+});	
+
+
+function generateFeed(stream_array) {
+
+	var i = 0;
+
+	while (stream_array[i] != null) {
 	
-	if (name_text != "" && message_text != "") {
-		
+		var published = stream_array[i].substring(14, stream_array[i].length-1);
+		//alert(published);
+		var publisher = stream_array[i+2].substring(15, stream_array[i+2].length-2);
+	
+		var message_text = stream_array[i+5].substring(11, stream_array[i+5].length-2);
+	
 		var post = document.createElement("div");
-		post.id = "post" + post_count;
+		post.id = "post0";
 		post.className = "post";
-		
-		var text = document.createElement("input");
-		text.type = "text";
-		
-		if (post_count > 0) {
+	
+			if (post_count > 0) {
 
 			var stream = document.getElementById("stream");
 			stream.insertBefore(post, stream.childNodes[0]);
@@ -108,26 +136,15 @@ function postToFeed() {
 		} else {
 			document.getElementById("stream").insertBefore(post);
 		}
-		
-
+	
 	
 		var date_and_time = document.createElement("div");
-		date_and_time.id = "post0time";
-		date_and_time.align = "center";
-		date_and_time.innerHTML = "" + currentdate.getDate() + "/"
-					+ (currentdate.getMonth()+1)  + "/" 
-					+ currentdate.getFullYear() + " at "  
-					+ currentdate.getHours() + ":"  
-					+ currentdate.getMinutes() + ":" 
-					+ currentdate.getSeconds() + "        ";
-					
-					
+		date_and_time.innerHTML = published;
+	
 		var user = document.createElement("div");
-		user.id = "post0user";
-		user.innerHTML = name_text  + ":";
+		user.innerHTML = publisher  + ":";
 		
 		var message = document.createElement("div");
-		message.id = "post0message";
 		message.innerHTML = message_text;
 		
 		var reply_name = document.createElement("input");
@@ -139,13 +156,8 @@ function postToFeed() {
 					
 		var reply_button = document.createElement("button");
 		reply_button.innerHTML = 'Reply';
-		reply_button.align = "right";
-		
-		//reply_message.onkeydown(limitText(this.form.limitedtextfield,
-		//						this.form.countdown,140));
-		//reply_message.onkeyup(limitText(this.form.limitedtextfield,
-		//						this.form.countdown,140));		
-		
+		reply_button.align = "right"; 		
+	
 		post.appendChild(date_and_time);
 		post.appendChild(user);
 		post.appendChild(message);
@@ -153,42 +165,91 @@ function postToFeed() {
 		post.appendChild(reply_message);
 		post.appendChild(reply_button);
 
-		
-		reply_button.onclick = function() {
-			var user = reply_button.parentNode.childNodes[3].value;
-			var message = reply_button.parentNode.childNodes[4].value;
-			
-			if (user != null && message != null) {
-			
-				var response = document.createElement("div");
-				response.innerHTML = "     " + user + " said:    " + 											message;
-				
-				var postname = reply_button.parentNode.id;
-				document.getElementById(postname).appendChild(response);
-				
-				reply_button.parentNode.childNodes[3].value = "";
-				reply_button.parentNode.childNodes[4].value = "";
-				
-			}
-		};
-		
-		
-		//CODE HERE TO SEND POST INFORMATION TO REST SERVICE
+		i = i + 7;
+	} 
 	
-						
-		document.getElementById("name").value = "";
-		document.getElementById("limitedtextfield").value = "";
-		
-		posts[post_count] = post;
-		
-		post_count += 1;
-					
-	} else {
-		
-		alert("Enter your name and a message.");
-		
-	}
 }
+
+
+function postToFeed() {
+
+	var currentdate = new Date();
+	
+	var name_text = document.getElementById("name").value;
+	var message_text = document.getElementById("limitedtextfield").value;
+	
+	var dropdown = document.getElementById("post_type");
+	var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
+	
+	var date_and_time_stamp = "" + currentdate.getDate() + "/"
+					+ (currentdate.getMonth()+1)  + "/" 
+					+ currentdate.getFullYear() + " at "  
+					+ currentdate.getHours() + ":"  
+					+ currentdate.getMinutes() + ":" 
+					+ currentdate.getSeconds() + "        ";
+	
+	if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
+	
+		alert("text post");
+	
+			var post = "{\"published\" : \""
+				  + date_and_time_stamp
+				  + "\", "
+				  + "\"actor\" : "
+				  + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+				  + "\"" + name_text + "\"}, "
+				  + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+				  + " : \"MESSAGE\" : \"message\" : " 
+				  + "\"" + message_text + "\"}, \"target\" : \"\"} ";
+			
+			alert(post);	  
+			
+			var json_post = JSON.stringify(eval('(' + post + ')'));
+			var obj = JSON.parse(json_post);
+			
+			alert("OK");
+				  
+				  
+			$.ajax({
+				type: "POST",
+				url: "http://floating-dawn-7087.herokuapp.com/rest/feed",
+				dataType: "json",
+				data: obj,
+				success: function(data){		
+					alert("Posted");
+
+				}
+			});
+						
+	   	    document.getElementById("name").value = "";
+			document.getElementById("limitedtextfield").value = "";
+			
+		
+	} else if (name_text != "" && message_text != "" && dropdown_value == "task") {
+		
+			alert("task post");
+	
+			var json_post = "{\"published\" : \""
+				  + date_and_time_stamp
+				  + "\", "
+				  + "\"actor\" : "
+				  + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+				  + "\"" + name_text + "\"}, "
+				  + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+				  + " : \"MESSAGE\" : \"message\" : " 
+				  + "\"" + message_text + "\"}, \"target\" : \"\"} ";
+		
+						
+	   	    document.getElementById("name").value = "";
+			document.getElementById("limitedtextfield").value = "";
+		
+	} else {
+		   alert("Enter your name and a message.");	
+	}
+	
+}
+
+
 </script>
 </body>
 </html>
