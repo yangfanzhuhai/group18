@@ -1,9 +1,11 @@
 package controllers;
 
+import java.net.UnknownHostException;
 import java.util.Date;
 
 import models.ActivityModel;
 import models.MessageObject;
+import models.MongoLink;
 import models.PersonActor;
 import models.TargetModel;
 import play.mvc.Controller;
@@ -16,15 +18,9 @@ public class Application extends Controller {
         return ok(index.render("Jenkins and Heroku are working!"));
     }
     
-    public static Result getActivities() {
-    	PersonActor actor = new PersonActor("Martin Smith");
-    	MessageObject message = new MessageObject("Hello JSON");
-    	TargetModel target = new TargetModel();
-    	ActivityModel activity = new ActivityModel(new Date(), actor, "said",
-    	    message, target);
-    	
-    	
-        return ok(activity.toJSON());
+    public static Result getActivities() throws UnknownHostException {
+    	MongoLink mongoLink = new MongoLink();
+        return ok(mongoLink.getNewsFeed(3).toString());
     }
 
 }
