@@ -44,9 +44,11 @@ public class MongoLink {
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
 		//Prints last 20 items of newsFeed
-		ArrayList<DBObject> list = ml.getNewsFeed(20);
-		for(DBObject o : list) {
-			System.out.println(o);
+		ArrayList<ArrayList<DBObject>> list = ml.getNewsFeed(20);
+		for(ArrayList<DBObject> a : list) {
+			for(DBObject o : a) {
+				System.out.println(o);
+			}
 		}
 		
 		//Checks inserting into newsFeed and prints new latest 20
@@ -62,29 +64,25 @@ public class MongoLink {
 //		}
 	}
 
-	//returns the last postLimit posts
-	public static ArrayList<DBObject> getNewsFeed(int postLimit) {
+	//returns the last postLimit posts with replies
+	public ArrayList<ArrayList<DBObject>> getNewsFeed(int postLimit) {
 
-	//	DBCursor cursor = newsFeed.find(new BasicDBObject("target", ""));
-	//	cursor.
-	//	cursor.length();
-	//	int postCount = (int) newsFeed.getCount();
-	//	if(postLimit > postCount) {
-	//		postLimit = postCount;
-	//	}
-		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", "")).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
+		ArrayList<DBObject> posts = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", "")).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
+		ArrayList<ArrayList<DBObject>> list = new ArrayList<ArrayList<DBObject>>();
+		
 		int i = 0;
-		while(i < list.size())
+		while(i < posts.size())
 		{
-			ArrayList<DBObject> temp = getReply(list.get(i).get("_id").toString());
-			list.addAll(i + 1, temp);
-			i += temp.size() + 1;
+			ArrayList<DBObject> replies = getReply(posts.get(i).get("_id").toString());
+			replies.add(0, posts.get(i));
+			list.add(i, replies);
+			i++;
 		}
 		
 		return list;
 	}
 	
-	public static ArrayList<DBObject> getNewsFeed(){
+	public ArrayList<ArrayList<DBObject>> getNewsFeed(){
 		return getNewsFeed(20);
 	}
 	
