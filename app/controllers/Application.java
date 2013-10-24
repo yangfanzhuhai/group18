@@ -17,17 +17,11 @@ public class Application extends Controller {
     }
     
     public static Result getActivities() {
-    	PersonActor actor = new PersonActor();
-    	actor.setDisplayName("Martin Smith");
-    	MessageObject message = new MessageObject();
-    	message.setMessage("Hello JSON");
+    	PersonActor actor = new PersonActor("Martin Smith");
+    	MessageObject message = new MessageObject("Hello JSON");
     	TargetModel target = new TargetModel();
-    	ActivityModel activity = new ActivityModel();
-    	activity.setPublished(new Date());
-    	activity.setActor(actor);
-    	activity.setVerb("said");
-    	activity.setObject(message);
-    	activity.setTarget(target);
+    	ActivityModel activity = new ActivityModel(new Date(), actor, "said",
+    	    message, target);
     	
     	
         return ok(activity.toJSON());
