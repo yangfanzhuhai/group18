@@ -63,7 +63,7 @@ public class MongoLink {
 	}
 
 	//returns the last postLimit posts
-	public ArrayList<DBObject> getNewsFeed(int postLimit) {
+	public static ArrayList<DBObject> getNewsFeed(int postLimit) {
 
 	//	DBCursor cursor = newsFeed.find(new BasicDBObject("target", ""));
 	//	cursor.
@@ -84,18 +84,17 @@ public class MongoLink {
 		return list;
 	}
 	
+	public static ArrayList<DBObject> getNewsFeed(){
+		return getNewsFeed(20);
+	}
+	
 	//use dbFormat to insert a formed message into the newsFeed DB
 	public boolean insertNews(DBObject obj) {
 		int oldCount = (int) newsFeed.getCount();
 		
 		newsFeed.insert(obj);
 		
-		int newCount = (int) newsFeed.getCount();
-		
-		if (newCount == oldCount + 1) {
-			return true;
-		} else 
-			return false;
+		return (int) newsFeed.getCount() == oldCount + 1;
 	}
 	
 	//shortcut for testing inserting in correct form
@@ -108,7 +107,7 @@ public class MongoLink {
 		return news;
 	}
 	
-	private ArrayList<DBObject> getReply(String id) {
+	private static ArrayList<DBObject> getReply(String id) {
 		
 		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", id)).toArray();
 		
