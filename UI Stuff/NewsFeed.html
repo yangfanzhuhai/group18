@@ -6,23 +6,6 @@
         type="text/javascript"></script>
 
 
-<style>
-
-ul
-{
-list-style-type:none;
-margin:0;
-padding:10px;
-float: right;
-
-}
-
-li {
-	display: inline;
-}
-
-</style>
-
 <script language="javascript" type="text/javascript">
 
 function limitText(limitField, limitCount, limitNum) {
@@ -32,8 +15,8 @@ function limitText(limitField, limitCount, limitNum) {
 		limitCount.value = limitNum - limitField.value.length;
 	}
 }
-</script>
 
+</script>
 
 </head>
 
@@ -100,10 +83,11 @@ $(document).ready(function() {
 		success: function(data){	
 			//USE JSON DATA TO DISPLAY STREAM	
 			//alert("CONNECTED");
-			//var stream_json = JSON.stringify(data);
+		//var stream_json = JSON.stringify(data);
 			//alert(data['published']);
 		//	alert(stream_json)
 			//alert(stream_json);
+			//alert("rec")
 
 			generateFeed(data);
 		}
@@ -112,36 +96,33 @@ $(document).ready(function() {
 	
 });	
 
-function getPublished(string) {
-
-//	alert(string.split("published"));
-
-}
-
-
 
 function generateFeed(stream_array) {
 
-	var post_no = 0;
 
+	for (var i=0;stream_array.length + 1;i++) {
+
+		var post_no = 0;
 	
-	var published = stream_array['published'];
-		
-	var publisher = stream_array['actor']["displayName"];
+		var published = stream_array[i][0]['published'];
+
+		var publisher = stream_array[i][0]['actor']["displayName"];
 			
-	var publisherType = stream_array['actor']["objectType"];
+			//alert(publisher);	
+		var publisherType = stream_array[i][0]['actor']["objectType"];
 	
-	var verb = stream_array['verb'];
+		var verb = stream_array[i][0]['verb'];
 		
-	var message_text = stream_array['object']["message"];
+		var message_text = stream_array[i][0]['object']["message"];
 		
-	var message_type = stream_array['object']["objectType"];
+		var message_type = stream_array[i][0]['object']["objectType"];
 	
 		var post = document.createElement("div");
 		post.id = "post" + post_no;
 		post.className = "post";
+
 	
-			if (post_count > 0) {
+		if (post_count > 0) {
 
 			var stream = document.getElementById("stream");
 			stream.insertBefore(post, stream.childNodes[0]);
@@ -149,7 +130,7 @@ function generateFeed(stream_array) {
 		} else {
 			document.getElementById("stream").insertBefore(post);
 		}
-	
+
 	
 		var date_and_time = document.createElement("div");
 		date_and_time.innerHTML = published;
@@ -169,7 +150,8 @@ function generateFeed(stream_array) {
 					
 		var reply_button = document.createElement("button");
 		reply_button.innerHTML = 'Reply';
-		reply_button.align = "right"; 		
+		reply_button.align = "right"; 	
+
 	
 		post.appendChild(date_and_time);
 		post.appendChild(user);
@@ -178,7 +160,42 @@ function generateFeed(stream_array) {
 		post.appendChild(reply_message);
 		post.appendChild(reply_button);
 
+
+		var j = 1;
+		alert(stream_array[i].length);
+		while (j < stream_array[i].length) {
+
+			var reply_div = document.createElement("div");
+			reply_div.className = "reply_post";
+
+			reply_div.setAttribute("class", "reply_post");
+    		reply_div.style.padding = "10px";
+			post.appendChild(reply_div);
+
+			var reply_published = document.createElement("div");
+			reply_published.innerHTML = stream_array[i][j]['published'];
+			reply_div.appendChild(reply_published);
+
+			var reply_publisher = document.createElement("div");
+			reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
+			reply_div.appendChild(reply_publisher);
+
+			var reply_message_text = document.createElement("div");
+			reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
+			reply_div.appendChild(reply_message_text);
+			
+			var reply_publisherType = stream_array[i][j]['actor']["objectType"];
+	
+			var reply_verb = stream_array[i][j]['verb'];
+		
+			var reply_message_type = stream_array[i][j]['object']["objectType"];
+
+			j++;
+		}
+
 		post_no = post_no + 1;
+	}
+
 	
 }
 
@@ -260,7 +277,6 @@ function postToFeed() {
 	}
 	
 }
-
 
 </script>
 </body>
