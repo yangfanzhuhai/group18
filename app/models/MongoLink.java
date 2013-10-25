@@ -118,6 +118,9 @@ public class MongoLink {
 		
 		int oldCount = (int) users.getCount();
 		
+		if(users.find(new BasicDBObject("username", obj.get("username"))).hasNext())
+			return false;
+		
 		users.insert(obj);
 		
 		return (int) users.getCount() == oldCount + 1;
