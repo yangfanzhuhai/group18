@@ -37,6 +37,61 @@ body {
 	
 }
 
+ul
+{
+list-style-type:none;
+margin:0;
+padding:10px;
+float: right;
+
+}
+
+li {
+	display: inline;
+}
+
+.title {
+	padding: 50px;
+
+}
+
+.login_box {
+	background: #C0C0C0;
+    margin: 2px;
+    border:2px solid;
+    border-color:#AF3838;
+	border-radius:5px;
+	text-align: center;
+	margin-left: 250px;
+	margin-right: 250px;
+	padding: 20px;
+}
+
+.remember {
+	
+	padding:10px;
+}
+
+.register {
+	
+	text-align: right;
+}
+
+.reply_post {
+	background: #C0C0C0;
+    margin: 20px;
+    border:2px solid;
+    border-color:#AF3838;
+	border-radius:5px;
+	margin-left: 500px;
+	margin-right: 500px;
+
+	padding: 5px;
+
+
+}
+
+
 
 
 h1 {text-align:right}
