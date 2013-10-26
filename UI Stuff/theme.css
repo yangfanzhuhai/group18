@@ -8,7 +8,8 @@ body {
     border:2px solid;
     border-color:#AF3838;
 	border-radius:5px;
-
+    width: 100%;
+    height: auto; 
 	padding: 10px;
 }
 
@@ -19,9 +20,8 @@ body {
     border:2px solid;
     border-color:#AF3838;
 	border-radius:5px;
-	margin-left: 500px;
-	margin-right: 500px;
-
+    width: 100%;
+    height: auto; 
 	padding: 5px;
 	
 }
@@ -32,7 +32,8 @@ body {
     border:2px solid;
     border-color:#AF3838;
 	border-radius:5px;
-
+    width: 100%;
+    height: auto; 
 	padding: 1px;
 	
 }
@@ -83,8 +84,8 @@ li {
     border:2px solid;
     border-color:#AF3838;
 	border-radius:5px;
-	margin-left: 500px;
-	margin-right: 500px;
+	width: 100%;
+    height: auto; 
 
 	padding: 5px;
 

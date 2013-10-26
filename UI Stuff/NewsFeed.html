@@ -91,7 +91,7 @@ $(document).ready(refreshFeed);
 
 function generateFeed(stream_array) {
 
-	for (var i=0;stream_array.length + 1;i++) {
+	for (var i=0; i < stream_array.length + 1;i++) {
 
 		var post_no = 0;
 	
@@ -220,7 +220,7 @@ function replyToPost(post_index, target, r_name, r_message) {
                   + r_name.value 
                   + "\"}, "
                   + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-                  + " : \"MESSAGE\", \"message\" : " 
+                  + " : \"REPLY\", \"message\" : " 
                   + "\"" 
                   + r_message.value 
                   + "\"}, \"target\" : \"" 
@@ -289,18 +289,34 @@ function postToFeed() {
     } else if (name_text != "" && message_text != "" && dropdown_value == "task") {      
         alert("task post");
 
-        var json_post = "{\"published\" : \""
+        var post = "{\"published\" : \""
               + date_and_time_stamp
               + "\", "
               + "\"actor\" : "
               + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-              + "\"" + name_text + "\"}, "
+              + "\"" 
+              + name_text 
+              + "\"}, "
               + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-              + " : \"MESSAGE\" : \"message\" : " 
-              + "\"" + message_text + "\"}, \"target\" : \"\"} ";
+              + " : \"TASK\", \"message\" : " 
+              + "\"" 
+              + message_text 
+              + "\"}, \"target\" : \"\"} ";
+        
+        alert(post);      
+        
+        var json_post = JSON.stringify(eval('(' + post + ')'));
+        var obj = JSON.parse(json_post);
+        json_post = "activity="+json_post;
+        $.ajax({type : "POST",
+                url : "http://floating-dawn-7087.herokuapp.com/rest/message",
+                dataType : "json", 
+                data : json_post,
+                complete: refreshFeed
+          });
   
-         document.getElementById("name").value = "";
-         document.getElementById("limitedtextfield").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("limitedtextfield").value = "";
         
     } else {
            alert("Enter your name and a message."); 
