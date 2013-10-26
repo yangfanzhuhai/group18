@@ -2,24 +2,29 @@ package models;
 
 public class MessageObject extends ObjectModel {
 
-	private String message;
-	
-	public String getMessage() {
-		return message;
-	}
+  private String message;
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
+  public MessageObject(String message) {
+    this.setMessage(message);
+  }
 
-	@Override
-	public ObjectType getType() {
-		return ObjectType.MESSAGE;
-	}
+  public String getMessage() {
+    return message;
+  }
 
-	@Override
-	public String toJSON() {
-		return "{\"objectType\" : \"" + getType() + "\", \"message\" : \"" + getMessage() + "\"}";
-	}
+  private void setMessage(String message) {
+    this.message = message;
+  }
+
+  @Override
+  public ObjectType getType() {
+    return ObjectType.MESSAGE;
+  }
+
+  @Override
+  public String toJSON() {
+    return "{\"objectType\" : \"" + getType() + "\", \"message\" : \""
+        + getMessage() + "\"}";
+  }
 
 }

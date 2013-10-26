@@ -9,3 +9,5 @@ GET     /                           controllers.Application.index()
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 GET		/rest/feed					controllers.Application.getActivities()
+
+POST	/rest/message				controllers.Rest.createMessage()

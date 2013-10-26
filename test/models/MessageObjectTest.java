@@ -13,8 +13,7 @@ public class MessageObjectTest {
 
 	@Test
 	public void testToJson() throws JSONException {
-		MessageObject messageObject = new MessageObject();
-		messageObject.setMessage(MESSAGE);
+		MessageObject messageObject = new MessageObject(MESSAGE);
 
 		String expectedJSON = "{\"objectType\" : \"MESSAGE\", \"message\" : \""
 				+ MESSAGE + "\"}";
