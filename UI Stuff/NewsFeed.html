@@ -73,21 +73,20 @@ You have <input readonly type="text" name="countdown" size="3" value="140"> char
 var posts = new Array();
 var post_count = 0;
 
+    function refreshFeed() {
+    //alert("hello");
+        $.ajax({
+            type: "GET",
+            url: "http://floating-dawn-7087.herokuapp.com/rest/feed",
+            dataType: "json",
+            success: function(data){    
+    
+                generateFeed(data);
+            }
+        });
+    }
 
-$(document).ready(function() {
-	//alert("hello");
-	$.ajax({
-		type: "GET",
-		url: "http://floating-dawn-7087.herokuapp.com/rest/feed",
-		dataType: "json",
-		success: function(data){	
-
-			generateFeed(data);
-		}
-	});
-
-	
-});	
+$(document).ready(refreshFeed);	
 
 
 function generateFeed(stream_array) {
@@ -216,29 +215,26 @@ function postToFeed() {
                   + "\", "
                   + "\"actor\" : "
                   + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-                  + "\"" + name_text + "\"}, "
+                  + "\"" 
+                  + name_text 
+                  + "\"}, "
                   + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-                  + " : \"MESSAGE\" : \"message\" : " 
-                  + "\"" + message_text + "\"}, \"target\" : \"\"} ";
+                  + " : \"MESSAGE\", \"message\" : " 
+                  + "\"" 
+                  + message_text 
+                  + "\"}, \"target\" : \"\"} ";
             
             alert(post);      
             
             var json_post = JSON.stringify(eval('(' + post + ')'));
             var obj = JSON.parse(json_post);
-            
-            alert("OK");
-                  
-                  
-            $.ajax({
-                type: "POST",
-                url: "http://floating-dawn-7087.herokuapp.com/rest/feed",
-                dataType: "json",
-                data: obj,
-                success: function(data){        
-                    alert("Posted");
-
-                }
-            });
+            json_post = "activity="+json_post;
+            $.ajax({type : "POST",
+                    url : "http://floating-dawn-7087.herokuapp.com/rest/message",
+                    dataType : "json", 
+                    data : json_post,
+                    complete: refreshFeed
+              });
                         
             document.getElementById("name").value = "";
             document.getElementById("limitedtextfield").value = "";
@@ -257,10 +253,9 @@ function postToFeed() {
                   + "\"verb\" : \"said\", \"object\" : {\"objectType\""
                   + " : \"MESSAGE\" : \"message\" : " 
                   + "\"" + message_text + "\"}, \"target\" : \"\"} ";
-        
-                        
-            document.getElementById("name").value = "";
-            document.getElementById("limitedtextfield").value = "";
+      
+             document.getElementById("name").value = "";
+             document.getElementById("limitedtextfield").value = "";
         
     } else {
            alert("Enter your name and a message."); 
