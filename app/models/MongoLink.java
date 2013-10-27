@@ -38,6 +38,21 @@ public class MongoLink {
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
 		//Prints last 20 items of newsFeed
+		
+	/*	try {
+			System.out.println(new ActivityModel("{\"published\" : \""
+			          + "234/324/423"
+			          + "\", "
+			          + "\"actor\" : "
+			          + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+			          + "\"" + "abc" + "\"}, "
+			          + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+			          + " : \"MESSAGE\" , \"message\" : " 
+			          + "\"" + "Hello" + "\"}, \"target\" : \"\"} ").toJSON());
+		} catch (ParseException e) {
+			System.out.println("PArse exception");
+		}*/
+		
 		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
