@@ -1,0 +1,81 @@
+<link rel="stylesheet" type="text/css" href ="@routes.Assets.at("stylesheets/theme.css")">
+<html>
+<head>
+
+<script src="http://code.jquery.com/jquery-latest.min.js"
+        type="text/javascript"></script>
+
+</head>
+
+<body>
+
+
+<div id = "title" align = "center" class ="title" >
+<img src="@routes.Assets.at("images/title.jpg")" alt="some_text"
+	width="500">
+</div>
+	
+	
+	
+<div id = "login_box" class = "login_box">
+
+	<div padding = "50px" margin="50">
+		<input name="username" type="text" maxlength="512"
+			placeholder="Username" id="username" align = "center"/>
+		<input name="password" type="password" maxlength="512"
+			placeholder="Password" id="password" align = "center"/>
+		<button name="login_button" class = "remember" id="login_button" onclick="login()" >
+			Login
+		</button>
+	</div>
+
+	<div class = "remember" id = "remember_me">
+		<input type="checkbox" placeholder="Remember me" name = "Remember me">
+			Remember Me
+		</input>
+		<button class = "remember" >
+			Register
+		</button>
+	</div>
+	
+</div>
+
+<div id = "logo" align = "center" class = "title" >
+<img src="@routes.Assets.at("images/logo.jpg")" alt="some_text"
+	width="500" >
+</div>
+
+<ul>
+<li><a href="contact.asp">Contact us</a></li>
+<li><a href="about.asp">About</a></li>
+</ul>
+
+<script>
+
+function login() {
+
+	var remember_me = document.getElementById("remember_me");
+	
+	if (remember_me.checked) {
+		
+		alert("remembered");
+	}
+	
+	var username = document.getElementById("username").value;
+	var password = document.getElementById("password").value;
+	
+	alert(username);
+	alert(password);
+	
+	window.location.href = 'NewsFeed.html'
+	
+	
+	
+}
+
+
+
+</script>
+
+</body>
+</html>
