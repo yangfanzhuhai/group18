@@ -8,115 +8,120 @@ import play.api.libs.json.Json;
 
 public class ActivityModel {
 
-  private Date published;
-  private ActorModel actor;
-  private String verb;
-  private ObjectModel object;
-  private TargetModel target;
+	private String published;
+	private ActorModel actor;
+	private String verb;
+	private ObjectModel object;
+	private TargetModel target;
 
-  public ActivityModel(Date published, ActorModel actor, String verb,
-      ObjectModel object, TargetModel target) {
-    this.setPublished(published);
-    this.setActor(actor);
-    this.setVerb(verb);
-    this.setObject(object);
-    this.setTarget(target);
-  }
+	public ActivityModel(String published, ActorModel actor, String verb,
+			ObjectModel object, TargetModel target) {
+		this.setPublished(published);
+		this.setActor(actor);
+		this.setVerb(verb);
+		this.setObject(object);
+		this.setTarget(target);
+	}
 
-  private static String cleanJsonStringValue(String stringValue){
-    return stringValue.replaceAll("^\"|\"$", "");
-  }
-  
-  public ActivityModel(String jsonString) throws ParseException {
-    JsValue obj = Json.parse(jsonString);
+	private static String cleanJsonStringValue(String stringValue) {
+		return stringValue.replaceAll("^\"|\"$", "");
+	}
 
-    //Date published = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", 
-    //    Locale.ENGLISH).parse(ActivityModel.cleanJsonStringValue(
-    //    obj.$bslash("published").toString()));
-    
-    Date published = new Date();
+	public ActivityModel(String jsonString) throws ParseException {
+		JsValue obj = Json.parse(jsonString);
 
-    String verb = ActivityModel.cleanJsonStringValue(
-        obj.$bslash("verb").toString());
+		// Date published = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
+		// Locale.ENGLISH).parse(ActivityModel.cleanJsonStringValue(
+		// obj.$bslash("published").toString()));
 
-    ActorModel actorModel = null;
-    JsValue actor = obj.$bslash("actor");
-    String actorObjectType = ActivityModel.cleanJsonStringValue(
-        actor.$bslash("objectType").toString());
-    String actorDisplayName = ActivityModel.cleanJsonStringValue(
-        actor.$bslash("displayName").toString());
-    switch (ActorType.valueOf(actorObjectType)) {
-    case PERSON:
-      actorModel = new PersonActor(actorDisplayName);
-    }
+		String published = ActivityModel.cleanJsonStringValue(obj.$bslash(
+				"published").toString());
 
-    ObjectModel objectModel = null;
-    JsValue object = obj.$bslash("object");
-    String objectObjectType = ActivityModel.cleanJsonStringValue(
-        object.$bslash("objectType").toString());
-    switch (ObjectType.valueOf(objectObjectType)) {
-    case MESSAGE:
-      String objectMessage = ActivityModel.cleanJsonStringValue(
-          object.$bslash("message").toString());
-      objectModel = new MessageObject(objectMessage);
-    }
+		String verb = ActivityModel.cleanJsonStringValue(obj.$bslash("verb")
+				.toString());
 
-    TargetModel targetModel = new TargetModel();
-    //JsValue target = obj.$bslash("target");
+		ActorModel actorModel = null;
+		JsValue actor = obj.$bslash("actor");
+		String actorObjectType = ActivityModel.cleanJsonStringValue(actor
+				.$bslash("objectType").toString());
+		String actorDisplayName = ActivityModel.cleanJsonStringValue(actor
+				.$bslash("displayName").toString());
+		switch (ActorType.valueOf(actorObjectType)) {
+		case PERSON:
+			actorModel = new PersonActor(actorDisplayName);
+		}
 
-    this.setPublished(published);
-    this.setActor(actorModel);
-    this.setVerb(verb);
-    this.setObject(objectModel);
-    this.setTarget(targetModel);
-  }
+		ObjectModel objectModel = null;
+		JsValue object = obj.$bslash("object");
+		String objectObjectType = ActivityModel.cleanJsonStringValue(object
+				.$bslash("objectType").toString());
+		switch (ObjectType.valueOf(objectObjectType)) {
+		case MESSAGE:
+			String objectMessage = ActivityModel.cleanJsonStringValue(object
+					.$bslash("message").toString());
+			objectModel = new MessageObject(objectMessage);
+		case TASK:
+			String objectName = ActivityModel.cleanJsonStringValue(object
+					.$bslash("name").toString());
+			objectModel = new TaskObject(objectName);
 
-  public Date getPublished() {
-    return published;
-  }
+		}
 
-  public void setPublished(Date published) {
-    this.published = published;
-  }
+		TargetModel targetModel = new TargetModel();
+		// JsValue target = obj.$bslash("target");
 
-  public ActorModel getActor() {
-    return actor;
-  }
+		this.setPublished(published);
+		this.setActor(actorModel);
+		this.setVerb(verb);
+		this.setObject(objectModel);
+		this.setTarget(targetModel);
+	}
 
-  public void setActor(ActorModel actor) {
-    this.actor = actor;
-  }
+	public String getPublished() {
+		return published;
+	}
 
-  public String getVerb() {
-    return verb;
-  }
+	public void setPublished(String published) {
+		this.published = published;
+	}
 
-  public void setVerb(String verb) {
-    this.verb = verb;
-  }
+	public ActorModel getActor() {
+		return actor;
+	}
 
-  public ObjectModel getObject() {
-    return object;
-  }
+	public void setActor(ActorModel actor) {
+		this.actor = actor;
+	}
 
-  public void setObject(ObjectModel object) {
-    this.object = object;
-  }
+	public String getVerb() {
+		return verb;
+	}
 
-  public TargetModel getTarget() {
-    return target;
-  }
+	public void setVerb(String verb) {
+		this.verb = verb;
+	}
 
-  public void setTarget(TargetModel target) {
-    this.target = target;
-  }
+	public ObjectModel getObject() {
+		return object;
+	}
 
-  public String toJSON() {
-    return "{\"published\" : \"" + getPublished().toString()
-        + "\", \"actor\" : " + getActor().toJSON()
-        + ", \"verb\" : \"" + getVerb()
-        + "\", \"object\" : " + getObject().toJSON()
-        + ", \"target\" : " + getTarget().toJSON() + " }";
-  }
+	public void setObject(ObjectModel object) {
+		this.object = object;
+	}
+
+	public TargetModel getTarget() {
+		return target;
+	}
+
+	public void setTarget(TargetModel target) {
+		this.target = target;
+	}
+
+	public String toJSON() {
+		return "{\"published\" : \"" + getPublished().toString()
+				+ "\", \"actor\" : " + getActor().toJSON() + ", \"verb\" : \""
+				+ getVerb() + "\", \"object\" : " + getObject().toJSON()
+				+ ", \"target\" : " + getTarget().toJSON() + " }";
+	}
 
 }

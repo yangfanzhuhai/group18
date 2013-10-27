@@ -30,7 +30,7 @@ public class Rest extends Controller {
 	
 	 public static Result getActivities() throws UnknownHostException {
 	    	MongoLink mongoLink = new MongoLink();
-	        return ok(mongoLink.getNewsFeed(3).toString());
+	        return ok(mongoLink.getNewsFeed().toString());
 	    }
 
 }
