@@ -76,7 +76,7 @@ public class MongoLink {
 			int i = 0;
 			while(i < posts.size())
 			{
-				ArrayList<String> replies = getReply(posts.get(i).get("_id").toString());
+				ArrayList<String> replies = getReplies(posts.get(i).get("_id").toString());
 				replies.add(0, new ActivityModel(posts.get(i).toString()).toJSON());
 				list.add(i, replies);
 				i++;
@@ -129,15 +129,14 @@ public class MongoLink {
 		return news;
 	}
 	
-	private static ArrayList<String> getReply(String id) throws ParseException {
+	private static ArrayList<String> getReplies(String id) throws ParseException {
 		
 		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", id)).toArray();
 		ArrayList<String> retList = new ArrayList<String>();		
 		
 		
-		if(!list.isEmpty()) {
-			retList.add(new ActivityModel(list.get(0).toString()).toJSON());
-			retList.addAll(getReply(list.get(0).get("_id").toString()));
+		for(DBObject o : list) {
+			retList.add(new ActivityModel(o.toString()).toJSON());
 		}
 		
 		return retList;
