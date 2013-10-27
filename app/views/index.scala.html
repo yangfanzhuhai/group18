@@ -225,8 +225,8 @@ function postToFeed() {
             
             alert(post);      
             
-            var json_post = JSON.stringify(eval('(' + post + ')'));
-            var obj = JSON.parse(json_post);
+           // var json_post = JSON.stringify(eval('(' + post + ')'));
+           // var obj = JSON.parse(json_post);
             
             alert("OK");
                   
@@ -235,11 +235,12 @@ function postToFeed() {
                 type: "POST",
                 url: "http://floating-dawn-7087.herokuapp.com/rest/message",
                 dataType: "json",
-                data: obj,
+                data: post,
                 success: function(data){        
                     alert("Posted");
 
                 }
+                
             });
                         
             document.getElementById("name").value = "";
