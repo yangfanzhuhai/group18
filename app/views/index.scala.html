@@ -81,7 +81,7 @@ function refreshFeed() {
         type: "GET",
         url: "/rest/feed",
         dataType: "json",
-        success: function(data){    
+        success: function(data){   
 
             generateFeed(data);
         }
@@ -93,10 +93,12 @@ $(document).ready(refreshFeed);
 
 function generateFeed(stream_array) {
 
-	for (var i=0;stream_array.length + 1;i++) {
+	for (var i=0; i < stream_array.length;i++) {
+
+
+		var message_type = stream_array[i][0]['object']["objectType"];
 
 		var post_no = 0;
-
 
 		var post_id = stream_array[i][0]['id'];
 
@@ -104,15 +106,10 @@ function generateFeed(stream_array) {
 
 		var publisher = stream_array[i][0]['actor']["displayName"];
 		
-	//	var publisherType = stream_array[i][0]['actor']["objectType"];
+		var publisherType = stream_array[i][0]['actor']["objectType"];
 	
-	//	var verb = stream_array[i][0]['verb'];
-		
-		var message_text = stream_array[i][0]['object']["message"];
+		var verb = stream_array[i][0]['verb'];
 
-	//	var message_type = stream_array[i][0]['object']["objectType"];
-
-	
 		var post = document.createElement("div");
 		post.id = post_id;
 		post.className = "post";
@@ -132,9 +129,25 @@ function generateFeed(stream_array) {
 	
 		var user = document.createElement("div");
 		user.innerHTML = publisher  + ":";
+
+
+		var post_data;
+
+		if (message_type == "MESSAGE") {
 		
-		var message = document.createElement("div");
-		message.innerHTML = message_text;
+			var message_text = stream_array[i][0]['object']["message"];
+			var post_data = document.createElement("div");
+			post_data.innerHTML = message_text;
+
+
+		} else if (message_type == "TASK") {
+
+			var task_name = stream_array[i][0]['object']["name"];
+			var post_data = document.createElement("div");
+			post.style.backgroundColor = "#FF6699";
+			post_data.innerHTML = task_name;
+
+		}	
 		
 		var reply_name = document.createElement("input");
 		reply_name.placeholder="Your name";
@@ -160,7 +173,7 @@ function generateFeed(stream_array) {
 	
 		post.appendChild(date_and_time);
 		post.appendChild(user);
-		post.appendChild(message);
+		post.appendChild(post_data);
 		post.appendChild(reply_name);
 		post.appendChild(reply_message);
 		post.appendChild(reply_button);
@@ -254,7 +267,7 @@ function replyToPost(post_id, reply_name, reply_message) {
         	url: "/rest/message",
         	dataType: "json",
         	data: {"activity":reply},
-        	complete: refreshFeed
+        	complete: refreshFeed 
         });
 
 	}
@@ -281,7 +294,6 @@ function postToFeed() {
     
     if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
     
-        alert("text post");
     
             var post = "{\"published\" : \""
                   + date_and_time_stamp
@@ -293,12 +305,10 @@ function postToFeed() {
                   + " : \"MESSAGE\" , \"message\" : " 
                   + "\"" + message_text + "\"}, \"target\" : \"\"} ";
             
-            alert(post);      
             
            // var json_post = JSON.stringify(eval('(' + post + ')'));
            // var obj = JSON.parse(json_post);
             
-            alert("OK");
                   
                   
             $.ajax({
@@ -306,11 +316,7 @@ function postToFeed() {
                 url: "/rest/message",
                 dataType: "json",
                 data: {"activity":post},
-                success: function(data){        
-                    alert("Posted");
-
-                }
-                
+				complete: refreshFeed                
             });
                         
             document.getElementById("name").value = "";
@@ -319,8 +325,6 @@ function postToFeed() {
         
     } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
         
-            alert("task post");
-    
             var json_post = "{\"published\" : \""
                   + date_and_time_stamp
                   + "\", "
@@ -328,8 +332,17 @@ function postToFeed() {
                   + "{\"objectType\" : \"PERSON\", \"displayName\" : "
                   + "\"" + name_text + "\"}, "
                   + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-                  + " : \"MESSAGE\" : \"message\" : " 
+                  + " : \"TASK\" , \"name\" : " 
                   + "\"" + message_text + "\"}, \"target\" : \"\"} ";
+                  
+
+             $.ajax({
+                type: "POST",
+                url: "/rest/message",
+                dataType: "json",
+                data: {"activity":json_post},
+                complete: refreshFeed
+            });
         
                         
             document.getElementById("name").value = "";
