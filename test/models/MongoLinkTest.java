@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
@@ -89,5 +90,41 @@ public class MongoLinkTest {
 		} catch (UnknownHostException e) {
 			fail("Connection to database failed");
 		}
+	}
+	
+	@Test
+	public void testUserRegisterAndLogin()
+	{
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			DBCollection coll = db.getCollection("testCollection");
+			
+			DBObject obj = new BasicDBObject("username", "Bob").append("password", "pass1");
+			registerNewUser(coll, obj);
+			
+			if(!checkLogin(coll, obj))
+				fail("Register and Login test failed");
+			
+			coll.drop();
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		}
+	}
+	
+	private boolean registerNewUser(DBCollection coll, DBObject obj) {
+		
+		int oldCount = (int) coll.getCount();
+		
+		if(coll.find(new BasicDBObject("username", obj.get("username"))).hasNext())
+			return false;
+		
+		coll.insert(obj);
+		
+		return (int) coll.getCount() == oldCount + 1;
+	}
+	
+	private boolean checkLogin(DBCollection coll, DBObject obj) {
+		return coll.find(new BasicDBObject("username", obj.get("username")).append("password", obj.get("password"))).hasNext();
 	}
 }
