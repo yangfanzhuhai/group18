@@ -52,6 +52,7 @@ public class MongoLink {
 		} catch (ParseException e) {
 			System.out.println("PArse exception");
 		}*/
+		test();
 		
 		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
 		for(ArrayList<String> a : list) {
@@ -81,6 +82,9 @@ public class MongoLink {
 //		}*/
 	}
 
+	private static void test(){
+		System.out.println(newsFeed.find(new BasicDBObject("object.objectType", "TASK")).toArray());
+	}
 	//returns the last postLimit posts with replies
 	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
 
