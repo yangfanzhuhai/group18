@@ -5,9 +5,15 @@
 # Home page
 GET     /                           controllers.Application.index()
 
+GET     /about                           controllers.Application.about()
+GET     /builds                           controllers.Application.builds()
+GET     /gits                           controllers.Application.gits()
+GET     /login                           controllers.Application.login()
+GET     /tasks                           controllers.Application.tasks()
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
-GET		/rest/feed					controllers.Application.getActivities()
+GET		/rest/feed					controllers.Rest.getActivities()
 
 POST	/rest/message				controllers.Rest.createMessage()

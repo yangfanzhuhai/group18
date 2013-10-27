@@ -1,39 +1,50 @@
 <link rel="stylesheet" type="text/css" href ="theme.css">
 <html>
 <head>
-<style>
 
-ul
-{
-list-style-type:none;
-margin:0;
-padding:10px;
-float: right;
+<script src="http://code.jquery.com/jquery-latest.min.js"
+        type="text/javascript"></script>
 
+
+<script language="javascript" type="text/javascript">
+
+function limitText(limitField, limitCount, limitNum) {
+	if (limitField.value.length > limitNum) {
+		limitField.value = limitField.value.substring(0, limitNum);
+	} else {
+		limitCount.value = limitNum - limitField.value.length;
+	}
 }
 
-li {
-	display: inline;
-}
+</script>
 
-</style>
 </head>
 
 <body>
 
 
-<img src="/Users/robertcox/Pictures/progress_all.jpg" alt="some_text"
+<img src="progress_all.jpg" alt="some_text"
 	width="200" >
 
 <div id = "post_options" class = "post_options" align = "center">
 
 	<input name="name" type="text" maxlength="512"
 		placeholder="Your name" id="name"/>
-
-	<input name="txt" type="text" maxlength="512"
-		placeholder="Your message" id="txt"/>
-		 
 		
+		
+<form name="myform">
+<textarea name="limitedtextarea" type="text" id = "limitedtextfield"
+onKeyDown="limitText(this.form.limitedtextfield,this.form.countdown,140);" 
+onKeyUp="limitText(this.form.limitedtextfield,this.form.countdown,140);" maxlength="140"> </textarea><br>
+<font size="1">(Maximum characters: 140)<br>
+You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
+</form>
+
+<select id="post_type">
+  <option value="text_post">Text Post</option>
+  <option value="task">Task</option>
+</select>
+ 		
 	<button type="button" onclick="postToFeed()">Post to Feed</button>
 	
 </div>
@@ -49,10 +60,11 @@ li {
 
 
 <ul>
-<li><a href="whiteboard.asp">Whiteboard</a></li>
-<li><a href="news.asp">Git Commits</a></li>
-<li><a href="contact.asp">Task List</a></li>
-<li><a href="about.asp">About</a></li>
+<li><a href="builds.html">Build History</a></li>
+<li><a href="gits.html">Git Commits</a></li>
+<li><a href="tasks.html">Task List</a></li>
+<li><a href="about.html">About</a></li>
+<li><a href="login.html">Log out</a></li>
 </ul>
 
 
@@ -61,81 +73,257 @@ li {
 var posts = new Array();
 var post_count = 0;
 
+function refreshFeed() {
+    document.getElementById("stream").innerHTML = "";
+    $.ajax({
+        type: "GET",
+        url: "http://floating-dawn-7087.herokuapp.com/rest/feed",
+        dataType: "json",
+        success: function(data){    
 
-function postToFeed() {
+            generateFeed(data);
+        }
+    });
+}
 
-	var currentdate = new Date();
+$(document).ready(refreshFeed);	
+
+
+function generateFeed(stream_array) {
+
+	for (var i=0; i < stream_array.length + 1;i++) {
+
+		var post_no = 0;
 	
-	var name_text = document.getElementById("name").value;
-	var message_text = document.getElementById("txt").value;
-	
-	if (name_text != "" && message_text != "") {
+		var published = stream_array[i][0]['published'];
+
+		var publisher = stream_array[i][0]['actor']["displayName"];
 		
+		var publisherType = stream_array[i][0]['actor']["objectType"];
+	
+		var verb = stream_array[i][0]['verb'];
+		
+		var message_text = stream_array[i][0]['object']["message"];
+		
+		var message_type = stream_array[i][0]['object']["objectType"];
+		
+		var target = stream_array[i][0]['target'];
+	
 		var post = document.createElement("div");
-		post.id = "post" + post_count;
+		post.id = "post" + post_no;
 		post.className = "post";
-		
-		var text = document.createElement("input");
-		text.type = "text";
-		
-		document.getElementById("stream").insertBefore(post, "stream");	
+
+		if (post_count > 0) {
+			var stream = document.getElementById("stream");
+			stream.insertBefore(post, stream.childNodes[0]);
+		} else {
+			document.getElementById("stream").insertBefore(post);
+		}
 
 	
 		var date_and_time = document.createElement("div");
-		date_and_time.id = "post0time";
-		date_and_time.align = "center";
-		date_and_time.innerHTML = "" + currentdate.getDate() + "/"
-					+ (currentdate.getMonth()+1)  + "/" 
-					+ currentdate.getFullYear() + " at "  
-					+ currentdate.getHours() + ":"  
-					+ currentdate.getMinutes() + ":" 
-					+ currentdate.getSeconds() + "        ";
-					
-					
+		date_and_time.innerHTML = published;
+	
 		var user = document.createElement("div");
-		user.id = "post0user";
-		user.innerHTML = name_text  + ":";
+		user.innerHTML = publisher  + ":";
 		
 		var message = document.createElement("div");
-		message.id = "post0message";
 		message.innerHTML = message_text;
+		
+		var reply_name = document.createElement("input");
+		reply_name.placeholder="Your name";
+		
+		var reply_message = document.createElement("input");
+		reply_message.placeholder = "Your message"
+		reply_message.type = "text";
 					
 		var reply_button = document.createElement("button");
 		reply_button.innerHTML = 'Reply';
-		reply_button.align = "right";
-		
-		reply_button.onclick = function() {
-			var user = prompt('What is your name?');
-			var message = prompt("What would you like to say?");
-			
-			if (user != null && message != null) {
-			
-				var response = document.createElement("div");
-				response.innerHTML = "     " + user + " said:    " + 											message;
-		
-				document.getElementById("post0").appendChild(response);
-			}
-		};
-	
-					
+		reply_button.align = "right"; 	
+
+        reply_button.onclick = (function(x, target, r_name, r_message) {
+            return function() {
+                //alert("you just clicked button" + x);
+                replyToPost(x, target, r_name, r_message);
+            }
+        }(i, target, reply_name, reply_message));
+        
 		post.appendChild(date_and_time);
 		post.appendChild(user);
 		post.appendChild(message);
+		post.appendChild(reply_name);
+		post.appendChild(reply_message);
 		post.appendChild(reply_button);
-						
-		document.getElementById("name").value = "";
-		document.getElementById("txt").value = "";
+
+
+		var j = 1;
+		while (j < stream_array[i].length) {
+
+			var reply_div = document.createElement("div");
+			reply_div.className = "reply_post";
+
+			reply_div.setAttribute("class", "reply_post");
+    		reply_div.style.padding = "10px";
+			post.appendChild(reply_div);
+
+			var reply_published = document.createElement("div");
+			reply_published.innerHTML = stream_array[i][j]['published'];
+			reply_div.appendChild(reply_published);
+
+			var reply_publisher = document.createElement("div");
+			reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
+			reply_div.appendChild(reply_publisher);
+
+			var reply_message_text = document.createElement("div");
+			reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
+			reply_div.appendChild(reply_message_text);
+			
+			var reply_publisherType = stream_array[i][j]['actor']["objectType"];
+	
+			var reply_verb = stream_array[i][j]['verb'];
 		
-		posts[post_count] = post;
-		
-		post_count += 1;
-					
-	} else {
-		
-		alert("Enter your name and a message.");
-		
+			var reply_message_type = stream_array[i][j]['object']["objectType"];
+
+			j++;
+		}
+
+		post_no++;
 	}
+
+	
 }
+
+function getTimeStamp() {
+    var currentdate = new Date();
+    return ("" + currentdate.getDate() + "/"
+                    + (currentdate.getMonth()+1)  + "/" 
+                    + currentdate.getFullYear() + " at "  
+                    + currentdate.getHours() + ":"  
+                    + currentdate.getMinutes() + ":" 
+                    + currentdate.getSeconds() + "        ");
+}
+
+function replyToPost(post_index, target, r_name, r_message) {
+    if (r_name.value == "") 
+        alert("Please enter your name.")
+    else if (r_message.value == "") {
+        alert ("Reply cannot be empty.");    
+    } else {
+        alert ("OK");
+        var date_and_time_stamp = getTimeStamp();
+        var reply = "{\"published\" : \""
+                  + date_and_time_stamp
+                  + "\", "
+                  + "\"actor\" : "
+                  + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+                  + "\"" 
+                  + r_name.value 
+                  + "\"}, "
+                  + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+                  + " : \"REPLY\", \"message\" : " 
+                  + "\"" 
+                  + r_message.value 
+                  + "\"}, \"target\" : \"" 
+                  + target
+                  +  "\"} ";
+        alert(reply);   
+        
+        var json_post = JSON.stringify(eval('(' + reply + ')'));
+        var obj = JSON.parse(json_post);
+        json_post = "activity=" + json_post;
+        $.ajax({type : "POST",
+                url : "http://floating-dawn-7087.herokuapp.com/rest/message",
+                dataType : "json", 
+                data : json_post,
+                complete: refreshFeed
+          });
+                    
+        r_name.value = "";
+        r_message.value = "";   
+    }
+}
+
+function postToFeed() {
+    var name_text = document.getElementById("name").value;
+    var message_text = document.getElementById("limitedtextfield").value;
+    
+    var dropdown = document.getElementById("post_type");
+    var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
+    
+    var date_and_time_stamp = getTimeStamp();
+    
+    if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
+    
+        alert("text post");
+    
+        var post = "{\"published\" : \""
+              + date_and_time_stamp
+              + "\", "
+              + "\"actor\" : "
+              + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+              + "\"" 
+              + name_text 
+              + "\"}, "
+              + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+              + " : \"MESSAGE\", \"message\" : " 
+              + "\"" 
+              + message_text 
+              + "\"}, \"target\" : \"\"} ";
+        
+        alert(post);      
+        
+        var json_post = JSON.stringify(eval('(' + post + ')'));
+        var obj = JSON.parse(json_post);
+        json_post = "activity="+json_post;
+        $.ajax({type : "POST",
+                url : "http://floating-dawn-7087.herokuapp.com/rest/message",
+                dataType : "json", 
+                data : json_post,
+                complete: refreshFeed
+          });
+                    
+        document.getElementById("name").value = "";
+        document.getElementById("limitedtextfield").value = "";
+            
+        
+    } else if (name_text != "" && message_text != "" && dropdown_value == "task") {      
+        alert("task post");
+
+        var post = "{\"published\" : \""
+              + date_and_time_stamp
+              + "\", "
+              + "\"actor\" : "
+              + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+              + "\"" 
+              + name_text 
+              + "\"}, "
+              + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+              + " : \"TASK\", \"message\" : " 
+              + "\"" 
+              + message_text 
+              + "\"}, \"target\" : \"\"} ";
+        
+        alert(post);      
+        
+        var json_post = JSON.stringify(eval('(' + post + ')'));
+        var obj = JSON.parse(json_post);
+        json_post = "activity="+json_post;
+        $.ajax({type : "POST",
+                url : "http://floating-dawn-7087.herokuapp.com/rest/message",
+                dataType : "json", 
+                data : json_post,
+                complete: refreshFeed
+          });
+  
+        document.getElementById("name").value = "";
+        document.getElementById("limitedtextfield").value = "";
+        
+    } else {
+           alert("Enter your name and a message."); 
+    }
+    
+}
+
 </script>
 </body>
 </html>
