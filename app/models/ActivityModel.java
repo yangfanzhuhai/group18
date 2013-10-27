@@ -131,7 +131,7 @@ public class ActivityModel {
 		this.ID = iD;
 	}
 
-	/** Converts the ActivityModel to a JSON object
+	/** Converts the ActivityModel to a JSON object.
 	 * Optionally has an ID field (if the ActivityModel has an ID set)
 	 * @return String JSON
 	 */
