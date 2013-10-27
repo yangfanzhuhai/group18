@@ -59,13 +59,13 @@ public class MongoLink {
 		if(ml.checkLogin("Piotr","pass"))
 			System.out.println("Success");
 		
-	/*	ml.registerNewUser(new BasicDBObject("username", "Rob").append("password", "pass2"));
+	//	ml.registerNewUser(new BasicDBObject("username", "Rob").append("password", "pass2"));
 		
-		if(ml.checkLogin("Rob", "pass2"))
-			System.out.println("Success2");
+	//	if(ml.checkLogin("Rob", "pass2"))
+	//		System.out.println("Success2");
 		
 		//Checks inserting into newsFeed and prints new latest 20
-//		boolean insertSuccess = ml.insertNews(ml.dbFormat("Today", "PERSON", "Yangfan", "whispered", "MESSAGE", "im replying", "notthewall"));
+		System.out.println(ml.insertNews(ml.dbFormat("Today", "PERSON", "Luke", "whispered", "MESSAGE", "What is up", "")));
 //		if(insertSuccess) {
 //			System.out.println("\n Insert Success");
 //			list = ml.getNewsFeed(20);
@@ -105,13 +105,11 @@ public class MongoLink {
 	}
 	
 	//use dbFormat to insert a formed message into the newsFeed DB
-	public boolean insertNews(DBObject obj) {
-		
-		int oldCount = (int) newsFeed.getCount();
+	public String insertNews(DBObject obj) {
 		
 		newsFeed.insert(obj);
 		
-		return (int) newsFeed.getCount() == oldCount + 1;
+		return newsFeed.find(obj).toArray().get(0).get("_id").toString();
 	}
 	
 	public boolean registerNewUser(DBObject obj) {
