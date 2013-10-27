@@ -32,5 +32,20 @@ public class Rest extends Controller {
 	    	MongoLink mongoLink = new MongoLink();
 	        return ok(mongoLink.getNewsFeed().toString());
 	    }
+	 
+	 public static Result registerUser(){
+		 final Map<String, String[]> values = request().body()
+					.asFormUrlEncoded();
+			String credentialsJson = values.get("credentials")[0];
+
+			try {
+				MongoLink mongoLink = new MongoLink();
+				mongoLink.registerNewUser((DBObject) JSON.parse(credentialsJson));
+				return ok();
+			} catch (Exception e) {
+				return status(400);
+			}
+		 
+	 }
 
 }

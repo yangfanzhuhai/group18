@@ -1,0 +1,120 @@
+<link rel="stylesheet" type="text/css" href ="@routes.Assets.at("stylesheets/theme.css")">
+<html>
+<head>
+
+<script src="http://code.jquery.com/jquery-latest.min.js"
+        type="text/javascript"></script>
+
+</head>
+
+<body>
+
+
+<div id = "title" align = "center" class ="title" >
+<img src="@routes.Assets.at("images/title.jpg")" alt="some_text"
+	width="500">
+</div>
+	
+	
+	
+<div id = "login_box" class = "login_box">
+
+	<form>
+		Username: <input type="text" id="username"><br>
+		Password: <input type="password" id="password"><br>
+		Re-enter Password: <input type="password" id="password_reenter"><br>
+	</form>
+
+	<button name="register_button" class = "remember" id="register_button" onclick="register()" >
+		Register
+	</button>
+	
+</div>
+
+<div id = "logo" align = "center" class = "title" >
+<img src="@routes.Assets.at("images/logo.jpg")" alt="some_text"
+	width="500" >
+</div>
+
+<ul>
+<li><a href="contact.asp">Contact us</a></li>
+<li><a href="about.asp">About</a></li>
+</ul>
+
+<script>
+
+function register() {
+
+	//var first_name = document.getElementById("first_name").value;
+	//var last_name = document.getElementById("last_name").value;
+	var username = document.getElementById("username").value;
+	var password = document.getElementById("password").value;
+	var password_reenter = document.getElementById("password_reenter").value;
+	
+	/*if (first_name == "") {
+
+		alert("Please enter your first name");
+	
+	} else if (last_name == "") {
+
+		alert("Please enter your second name");
+
+	} else */if (username == "") {
+
+		alert("Please enter a username");
+
+	} else if (password == "") {
+		
+		alert("Please enter a password");
+
+	} else if (password_reenter == "") {
+
+		alert("Please re-enter your password");
+
+	} else if (password != password_reenter) {
+
+		alert("Passwords do not match");
+
+	} else {
+	
+	            var credentials = "{\"username\" : "
+                  + "\"" + username + "\", "
+                  + "\"password\" : "
+                  + "\"" + password + "\""
+                  + "}";
+            
+            alert(credentials);
+            
+            $.ajax({
+                type: "POST",
+                url: "/rest/register",
+                dataType: "json",
+                data: {"credentials":credentials},
+                success: function(data){        
+                    alert("Posted");
+
+                }
+                
+            });      
+                  
+                  
+		
+	}
+
+
+	
+	alert(username);
+	alert(password);
+	
+	window.location.href = '@routes.Application.index'
+	
+	
+	
+}
+
+
+
+</script>
+
+</body>
+</html>

@@ -8,6 +8,7 @@ import views.html.gits;
 import views.html.index;
 import views.html.login;
 import views.html.tasks;
+import views.html.register;
 
 
 public class Application extends Controller {
@@ -34,6 +35,10 @@ public class Application extends Controller {
     
     public static Result tasks() {
         return ok(tasks.render());
+    }
+    
+    public static Result register() {
+        return ok(register.render());
     }
     
 
