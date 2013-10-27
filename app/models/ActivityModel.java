@@ -57,7 +57,7 @@ public class ActivityModel {
     switch (ObjectType.valueOf(objectObjectType)) {
     case MESSAGE:
       String objectMessage = ActivityModel.cleanJsonStringValue(
-          object.$bslash("objectType").toString());
+          object.$bslash("message").toString());
       objectModel = new MessageObject(objectMessage);
     }
 
