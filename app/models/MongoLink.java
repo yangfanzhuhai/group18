@@ -65,7 +65,7 @@ public class MongoLink {
 	//		System.out.println("Success2");
 		
 		//Checks inserting into newsFeed and prints new latest 20
-		System.out.println(ml.insertNews(ml.dbFormat("Today", "PERSON", "Luke", "whispered", "MESSAGE", "What is up", "")));
+	//	System.out.println(ml.insertNews(ml.dbFormat("Today", "PERSON", "Luke", "whispered", "MESSAGE", "What is up", "")));
 //		if(insertSuccess) {
 //			System.out.println("\n Insert Success");
 //			list = ml.getNewsFeed(20);
