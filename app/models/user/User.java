@@ -3,6 +3,7 @@ package models.user;
 import java.util.Date;
 
 import models.DatabaseBaseModel;
+import models.DatabaseWriteException;
 
 /**
  * Represents a user.
@@ -43,7 +44,7 @@ public class User extends DatabaseBaseModel<User> {
    * @param lastName
    */
   public User(String email, String displayName, String firstName,
-      String lastName) {
+      String lastName) throws DatabaseWriteException {
     this.setEmail(email);
     this.setDisplayName(displayName);
     this.setFirstName(firstName);
@@ -61,6 +62,11 @@ public class User extends DatabaseBaseModel<User> {
     return email;
   }
 
+  /**
+   * Set the email address of the user.
+   * 
+   * @param email
+   */
   private void setEmail(String email) {
     this.email = email;
   }
@@ -74,6 +80,11 @@ public class User extends DatabaseBaseModel<User> {
     return displayName;
   }
 
+  /**
+   * Set the display name of the user.
+   * 
+   * @param displayName
+   */
   private void setDisplayName(String displayName) {
     this.displayName = displayName;
   }
@@ -87,6 +98,10 @@ public class User extends DatabaseBaseModel<User> {
     return firstName;
   }
 
+  /**
+   * Set the first name of the user.
+   * @param firstName
+   */
   private void setFirstName(String firstName) {
     this.firstName = firstName;
   }
@@ -100,6 +115,10 @@ public class User extends DatabaseBaseModel<User> {
     return lastName;
   }
 
+  /**
+   * Set the last name of the user.
+   * @param lastName
+   */
   private void setLastName(String lastName) {
     this.lastName = lastName;
   }
@@ -114,6 +133,7 @@ public class User extends DatabaseBaseModel<User> {
   }
 
   /**
+   * Set the date the user joined.
    * 
    * @param dateJoined
    */
@@ -139,4 +159,17 @@ public class User extends DatabaseBaseModel<User> {
     return null;
   }
 
+  /**
+   * Read an existing instance from the database given the email address of the
+   * user. (Email address must be unique).
+   * 
+   * @param email
+   * 
+   * @return The User with the given email address.
+   */
+  protected User readexistingInstanceFromDatabase(String email){
+    // TODO: Read an existing instance given the email address of the user.
+    return null;
+  }
+  
 }

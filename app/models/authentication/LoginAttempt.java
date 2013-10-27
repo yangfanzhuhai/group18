@@ -3,6 +3,7 @@ package models.authentication;
 import java.util.Date;
 
 import models.DatabaseBaseModel;
+import models.DatabaseWriteException;
 
 /**
  * Represents a login attempt.
@@ -26,7 +27,7 @@ public class LoginAttempt extends DatabaseBaseModel<LoginAttempt> {
    * @param userAgent
    */
   public LoginAttempt(String username, String password, String ipAddress,
-      String userAgent) {
+      String userAgent) throws DatabaseWriteException {
 
     this.setIpAddress(ipAddress);
     this.setUserAgent(userAgent);

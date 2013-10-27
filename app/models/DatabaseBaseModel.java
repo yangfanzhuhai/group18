@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
 public abstract class DatabaseBaseModel<T extends DatabaseBaseModel<T>> {
 
   private Integer id = null;
-  
+
   /**
    * The id of the model.
    * 
@@ -21,46 +21,46 @@ public abstract class DatabaseBaseModel<T extends DatabaseBaseModel<T>> {
   public Integer getId() {
     return this.id;
   }
-  
+
   /**
    * Set the id of the model.
    * 
    * @param id
    */
-  private void setId(Integer id){
+  private void setId(Integer id) {
     this.id = id;
   }
-  
+
   /**
-   * Save the current model instance.
-   * If the instance already exists - update it.
-   * If the instance doesn't exist - create it.
+   * Save the current model instance. If the instance already exists - update
+   * it. If the instance doesn't exist - create it.
    */
-  public void save() {
-    
+  public void save() throws DatabaseWriteException {
+
     // No id assigned to model instance - new instance
-    if(this.getId() == null) {
+    if (this.getId() == null) {
       this.setId(this.insertNewInstanceIntoDatabase());
-    } 
-    
+    }
+
     // Id has been assigned - existing instance.
     else {
       this.updateExistingInstanceInDatabase();
     }
   }
-  
+
   /**
-   * Insert the current model into the database as a new entry.
-   * Should return the id of the new insertion.
+   * Insert the current model into the database as a new entry. Should return
+   * the id of the new insertion.
    */
-  protected abstract Integer insertNewInstanceIntoDatabase();
-  
+  protected abstract Integer insertNewInstanceIntoDatabase()
+      throws DatabaseWriteException;
+
   /**
    * Update an existing instance in the database.
    */
-  protected abstract void updateExistingInstanceInDatabase();
-  
-  
+  protected abstract void updateExistingInstanceInDatabase()
+      throws DatabaseWriteException;
+
   /**
    * Find the instance of this model given its id.
    * 
@@ -68,8 +68,8 @@ public abstract class DatabaseBaseModel<T extends DatabaseBaseModel<T>> {
    * 
    * @return The instantiated model (read from database).
    */
-  protected abstract T readExistingInstanceFromDatabase(Integer id);
-
+  protected abstract T readExistingInstanceFromDatabase(Integer id)
+      throws DatabaseReadException;
 
   /**
    * Merge this instance with another instance of the same type.
