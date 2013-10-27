@@ -62,7 +62,7 @@ You have <input readonly type="text" name="countdown" size="3" value="140"> char
 
 
 <ul>
-<li><a href="@routes.Application.builds")">Build History</a></li>
+<li><a href="@routes.Application.builds">Build History</a></li>
 <li><a href="@routes.Application.gits">Git Commits</a></li>
 <li><a href="@routes.Application.tasks">Task List</a></li>
 <li><a href="@routes.Application.about">About</a></li>
@@ -72,47 +72,49 @@ You have <input readonly type="text" name="countdown" size="3" value="140"> char
 
 <script>
 
-var posts = new Array();
 var post_count = 0;
 
 
-$(document).ready(function() {
-	//alert("hello");
-	$.ajax({
-		type: "GET",
-		url: "http://floating-dawn-7087.herokuapp.com/rest/feed",
-		dataType: "json",
-		success: function(data){	
+function refreshFeed() {
+    document.getElementById("stream").innerHTML = "";
+    $.ajax({
+        type: "GET",
+        url: "/rest/feed",
+        dataType: "json",
+        success: function(data){    
 
-			generateFeed(data);
-		}
-	});
+            generateFeed(data);
+        }
+    });
+}
 
-	
-});	
+$(document).ready(refreshFeed);	
 
 
 function generateFeed(stream_array) {
 
-
 	for (var i=0;stream_array.length + 1;i++) {
 
 		var post_no = 0;
-	
+
+
+		var post_id = stream_array[i][0]['id'];
+
 		var published = stream_array[i][0]['published'];
 
 		var publisher = stream_array[i][0]['actor']["displayName"];
 		
-		var publisherType = stream_array[i][0]['actor']["objectType"];
+	//	var publisherType = stream_array[i][0]['actor']["objectType"];
 	
-		var verb = stream_array[i][0]['verb'];
+	//	var verb = stream_array[i][0]['verb'];
 		
 		var message_text = stream_array[i][0]['object']["message"];
-		
-		var message_type = stream_array[i][0]['object']["objectType"];
+
+	//	var message_type = stream_array[i][0]['object']["objectType"];
+
 	
 		var post = document.createElement("div");
-		post.id = "post" + post_no;
+		post.id = post_id;
 		post.className = "post";
 
 	
@@ -145,6 +147,16 @@ function generateFeed(stream_array) {
 		reply_button.innerHTML = 'Reply';
 		reply_button.align = "right"; 	
 
+
+		 reply_button.onclick = (function(post_id, reply_name, reply_message) {
+            return function() {
+                //alert("you just clicked button" + x);
+                replyToPost(post_id, reply_name, reply_message);
+            }
+        }(post_id, reply_name, reply_message));
+
+
+
 	
 		post.appendChild(date_and_time);
 		post.appendChild(user);
@@ -152,7 +164,6 @@ function generateFeed(stream_array) {
 		post.appendChild(reply_name);
 		post.appendChild(reply_message);
 		post.appendChild(reply_button);
-
 
 		var j = 1;
 		while (j < stream_array[i].length) {
@@ -185,10 +196,69 @@ function generateFeed(stream_array) {
 			j++;
 		}
 
+
 		post_no = post_no + 1;
 	}
 
 	
+}
+
+function getTimeStamp() {
+    var currentdate = new Date();
+    return ("" + currentdate.getDate() + "/"
+                    + (currentdate.getMonth()+1)  + "/" 
+                    + currentdate.getFullYear() + " at "  
+                    + currentdate.getHours() + ":"  
+                    + currentdate.getMinutes() + ":" 
+                    + currentdate.getSeconds() + "        ");
+}
+
+
+
+function replyToPost(post_id, reply_name, reply_message) {
+
+	var post = document.getElementById(post_id);
+	var reply_name_text = reply_name.value;
+	var reply_message_text = reply_message.value;
+
+	if (reply_name == "") {
+
+		alert("Please enter your name.");
+
+	} else if (reply_message = "") {
+
+		alert("Reply cannot be empty.");
+
+	} else {
+
+		var date_and_time_stamp = getTimeStamp();
+
+        var reply = "{\"published\" : \""
+                  + date_and_time_stamp
+                  + "\", "
+                  + "\"actor\" : "
+                  + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+                  + "\"" 
+                  + reply_name_text
+                  + "\"}, "
+                  + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+                  + " : \"MESSAGE\", \"message\" : " 
+                  + "\"" 
+                  + reply_message_text
+                  + "\"}, \"target\" : \"" 
+                  + post_id
+                  +  "\"} ";
+
+        $.ajax({
+        	type: "POST",
+        	url: "/rest/message",
+        	dataType: "json",
+        	data: {"activity":reply},
+        	complete: refreshFeed
+        });
+
+	}
+
 }
 
 
@@ -233,7 +303,7 @@ function postToFeed() {
                   
             $.ajax({
                 type: "POST",
-                url: "http://floating-dawn-7087.herokuapp.com/rest/message",
+                url: "/rest/message",
                 dataType: "json",
                 data: {"activity":post},
                 success: function(data){        
