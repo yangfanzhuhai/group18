@@ -60,10 +60,12 @@ public class ActivityModel {
 			String objectMessage = ActivityModel.cleanJsonStringValue(object
 					.$bslash("message").toString());
 			objectModel = new MessageObject(objectMessage);
+			break;
 		case TASK:
 			String objectName = ActivityModel.cleanJsonStringValue(object
 					.$bslash("name").toString());
 			objectModel = new TaskObject(objectName);
+			break;
 
 		}
 
