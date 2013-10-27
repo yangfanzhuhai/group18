@@ -92,8 +92,13 @@ public class MongoLink {
 			while(i < posts.size())
 			{
 				ArrayList<String> replies = getReplies(posts.get(i).get("_id").toString());
-				replies.add(0, new ActivityModel(posts.get(i).toString()).toJSON());
+				
+				ActivityModel post = new ActivityModel(posts.get(i).toString());
+				post.setID(posts.get(i).get("_id").toString());
+				
+				replies.add(0, post.toJSON());
 				list.add(i, replies);
+				
 				i++;
 			}
 		} catch (ParseException e) {

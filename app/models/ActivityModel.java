@@ -1,13 +1,13 @@
 package models;
 
 import java.text.ParseException;
-import java.util.Date;
 
 import play.api.libs.json.JsValue;
 import play.api.libs.json.Json;
 
 public class ActivityModel {
 
+	private String ID;
 	private String published;
 	private ActorModel actor;
 	private String verb;
@@ -16,6 +16,7 @@ public class ActivityModel {
 
 	public ActivityModel(String published, ActorModel actor, String verb,
 			ObjectModel object, TargetModel target) {
+		this.ID = null;
 		this.setPublished(published);
 		this.setActor(actor);
 		this.setVerb(verb);
@@ -34,6 +35,8 @@ public class ActivityModel {
 		// Locale.ENGLISH).parse(ActivityModel.cleanJsonStringValue(
 		// obj.$bslash("published").toString()));
 
+		ID = null;
+		 
 		String published = ActivityModel.cleanJsonStringValue(obj.$bslash(
 				"published").toString());
 
@@ -69,7 +72,8 @@ public class ActivityModel {
 
 		}
 
-		TargetModel targetModel = new TargetModel();
+		String target = ActivityModel.cleanJsonStringValue(obj.$bslash("target").toString());
+		TargetModel targetModel = new TargetModel(target);
 		// JsValue target = obj.$bslash("target");
 
 		this.setPublished(published);
@@ -119,8 +123,22 @@ public class ActivityModel {
 		this.target = target;
 	}
 
+	public String getID() {
+		return ID;
+	}
+
+	public void setID(String iD) {
+		this.ID = iD;
+	}
+
+	/** Converts the ActivityModel to a JSON object
+	 * Optionally has an ID field (if the ActivityModel has an ID set)
+	 * @return String JSON
+	 */
 	public String toJSON() {
-		return "{\"published\" : \"" + getPublished().toString()
+		String prefix = ID == null ? "" : "\"id\" : \"" + getID() + "\", ";
+		
+		return "{" + prefix + "\"published\" : \"" + getPublished().toString()
 				+ "\", \"actor\" : " + getActor().toJSON() + ", \"verb\" : \""
 				+ getVerb() + "\", \"object\" : " + getObject().toJSON()
 				+ ", \"target\" : " + getTarget().toJSON() + " }";
