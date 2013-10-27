@@ -23,7 +23,7 @@ public class MongoLink {
 	private static DBCollection newsFeed;
 	private static DBCollection users;
 	
-	//a link from Java to the MongoDB
+	/**Class linking from Java to the MongoDB**/
 	public MongoLink() throws UnknownHostException {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
@@ -85,10 +85,11 @@ public class MongoLink {
 	private static void test(){
 		System.out.println(newsFeed.find(new BasicDBObject("object.objectType", "TASK")).toArray());
 	}
-	//returns the last postLimit posts with replies
-	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
-
-		ArrayList<DBObject> posts = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", "")).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
+	
+	/**Returns a list of postLimit items containing key from collection**/
+	private ArrayList<ArrayList<String>> dbFetch(DBCollection collection, BasicDBObject key, int postLimit) {
+		
+		ArrayList<DBObject> posts = (ArrayList<DBObject>) collection.find(key).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
 		
 		try {
@@ -113,15 +114,35 @@ public class MongoLink {
 		return list;
 	}
 	
+	
+	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
+	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
+		return dbFetch(newsFeed, new BasicDBObject("target", ""), postLimit);
+		
+	}
+	
+	/**Default method to return last 20 items from newsFeed collection**/
 	public ArrayList<ArrayList<String>> getNewsFeed(){
 		return getNewsFeed(20);
 	}
 	
-	//use dbFormat to insert a formed message into the newsFeed DB
+	/**Returns a list of postLimit tasks**/
+	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
+		return dbFetch(newsFeed, new BasicDBObject("object.objectType", "TASK"), postLimit);
+		
+	}
+	
+	/**Default method to return last 20 tasks**/
+	public ArrayList<ArrayList<String>> getTasks(){
+		return getTasks(20);
+	}
+	
+	
+	
+	/**Inserts obj into newsFeed collection**/
 	public String insertNews(DBObject obj) {
 		
 		newsFeed.insert(obj);
-		
 		return newsFeed.find(obj).toArray().get(0).get("_id").toString();
 	}
 	
@@ -141,7 +162,7 @@ public class MongoLink {
 		return users.find(new BasicDBObject("username", username).append("password", pass)).hasNext();
 	}
 	
-	//shortcut for testing inserting in correct form
+	/**Shortcut to JSON format for testing inserts**/
 	private BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
 		BasicDBObject news = new BasicDBObject("published", published);
 		news.append("actor", new BasicDBObject("objectType", actorType).append("displayName", dispName));
