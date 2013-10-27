@@ -10,6 +10,7 @@ body {
 	border-radius:5px;
 
 	padding: 10px;
+	
 }
 
 .task {
@@ -26,12 +27,13 @@ body {
 
 .post_options {
 	background: #C0C0C0;
+	width: 40%;
     margin: 20px;
     border:2px solid;
     border-color:#AF3838;
 	border-radius:5px;
-	margin-left: 500px;
-	margin-right: 500px;
+	margin-left: auto;
+	margin-right: auto;
 
 	padding: 5px;
 	
@@ -40,6 +42,9 @@ body {
 .stream {
 	background: #C0C0C0;
     margin: 2px;
+    width: 50%;
+    margin-left: auto;
+	margin-right: auto;
     border:2px solid;
     border-color:#AF3838;
 	border-radius:5px;
@@ -90,12 +95,13 @@ li {
 
 .reply_post {
 	background: #C0C0C0;
+	width: 75%;
     margin: 20px;
     border:2px solid;
     border-color:#AF3838;
 	border-radius:5px;
-	margin-left: 500px;
-	margin-right: 500px;
+	margin-left: auto;
+	margin-right: auto;
 
 	padding: 5px;
 
