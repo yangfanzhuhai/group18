@@ -235,7 +235,7 @@ function postToFeed() {
                 type: "POST",
                 url: "http://floating-dawn-7087.herokuapp.com/rest/message",
                 dataType: "json",
-                data: post,
+                data: {"activity":post},
                 success: function(data){        
                     alert("Posted");
 
