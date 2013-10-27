@@ -17,7 +17,7 @@ public class ActivityModelTest {
   private static final String ACTOR_JSON = "{\"actor\" : \"json\"}";
   private static final String OBJECT_JSON = "{\"object\" : \"json\"}";
   private static final String TARGET_JSON = "{\"target\" : \"json\"}";
-  private static final Date PUBLISHED_DATE = new Date();
+  private static final String PUBLISHED_DATE = "Date";
   private static final String VERB_STRING = "verb";
 
   @Test
