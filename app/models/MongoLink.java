@@ -38,6 +38,21 @@ public class MongoLink {
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
 		//Prints last 20 items of newsFeed
+		
+	/*	try {
+			System.out.println(new ActivityModel("{\"published\" : \""
+			          + "234/324/423"
+			          + "\", "
+			          + "\"actor\" : "
+			          + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+			          + "\"" + "abc" + "\"}, "
+			          + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+			          + " : \"MESSAGE\" , \"message\" : " 
+			          + "\"" + "Hello" + "\"}, \"target\" : \"\"} ").toJSON());
+		} catch (ParseException e) {
+			System.out.println("PArse exception");
+		}*/
+		
 		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
@@ -77,8 +92,13 @@ public class MongoLink {
 			while(i < posts.size())
 			{
 				ArrayList<String> replies = getReplies(posts.get(i).get("_id").toString());
-				replies.add(0, new ActivityModel(posts.get(i).toString()).toJSON());
+				
+				ActivityModel post = new ActivityModel(posts.get(i).toString());
+				post.setID(posts.get(i).get("_id").toString());
+				
+				replies.add(0, post.toJSON());
 				list.add(i, replies);
+				
 				i++;
 			}
 		} catch (ParseException e) {

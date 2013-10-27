@@ -22,7 +22,7 @@ public class Rest extends Controller {
 			MongoLink mongoLink = new MongoLink();
 			ActivityModel activity = new ActivityModel(activityJson);
 			mongoLink.insertNews((DBObject)JSON.parse(activity.toJSON()));
-			return ok(activity.toJSON());
+			return ok();
 		} catch (Exception e) {
 			return status(400);
 		}

@@ -1,9 +1,23 @@
 package models;
 
 public class TargetModel {
+
+	private String id;
 	
-	public String toJSON(){
-		return "\"\"";
+	public TargetModel(String id){
+		this.id = id;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String toJSON() {
+		return "\"" + getId() + "\"";
 	}
 
 }
