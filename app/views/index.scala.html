@@ -33,13 +33,18 @@ function limitText(limitField, limitCount, limitNum) {
 <body>
 
 <script>
+	
+	var userName;
+	
     $.ajax({
         type: "GET",
         url: "/rest/user",
         success: function(data){   
 			alert(data);
+			userName = data;
         }
     });
+    
 </script>
 
 <img src="@routes.Assets.at("images/progress_all.jpg")" alt="some_text"
@@ -47,8 +52,8 @@ function limitText(limitField, limitCount, limitNum) {
 
 <div id = "post_options" class = "post_options" align = "center">
 
-	<input name="name" type="text" maxlength="512"
-		placeholder="Your name" id="name"/>
+	<!--input name="name" type="text" maxlength="512"
+		placeholder="Your name" id="name"/-->
 		
 		
 <form name="myform">
@@ -133,8 +138,8 @@ function generateFeed(stream_array) {
 		var date_and_time = document.createElement("div");
 		date_and_time.innerHTML = published;
 
-		var reply_name = document.createElement("input");
-		reply_name.placeholder="Your name";
+		//var reply_name = document.createElement("input");
+		//reply_name.placeholder="Your name";
 		
 		var reply_message = document.createElement("input");
 		reply_message.placeholder = "Your message"
@@ -158,7 +163,7 @@ function generateFeed(stream_array) {
 			post.appendChild(date_and_time);
 			post.appendChild(user);
 			post.appendChild(message);
-			post.appendChild(reply_name);
+			//post.appendChild(reply_name);
 			post.appendChild(reply_message);
 			post.appendChild(reply_button);
 
@@ -172,7 +177,7 @@ function generateFeed(stream_array) {
 
 			post.appendChild(date_and_time);
 			post.appendChild(task_data);
-			post.appendChild(reply_name);
+			//post.appendChild(reply_name);
 			post.appendChild(reply_message);
 			post.appendChild(reply_button);
 
@@ -180,13 +185,13 @@ function generateFeed(stream_array) {
 		
 
 
-
-		 reply_button.onclick = (function(post_id, reply_name, reply_message) {
+		 reply_button.onclick = (function(post_id, reply_message) {
             return function() {
                 //alert("you just clicked button" + x);
-                replyToPost(post_id, reply_name, reply_message);
+                alert(reply_message.value);
+                replyToPost(post_id, reply_message);
             }
-        }(post_id, reply_name, reply_message));
+        }(post_id, reply_message));
 
 
 		var j = 1;
@@ -209,6 +214,7 @@ function generateFeed(stream_array) {
 
 			var reply_message_text = document.createElement("div");
 			reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
+			alert(reply_message_text.innerHTML);
 			reply_div.appendChild(reply_message_text);
 			
 			var reply_publisherType = stream_array[i][j]['actor']["objectType"];
@@ -239,17 +245,14 @@ function getTimeStamp() {
 
 
 
-function replyToPost(post_id, reply_name, reply_message) {
+function replyToPost(post_id, reply_message) {
 
 	var post = document.getElementById(post_id);
-	var reply_name_text = reply_name.value;
+	var reply_name_text = userName;
 	var reply_message_text = reply_message.value;
+	alert(reply_message_text);
 
-	if (reply_name == "") {
-
-		alert("Please enter your name.");
-
-	} else if (reply_message = "") {
+	if (reply_message_text = "") {
 
 		alert("Reply cannot be empty.");
 
@@ -290,7 +293,8 @@ function postToFeed() {
 
     var currentdate = new Date();
     
-    var name_text = document.getElementById("name").value;
+    var name_text = userName;
+    /*document.getElementById("name").value;*/
     var message_text = document.getElementById("limitedtextfield").value;
     
     message_text = message_text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
