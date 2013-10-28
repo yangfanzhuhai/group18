@@ -101,8 +101,7 @@ function register() {
                 dataType: "json",
                 data: {"credentials":credentials},
                 success: function(data){        
-                    alert("Posted");
-
+                    window.location.href = '@routes.Application.index'
                 }
                 
             });      
@@ -112,11 +111,6 @@ function register() {
 	}
 
 
-	
-	alert(username);
-	alert(password);
-	
-	window.location.href = '@routes.Application.index'
 	
 	
 	

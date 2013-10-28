@@ -6,6 +6,8 @@ import java.util.Map;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
+import com.google.code.gson;
+
 import models.ActivityModel;
 import models.MongoLink;
 import play.mvc.Controller;
@@ -26,6 +28,10 @@ public class Rest extends Controller {
 		} catch (Exception e) {
 			return status(400);
 		}
+	}
+	
+	public static Result getUser(){
+		
 	}
 	
 	 public static Result getActivities() throws UnknownHostException {
@@ -49,6 +55,25 @@ public class Rest extends Controller {
 				return ok();
 			} catch (Exception e) {
 				return status(400);
+			}
+		 
+	 }
+	 
+	 public static Result loginUser(){
+		 final Map<String, String[]> values = request().body()
+					.asFormUrlEncoded();
+			String credentialsJson = values.get("credentials")[0];
+
+			try {
+				MongoLink mongoLink = new MongoLink();
+				if (mongoLink.checkLogin(JSON.parse(credentialsJson))){
+					session("connected", arg1)
+					return status(200);
+				} else {
+					return status(400);
+				}
+			} catch (Exception e) {
+				return status(422);
 			}
 		 
 	 }

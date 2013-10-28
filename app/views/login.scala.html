@@ -69,8 +69,24 @@ function login() {
 	var username = document.getElementById("username").value;
 	var password = document.getElementById("password").value;
 	
-	alert(username);
-	alert(password);
+	var credentials = "{\"username\" : "
+                  + "\"" + username + "\", "
+                  + "\"password\" : "
+                  + "\"" + password + "\""
+                  + "}";
+            
+            alert(credentials);
+	
+	$.ajax({
+                type: "POST",
+                url: "/rest/login",
+                dataType: "json",
+                data: {"credentials":credentials},
+                success: function(data){        
+                    window.location.href = '@routes.Application.index'
+                }
+                
+            });      
 	
 	window.location.href = 'NewsFeed.html'
 	
