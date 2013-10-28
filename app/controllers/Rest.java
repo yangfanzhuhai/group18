@@ -52,10 +52,13 @@ public class Rest extends Controller {
 
 			try {
 				MongoLink mongoLink = new MongoLink();
-				mongoLink.registerNewUser((DBObject) JSON.parse(credentialsJson));
+				if (mongoLink.registerNewUser((DBObject) JSON.parse(credentialsJson))){
 				return ok();
+				} else {
+					return status(400);
+				}
 			} catch (Exception e) {
-				return status(400);
+				return status(422);
 			}
 		 
 	 }
