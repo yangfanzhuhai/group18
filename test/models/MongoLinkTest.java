@@ -92,6 +92,10 @@ public class MongoLinkTest {
 		}
 	}
 	
+	/**
+	 * Tests that a newly registered user gets recorded
+	 * in the database and can login
+	 */
 	@Test
 	public void testUserRegisterAndLogin()
 	{
@@ -101,7 +105,9 @@ public class MongoLinkTest {
 			DBCollection coll = db.getCollection("testCollection");
 			
 			DBObject obj = new BasicDBObject("username", "Bob").append("password", "pass1");
-			registerNewUser(coll, obj);
+			
+			if(!registerNewUser(coll, obj))
+					fail("Registering failed");
 			
 			if(!checkLogin(coll, obj))
 				fail("Register and Login test failed");
