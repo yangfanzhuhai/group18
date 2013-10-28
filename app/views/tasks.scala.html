@@ -133,10 +133,9 @@ function generateFeed(stream_array) {
 		if (message_type == "TASK") {
 
 			var task_name = stream_array[i][0]['object']["name"];
-			var post_data = document.createElement("div");
+			var task_data = document.createElement("div");
 			post.style.backgroundColor = "#FF6699";
-			post_data.innerHTML = task_name;
-
+			task_data.innerHTML = "NEW TASK: " + task_name.bold() + " BY " + publisher.bold();
 		}	
 		
 		var reply_name = document.createElement("input");
@@ -163,7 +162,7 @@ function generateFeed(stream_array) {
 	
 		post.appendChild(date_and_time);
 		post.appendChild(user);
-		post.appendChild(post_data);
+		post.appendChild(task_data);
 		post.appendChild(reply_name);
 		post.appendChild(reply_message);
 		post.appendChild(reply_button);
