@@ -33,6 +33,11 @@ public class Rest extends Controller {
 	        return ok(mongoLink.getNewsFeed().toString());
 	    }
 	 
+	 public static Result getTasks() throws UnknownHostException {
+	    	MongoLink mongoLink = new MongoLink();
+	        return ok(mongoLink.getTasks().toString());
+	    }
+	 
 	 public static Result registerUser(){
 		 final Map<String, String[]> values = request().body()
 					.asFormUrlEncoded();
