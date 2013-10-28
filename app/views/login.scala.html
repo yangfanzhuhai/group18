@@ -80,15 +80,13 @@ function login() {
 	$.ajax({
                 type: "POST",
                 url: "/rest/login",
-                dataType: "json",
                 data: {"credentials":credentials},
-                success: function(data){        
+                success: function(data){
                     window.location.href = '@routes.Application.index'
                 }
                 
             });      
 	
-	window.location.href = 'NewsFeed.html'
 	
 	
 	

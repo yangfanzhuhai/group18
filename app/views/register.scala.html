@@ -98,7 +98,6 @@ function register() {
             $.ajax({
                 type: "POST",
                 url: "/rest/register",
-                dataType: "json",
                 data: {"credentials":credentials},
                 success: function(data){        
                     window.location.href = '@routes.Application.index'

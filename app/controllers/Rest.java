@@ -6,10 +6,11 @@ import java.util.Map;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
-import com.google.code.gson;
+import com.google.gson.Gson;
 
 import models.ActivityModel;
 import models.MongoLink;
+import models.User;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -31,7 +32,7 @@ public class Rest extends Controller {
 	}
 	
 	public static Result getUser(){
-		
+		return ok(session("connected"));
 	}
 	
 	 public static Result getActivities() throws UnknownHostException {
@@ -65,10 +66,14 @@ public class Rest extends Controller {
 			String credentialsJson = values.get("credentials")[0];
 
 			try {
+				Gson gson = new Gson();
+				User user = gson.fromJson(credentialsJson, User.class);
+				String username = user.username;
+				String password = user.password;
 				MongoLink mongoLink = new MongoLink();
-				if (mongoLink.checkLogin(JSON.parse(credentialsJson))){
-					session("connected", arg1)
-					return status(200);
+				if (mongoLink.checkLogin(username, password)){
+					session("connected", username);
+					return ok();
 				} else {
 					return status(400);
 				}
