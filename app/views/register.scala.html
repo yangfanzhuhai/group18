@@ -86,12 +86,11 @@ function register() {
 		alert("Passwords do not match");
 
 	} else {
-	
-	            var credentials = "{\"username\" : "
-                  + "\"" + username + "\", "
-                  + "\"password\" : "
-                  + "\"" + password + "\""
-                  + "}";
+            var credentials = "{\"username\" : "
+                + "\"" + username + "\", "
+                + "\"password\" : "
+                + "\"" + password + "\""
+                + "}";
             
             alert(credentials);
             
@@ -102,29 +101,14 @@ function register() {
                 data: {"credentials":credentials},
                 success: function(data){        
                     alert("Posted");
-
-                }
-                
+                }           
             });      
-                  
-                  
-		
 	}
-
-
-	
 	alert(username);
 	alert(password);
 	
-	window.location.href = '@routes.Application.index'
-	
-	
-	
+	window.location.href = '@routes.Application.index';
 }
-
-
-
 </script>
-
 </body>
 </html>
