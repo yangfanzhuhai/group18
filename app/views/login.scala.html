@@ -44,7 +44,7 @@
 			Remember Me
 		</input>
 		<button class = "remember" >
-			Register
+			<a href = "@routes.Application.register">Register</a>
 		</button>
 	</div>
 	
@@ -56,6 +56,10 @@
 </div>
 
 <script>
+
+function register() {
+  window.location.href = "@routes.Application.register";
+}
 
 function login() {
 
@@ -72,13 +76,8 @@ function login() {
 	alert(username);
 	alert(password);
 	
-	window.location.href = 'NewsFeed.html'
-	
-	
-	
+	window.location.href = '@routes.Application.index'
 }
-
-
 
 </script>
 

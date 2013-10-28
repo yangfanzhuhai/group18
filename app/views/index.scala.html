@@ -246,29 +246,29 @@ function replyToPost(post_id, reply_name, reply_message) {
 
 		var date_and_time_stamp = getTimeStamp();
 
-        var reply = "{\"published\" : \""
-                  + date_and_time_stamp
-                  + "\", "
-                  + "\"actor\" : "
-                  + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-                  + "\"" 
-                  + reply_name_text
-                  + "\"}, "
-                  + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-                  + " : \"MESSAGE\", \"message\" : " 
-                  + "\"" 
-                  + reply_message_text
-                  + "\"}, \"target\" : \"" 
-                  + post_id
-                  +  "\"} ";
+    var reply = "{\"published\" : \""
+              + date_and_time_stamp
+              + "\", "
+              + "\"actor\" : "
+              + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+              + "\"" 
+              + reply_name_text
+              + "\"}, "
+              + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+              + " : \"MESSAGE\", \"message\" : " 
+              + "\"" 
+              + reply_message_text
+              + "\"}, \"target\" : \"" 
+              + post_id
+              +  "\"} ";
 
-        $.ajax({
-        	type: "POST",
-        	url: "/rest/message",
-        	dataType: "json",
-        	data: {"activity":reply},
-        	complete: refreshFeed 
-        });
+    $.ajax({
+    	type: "POST",
+    	url: "/rest/message",
+    	dataType: "json",
+    	data: {"activity":reply},
+    	complete: refreshFeed 
+    });
 
 	}
 
@@ -295,33 +295,26 @@ function postToFeed() {
     if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
     
     
-            var post = "{\"published\" : \""
-                  + date_and_time_stamp
-                  + "\", "
-                  + "\"actor\" : "
-                  + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-                  + "\"" + name_text + "\"}, "
-                  + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-                  + " : \"MESSAGE\" , \"message\" : " 
-                  + "\"" + message_text + "\"}, \"target\" : \"\"} ";
-            
-            
-           // var json_post = JSON.stringify(eval('(' + post + ')'));
-           // var obj = JSON.parse(json_post);
-            
+      var post = "{\"published\" : \""
+            + date_and_time_stamp
+            + "\", "
+            + "\"actor\" : "
+            + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+            + "\"" + name_text + "\"}, "
+            + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+            + " : \"MESSAGE\" , \"message\" : " 
+            + "\"" + message_text + "\"}, \"target\" : \"\"} ";
+  
+      $.ajax({
+          type: "POST",
+          url: "/rest/message",
+          dataType: "json",
+          data: {"activity":post},
+	        complete: refreshFeed                
+      });
                   
-                  
-            $.ajax({
-                type: "POST",
-                url: "/rest/message",
-                dataType: "json",
-                data: {"activity":post},
-				complete: refreshFeed                
-            });
-                        
-            document.getElementById("name").value = "";
-            document.getElementById("limitedtextfield").value = "";
-            
+      document.getElementById("name").value = "";
+      document.getElementById("limitedtextfield").value = "";           
         
     } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
         
@@ -333,8 +326,7 @@ function postToFeed() {
                   + "\"" + name_text + "\"}, "
                   + "\"verb\" : \"said\", \"object\" : {\"objectType\""
                   + " : \"TASK\" , \"name\" : " 
-                  + "\"" + message_text + "\"}, \"target\" : \"\"} ";
-                  
+                  + "\"" + message_text + "\"}, \"target\" : \"\"} "; 
 
              $.ajax({
                 type: "POST",
@@ -342,8 +334,7 @@ function postToFeed() {
                 dataType: "json",
                 data: {"activity":json_post},
                 complete: refreshFeed
-            });
-        
+            });      
                         
             document.getElementById("name").value = "";
             document.getElementById("limitedtextfield").value = "";
