@@ -61,7 +61,7 @@ public class MongoLink {
 			}
 		}
 		
-		if(ml.checkLogin("Piotr","pass"))
+		if(ml.checkLogin(new BasicDBObject("username", "Piotr").append("password","pass")))
 			System.out.println("Success");
 		
 	//	ml.registerNewUser(new BasicDBObject("username", "Rob").append("password", "pass2"));
@@ -158,8 +158,12 @@ public class MongoLink {
 		return (int) users.getCount() == oldCount + 1;
 	}
 	
-	public boolean checkLogin(String username, String pass) {
-		return users.find(new BasicDBObject("username", username).append("password", pass)).hasNext();
+	public boolean checkLogin(DBObject obj) {
+		return checkLogin( obj.get("username").toString() ,obj.get("password").toString());
+	}
+	
+	public boolean checkLogin(String username, String password) {
+		return users.find(new BasicDBObject("username", username).append("password", password)).hasNext();
 	}
 	
 	/**Shortcut to JSON format for testing inserts**/

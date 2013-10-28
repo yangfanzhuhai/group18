@@ -43,8 +43,8 @@
 		<input type="checkbox" placeholder="Remember me" name = "Remember me">
 			Remember Me
 		</input>
-		<button class = "remember" >
-			<a href = "@routes.Application.register">Register</a>
+		<button class = "remember" onclick = "register()" >
+			Register
 		</button>
 	</div>
 	
@@ -58,7 +58,7 @@
 <script>
 
 function register() {
-  window.location.href = "@routes.Application.register";
+  window.location.href = '@routes.Application.register';
 }
 
 function login() {
@@ -76,7 +76,7 @@ function login() {
 	alert(username);
 	alert(password);
 	
-	window.location.href = '@routes.Application.index'
+	window.location.href = '@routes.Application.index';
 }
 
 </script>
