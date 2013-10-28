@@ -142,7 +142,9 @@ function generateFeed(stream_array) {
 		
 			var message_text = stream_array[i][0]['object']["message"];
 			var message = document.createElement("div");
+			message_text = message_text.replace("\n", "<br>");
 			message.innerHTML = message_text;
+
 
 			post.appendChild(date_and_time);
 			post.appendChild(user);
