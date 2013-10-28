@@ -32,6 +32,15 @@ function limitText(limitField, limitCount, limitNum) {
 
 <body>
 
+<script>
+    $.ajax({
+        type: "GET",
+        url: "/rest/user",
+        success: function(data){   
+			alert(data);
+        }
+    });
+</script>
 
 <img src="@routes.Assets.at("images/progress_all.jpg")" alt="some_text"
 	width="200" >

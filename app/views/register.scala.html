@@ -97,17 +97,13 @@ function register() {
             $.ajax({
                 type: "POST",
                 url: "/rest/register",
-                dataType: "json",
                 data: {"credentials":credentials},
                 success: function(data){        
-                    alert("Posted");
-                }           
+				    window.location.href = '@routes.Application.index'
+                }
             });      
 	}
-	alert(username);
-	alert(password);
-	
-	window.location.href = '@routes.Application.index';
+
 }
 </script>
 </body>

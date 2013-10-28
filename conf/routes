@@ -17,6 +17,8 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 GET		/rest/feed					controllers.Rest.getActivities()
 GET		/rest/tasks					controllers.Rest.getTasks()
+GET		/rest/user					controllers.Rest.getUser()
 
 POST	/rest/message				controllers.Rest.createMessage()
 POST	/rest/register				controllers.Rest.registerUser()
+POST	/rest/login					controllers.Rest.loginUser()
