@@ -40,7 +40,6 @@ function limitText(limitField, limitCount, limitNum) {
         type: "GET",
         url: "/rest/user",
         success: function(data){   
-			alert(data);
 			userName = data;
         }
     });
@@ -54,7 +53,7 @@ function limitText(limitField, limitCount, limitNum) {
 
 	<!--input name="name" type="text" maxlength="512"
 		placeholder="Your name" id="name"/-->
-		
+	<div id="username"> </div>	
 		
 <form name="myform">
 <textarea name="limitedtextarea" type="text" id = "limitedtextfield"
@@ -104,6 +103,8 @@ $(document).ready(refreshFeed);
 
 
 function generateFeed(stream_array) {
+
+	document.getElementById("username").innerHTML=userName;
 
 	for (var i=0; i < stream_array.length;i++) {
 
@@ -188,7 +189,6 @@ function generateFeed(stream_array) {
 		 reply_button.onclick = (function(post_id, reply_message) {
             return function() {
                 //alert("you just clicked button" + x);
-                alert(reply_message.value);
                 replyToPost(post_id, reply_message);
             }
         }(post_id, reply_message));
@@ -214,7 +214,6 @@ function generateFeed(stream_array) {
 
 			var reply_message_text = document.createElement("div");
 			reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
-			alert(reply_message_text.innerHTML);
 			reply_div.appendChild(reply_message_text);
 			
 			var reply_publisherType = stream_array[i][j]['actor']["objectType"];
@@ -250,9 +249,8 @@ function replyToPost(post_id, reply_message) {
 	var post = document.getElementById(post_id);
 	var reply_name_text = userName;
 	var reply_message_text = reply_message.value;
-	alert(reply_message_text);
 
-	if (reply_message_text = "") {
+	if (reply_message_text == "") {
 
 		alert("Reply cannot be empty.");
 
@@ -330,7 +328,7 @@ function postToFeed() {
 	        complete: refreshFeed                
       });
                   
-      document.getElementById("name").value = "";
+      //document.getElementById("name").value = "";
       document.getElementById("limitedtextfield").value = "";           
         
     } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
@@ -356,9 +354,7 @@ function postToFeed() {
             document.getElementById("name").value = "";
             document.getElementById("limitedtextfield").value = "";
         
-    } else {
-           alert("Enter your name and a message."); 
-    }
+    } 
     
 }
 
