@@ -79,7 +79,6 @@ function login() {
                   + "\"" + password + "\""
                   + "}";
             
-            alert(credentials);
 	
 	$.ajax({
                 type: "POST",
@@ -87,7 +86,12 @@ function login() {
                 data: {"credentials":credentials},
                 success: function(data){
                     window.location.href = '@routes.Application.index'
-                }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                	if (xhr.status == 400) {
+                		alert("Invalid login. Please register or try again");
+                	}
+                } 
                 
             });      
 
