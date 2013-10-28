@@ -282,6 +282,8 @@ function postToFeed() {
     var name_text = document.getElementById("name").value;
     var message_text = document.getElementById("limitedtextfield").value;
     
+    message_text = message_text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+    
     var dropdown = document.getElementById("post_type");
     var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
     
