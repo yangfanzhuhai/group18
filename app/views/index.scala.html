@@ -121,32 +121,9 @@ function generateFeed(stream_array) {
 			document.getElementById("stream").insertBefore(post);
 		}
 
-	
 		var date_and_time = document.createElement("div");
 		date_and_time.innerHTML = published;
-	
-		var user = document.createElement("div");
-		user.innerHTML = publisher  + ":";
 
-
-		var post_data;
-
-		if (message_type == "MESSAGE") {
-		
-			var message_text = stream_array[i][0]['object']["message"];
-			var post_data = document.createElement("div");
-			post_data.innerHTML = message_text;
-
-
-		} else if (message_type == "TASK") {
-
-			var task_name = stream_array[i][0]['object']["name"];
-			var post_data = document.createElement("div");
-			post.style.backgroundColor = "#FF6699";
-			post_data.innerHTML = task_name;
-
-		}	
-		
 		var reply_name = document.createElement("input");
 		reply_name.placeholder="Your name";
 		
@@ -158,6 +135,40 @@ function generateFeed(stream_array) {
 		reply_button.innerHTML = 'Reply';
 		reply_button.align = "right"; 	
 
+		if (message_type == "MESSAGE") {
+
+			var user = document.createElement("div");
+			user.innerHTML = publisher  + ":";
+		
+			var message_text = stream_array[i][0]['object']["message"];
+			var message = document.createElement("div");
+			message.innerHTML = message_text;
+
+			post.appendChild(date_and_time);
+			post.appendChild(user);
+			post.appendChild(message);
+			post.appendChild(reply_name);
+			post.appendChild(reply_message);
+			post.appendChild(reply_button);
+
+
+		} else if (message_type == "TASK") {
+
+			var task_name = stream_array[i][0]['object']["name"];
+			var task_data = document.createElement("div");
+			post.style.backgroundColor = "#FF6699";
+			task_data.innerHTML = "NEW TASK: " + task_name.bold() + " BY " + publisher.bold();
+
+			post.appendChild(date_and_time);
+			post.appendChild(task_data);
+			post.appendChild(reply_name);
+			post.appendChild(reply_message);
+			post.appendChild(reply_button);
+
+		}	
+		
+
+
 
 		 reply_button.onclick = (function(post_id, reply_name, reply_message) {
             return function() {
@@ -166,15 +177,6 @@ function generateFeed(stream_array) {
             }
         }(post_id, reply_name, reply_message));
 
-
-
-	
-		post.appendChild(date_and_time);
-		post.appendChild(user);
-		post.appendChild(post_data);
-		post.appendChild(reply_name);
-		post.appendChild(reply_message);
-		post.appendChild(reply_button);
 
 		var j = 1;
 		while (j < stream_array[i].length) {
