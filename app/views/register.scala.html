@@ -4,11 +4,11 @@
 <title> Register </title>
 
 <ul>
-<li><a href="@routes.Application.index">News Feed</a></li>
+<!--li><a href="@routes.Application.index">News Feed</a></li>
 <li><a href="@routes.Application.tasks">Task List</a></li>
 <li><a href="@routes.Application.gits">Git Commits</a></li>
 <li><a href="@routes.Application.builds">Build History</a></li>
-<li><a href="@routes.Application.about">About</a></li>
+<li><a href="@routes.Application.about">About</a></li-->
 <li><a href="@routes.Application.login">Log in</a></li>
 </ul>
 
@@ -99,7 +99,7 @@ function register() {
                 url: "/rest/register",
                 data: {"credentials":credentials},
                 success: function(data){        
-				    window.location.href = '@routes.Application.index'
+				    window.location.href = '@routes.Application.login'
                 }
             });      
 	}
