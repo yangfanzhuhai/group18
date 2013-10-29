@@ -4,6 +4,8 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 
+import models.activity.Activity;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -77,7 +79,7 @@ public class MongoLink {
 			while(i < posts.size())
 			{
 				ArrayList<String> replies = getReplies(posts.get(i).get("_id").toString());
-				replies.add(0, new ActivityModel(posts.get(i).toString()).toJSON());
+				replies.add(0, new Activity(posts.get(i).toString()).toJSON());
 				list.add(i, replies);
 				i++;
 			}
@@ -134,7 +136,7 @@ public class MongoLink {
 		
 		
 		for(DBObject o : list) {
-			retList.add(new ActivityModel(o.toString()).toJSON());
+			retList.add(new Activity(o.toString()).toJSON());
 		}
 		
 		return retList;

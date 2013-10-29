@@ -1,4 +1,4 @@
-package models;
+package models.activity.object;
 
 public enum ObjectType {
 	MESSAGE

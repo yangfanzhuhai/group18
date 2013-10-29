@@ -2,6 +2,7 @@ package models;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import models.activity.actor.Person;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,7 +14,7 @@ public class PersonActorTest {
 
 	@Test
 	public void testToJson() throws JSONException {
-		PersonActor personActor = new PersonActor(DISPLAY_NAME);
+		Person personActor = new Person(DISPLAY_NAME);
 
 		String expectedJSON = "{\"objectType\" : \"PERSON\", \"displayName\" : \""
 				+ DISPLAY_NAME + "\"}";

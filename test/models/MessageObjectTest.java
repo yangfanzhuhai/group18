@@ -2,6 +2,7 @@ package models;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import models.activity.object.Message;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,7 +14,7 @@ public class MessageObjectTest {
 
 	@Test
 	public void testToJson() throws JSONException {
-		MessageObject messageObject = new MessageObject(MESSAGE);
+		Message messageObject = new Message(MESSAGE);
 
 		String expectedJSON = "{\"objectType\" : \"MESSAGE\", \"message\" : \""
 				+ MESSAGE + "\"}";
