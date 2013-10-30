@@ -7,7 +7,7 @@ tmp
 .classpath
 .project
 .target/
-
+updateDBBranch
 
 # Temp files
 *~
