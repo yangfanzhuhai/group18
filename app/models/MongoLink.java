@@ -65,7 +65,6 @@ public class MongoLink {
 		} catch (ParseException e) {
 			System.out.println("PArse exception");
 		}*/
-	//	test();
 		
 		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
 
@@ -103,10 +102,6 @@ public class MongoLink {
 //		} else {
 //			System.out.println("insert failed");
 //		}*/
-	}
-
-	private static void test(){
-		System.out.println(newsFeed.find(new BasicDBObject("object.objectType", "TASK")).toArray());
 	}
 	
 	/**Returns a list of postLimit items containing key from collection**/
@@ -203,7 +198,6 @@ public class MongoLink {
 	}
 	
 	/**
-	 * 
 	 * @param id - ID string of the task
 	 * @return ArrayList of all the news feed items that reference the task
 	 * @throws ParseException
@@ -211,21 +205,26 @@ public class MongoLink {
 	private ArrayList<String> getReferences(String id) throws ParseException {
 		ArrayList<String> l = new ArrayList<String>();
 		l.add(id);
-		return getAssociatedObjects(id, new BasicDBObject("target.taskIDs", new BasicDBObject("$in", l)));
+		return getItems(new BasicDBObject("target.taskIDs", new BasicDBObject("$in", l)));
 	}
 	
 	/**
-	 * 
 	 * @param id - ID string of the news feed post
 	 * @return ArrayList of all the replies to that post
 	 * @throws ParseException
 	 */
 	private ArrayList<String> getReplies(String id) throws ParseException {
 		
-		return getAssociatedObjects(id, new BasicDBObject("target.messageID", id));
+		return getItems(new BasicDBObject("target.messageID", id));
 	}
 	
-	private ArrayList<String> getAssociatedObjects(String id, DBObject query) throws ParseException {
+	/** Generic method to find list of objects that satisfy the given query
+	 * 
+	 * @param query - DBObject containing the information about the query
+	 * @return ArrayList of objects
+	 * @throws ParseException
+	 */
+	private ArrayList<String> getItems(DBObject query) throws ParseException {
 		
 		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).toArray();
 		ArrayList<String> retList = new ArrayList<String>();		
