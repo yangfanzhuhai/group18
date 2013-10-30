@@ -137,6 +137,11 @@ public class MongoLink {
 		return getTasks(20);
 	}
 	
+	/**Returns all tasks **/
+	public ArrayList<ArrayList<String>> getAllTasks(){
+		return getTasks((int) newsFeed.count());
+	}
+	
 	
 	
 	/**Inserts obj into newsFeed collection**/
