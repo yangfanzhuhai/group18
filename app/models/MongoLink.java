@@ -13,6 +13,8 @@ import com.mongodb.MongoClientURI;
 
 public class MongoLink {
 	
+	public static MongoLink MONGO_LINK;
+	
 	private final static String DBUSER = "testUser";
 	private final static String DBPASS = "test";
 	private final int DBPORT = 49868;
@@ -25,19 +27,29 @@ public class MongoLink {
 	private static DBCollection gitRepos;
 	
 	/**Class linking from Java to the MongoDB**/
-	public MongoLink() throws UnknownHostException {
+	public MongoLink(boolean devMode) throws UnknownHostException {
 		
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		
-		gitRepos = db.getCollection("gitRepositories");
-		newsFeed = db.getCollection("newsFeed");
-		users = db.getCollection("userAccounts");
+		if(devMode)
+		{
+			gitRepos = db.getCollection("DEVgitRepositories");
+			newsFeed = db.getCollection("DEVnewsFeed");
+			users = db.getCollection("DEVuserAccounts");
+		}
+		else
+		{
+			gitRepos = db.getCollection("gitRepositories");
+			newsFeed = db.getCollection("newsFeed");
+			users = db.getCollection("userAccounts");
+		}
+
 	}
 
 	//for testing
 	public static void main(String[] args) throws UnknownHostException {
-		MongoLink ml = new MongoLink();
+		MongoLink ml = new MongoLink(true);
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
 		//Prints last 20 items of newsFeed
@@ -58,10 +70,20 @@ public class MongoLink {
 	//	test();
 		
 		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
+
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
 			}
+		}
+		try {
+			System.out.println("REFERENCES");
+			for(String a : ml.getReferences("sadf")) {
+					System.out.println(a);
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		if(ml.checkLogin(new BasicDBObject("username", "Piotr").append("password","pass")))
@@ -145,20 +167,6 @@ public class MongoLink {
 		return getTasks((int) newsFeed.count());
 	}
 	
-	private ArrayList<String> getReferences(String id) throws ParseException {
-		
-		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target.taskIDs", id)).toArray();
-		ArrayList<String> retList = new ArrayList<String>();		
-		
-		
-		for(DBObject o : list) {
-			retList.add(new ActivityModel(o.toString()).toJSON());
-		}
-		
-		return retList;
-	}
-	
-	
 	/**Inserts obj into newsFeed collection**/
 	public String insertNews(DBObject obj) {
 		
@@ -196,9 +204,32 @@ public class MongoLink {
 		return news;
 	}
 	
-	private static ArrayList<String> getReplies(String id) throws ParseException {
+	/**
+	 * 
+	 * @param id - ID string of the task
+	 * @return ArrayList of all the news feed items that reference the task
+	 * @throws ParseException
+	 */
+	private ArrayList<String> getReferences(String id) throws ParseException {
+		ArrayList<String> l = new ArrayList<String>();
+		l.add(id);
+		return getAssociatedObjects(id, new BasicDBObject("target.taskIDs", new BasicDBObject("$in", l)));
+	}
+	
+	/**
+	 * 
+	 * @param id - ID string of the news feed post
+	 * @return ArrayList of all the replies to that post
+	 * @throws ParseException
+	 */
+	private ArrayList<String> getReplies(String id) throws ParseException {
 		
-		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target.messageID", id)).toArray();
+		return getAssociatedObjects(id, new BasicDBObject("target.messageID", id));
+	}
+	
+	private ArrayList<String> getAssociatedObjects(String id, DBObject query) throws ParseException {
+		
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).toArray();
 		ArrayList<String> retList = new ArrayList<String>();		
 		
 		
