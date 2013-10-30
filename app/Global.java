@@ -12,8 +12,7 @@ public class Global extends GlobalSettings {
 	  @Override
 	  public void onStart(Application app) {
 	    try {
-	    	Play.isDev(Play.current());
-			MongoLink.MONGO_LINK = new MongoLink();
+			MongoLink.MONGO_LINK = new MongoLink(Play.isDev(Play.current()));
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
