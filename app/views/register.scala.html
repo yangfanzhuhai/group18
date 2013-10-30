@@ -35,8 +35,8 @@
     </div>
   
   <ul>
-  <!--li><a href="@routes.Application.index">News Feed</a></li>
-  <li><a href="@routes.Application.tasks">Task List</a></li>
+  <!--li><a href="@routes.Application.feed(0)">News Feed</a></li>
+  <li><a href="@routes.Application.feed(1)">Task List</a></li>
   <li><a href="@routes.Application.gits">Git Commits</a></li>
   <li><a href="@routes.Application.builds">Build History</a></li>
   <li><a href="@routes.Application.about">About</a></li-->
@@ -121,7 +121,7 @@
                   url: "/rest/register",
                   data: {"credentials":credentials},
                   success: function(data){        
-				      window.location.href = '@routes.Application.login'
+				      window.location.href = '@routes.Application.feed(0)'
                   },
                   error: function (xhr, ajaxOptions, thrownError) {
                   	if (xhr.status == 400) {

@@ -52,7 +52,6 @@
       var remember_me = document.getElementById("remember_me");
 
       if (remember_me.checked) {
-	
 	      alert("remembered");
       }
 
@@ -64,13 +63,13 @@
                       + "\"password\" : "
                       + "\"" + password + "\""
                       + "}";
-                
+
       $.ajax({
           type: "POST",
           url: "/rest/login",
           data: {"credentials":credentials},
           success: function(data){
-              window.location.href = '@routes.Application.index'
+              window.location.href = '@routes.Application.feed(0)'
           },
           error: function (xhr, ajaxOptions, thrownError) {
           	if (xhr.status == 400) {

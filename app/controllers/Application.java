@@ -5,16 +5,16 @@ import play.mvc.Result;
 import views.html.about;
 import views.html.builds;
 import views.html.gits;
-import views.html.index;
+import views.html.feed;
 import views.html.login;
 import views.html.register;
-import views.html.tasks;
 
 public class Application extends Controller {
 
-	public static Result index() {
+	public static Result feed(Integer toggle) {
 		if (session("connected") != null) {
-			return ok(index.render());
+			String userName = session("connected");
+			return ok(feed.render(toggle, userName));
 		} else {
 			return ok(login.render());
 		}
@@ -45,13 +45,6 @@ public class Application extends Controller {
 		return ok(login.render());
 	}
 
-	public static Result tasks() {
-		if (session("connected") != null) {
-			return ok(tasks.render());
-		} else {
-			return ok(login.render());
-		}
-	}
 
 	public static Result register() {
 		return ok(register.render());
