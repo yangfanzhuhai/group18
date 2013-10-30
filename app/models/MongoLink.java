@@ -120,7 +120,7 @@ public class MongoLink {
 	
 	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
 	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
-		return dbFetch(newsFeed, new BasicDBObject("target", ""), postLimit);
+		return dbFetch(newsFeed, new BasicDBObject("target.messageID", ""), postLimit);
 		
 	}
 	
@@ -145,6 +145,18 @@ public class MongoLink {
 		return getTasks((int) newsFeed.count());
 	}
 	
+	private ArrayList<String> getReferences(String id) throws ParseException {
+		
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target.taskIDs", id)).toArray();
+		ArrayList<String> retList = new ArrayList<String>();		
+		
+		
+		for(DBObject o : list) {
+			retList.add(new ActivityModel(o.toString()).toJSON());
+		}
+		
+		return retList;
+	}
 	
 	
 	/**Inserts obj into newsFeed collection**/
@@ -186,7 +198,7 @@ public class MongoLink {
 	
 	private static ArrayList<String> getReplies(String id) throws ParseException {
 		
-		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", id)).toArray();
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target.messageID", id)).toArray();
 		ArrayList<String> retList = new ArrayList<String>();		
 		
 		
