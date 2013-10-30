@@ -351,9 +351,9 @@ function replyToPost(post_id, reply_message) {
               + reply_message_text
               + "\"}, \"target\" : { \"messageID\" : \"" 
               + post_id
-	      + "\", \"taskIDs\" : \""
+	      + "\", \"taskIDs\" : ["
 	      + references
-              +  "\"}} ";
+              +  "]}} ";
 
     $.ajax({
     	type: "POST",
@@ -410,9 +410,11 @@ var references = [];
             + "\"verb\" : \"said\", \"object\" : {\"objectType\""
             + " : \"MESSAGE\" , \"message\" : " 
             + "\"" + message_text
-	    + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : \""
+	    + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
 	    + references
-            +  "\"}} ";
+            +  "]}} ";
+
+alert(post);
   
       $.ajax({
           type: "POST",
@@ -438,9 +440,9 @@ var references = [];
                   + "\"verb\" : \"said\", \"object\" : {\"objectType\""
                   + " : \"TASK\" , \"name\" : " 
                   + "\"" + message_text
-		  + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : \""
+		  + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
 	 	  + references
-         	  +  "\"}} ";
+         	  +  "]}} ";
 
              $.ajax({
                 type: "POST",

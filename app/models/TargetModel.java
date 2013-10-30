@@ -28,8 +28,22 @@ public class TargetModel {
 	}
 
 	public String toJSON() {
-		return "{\"messageID\" : \"" + getMessageID() + "\", \"taskIDs\" : \""
-		        + getTaskIDs() + "\"}";
+		return "{\"messageID\" : \"" + getMessageID() + "\", \"taskIDs\" : "
+		        + printTaskIDs() + "}";
+	}
+	
+	private String printTaskIDs() {
+		String s = "[";
+		
+		if (!taskIDs.isEmpty()) {
+			int i;
+			for (i = 0; i < taskIDs.size() - 1; i++) {
+				s += "\"" + taskIDs.get(i) + "\",";
+			}
+			s += "\"" + taskIDs.get(i) + "\"";
+		}
+		
+		return s += "]";
 	}
 
 }
