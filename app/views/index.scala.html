@@ -5,12 +5,27 @@
 <title> News Feed </title>
 
 <ul>
-<li><a href="@routes.Application.tasks">Task List</a></li>
+<li><a href= "javascript:;" onclick="toggleTasks()" id="firstLink">Task List</a></li>
 <li><a href="@routes.Application.gits">Git Commits</a></li>
 <li><a href="@routes.Application.builds">Build History</a></li>
 <li><a href="@routes.Application.about">About</a></li>
 <li><a href="@routes.Application.login">Log out</a></li>
 </ul>
+
+<script>
+var tasks = 0;
+function toggleTasks() {
+	if(tasks==0) {
+		tasks = 1;
+		document.getElementById("firstLink").innerHTML= "<a href=\"@routes.Application.index\" onclick=\"toggleTasks()\" id=\"firstLink\">News Feed</a>";
+		history.pushState("", "Tasks", "tasklist");
+	} else {
+		tasks = 0;
+		document.getElementById("firstLink").innerHTML= "< onclick=\"toggleTasks()\" id=\"firstLink\">Task List</a>";
+	}
+	refreshFeed();
+}
+</script>
 
 <script src="http://code.jquery.com/jquery-latest.min.js"
         type="text/javascript"></script>
@@ -56,21 +71,31 @@ function limitText(limitField, limitCount, limitNum) {
 	<div id="username"> </div>	
 		
 <form name="myform">
-<textarea name="limitedtextarea" type="text" id = "limitedtextfield"
-onKeyDown="limitText(this.form.limitedtextfield,this.form.countdown,140);" 
+<textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
+onKeyDown="if (event.keyCode == 13) { postToFeed(); return false; }; limitText(this.form.limitedtextfield,this.form.countdown,140);" 
 onKeyUp="limitText(this.form.limitedtextfield,this.form.countdown,140);" maxlength="140"> </textarea><br>
 <font size="1">(Maximum characters: 140)<br>
 You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
 </form>
 
-<select id="post_type">
+	<div id = "task_referencer" align = "center">
+		<select id="tasks">
+			<option value="default">-Reference a Task-</option>
+		</select>
+
+	</div>
+
+<select id="post_type" onchange="postTypeChange(this.value)">
   <option value="text_post">Text Post</option>
   <option value="task">Task</option>
 </select>
  		
 	<button type="button" onclick="postToFeed()">Post to Feed</button>
+
 	
 </div>
+
+
 
 
 <div id = "posts" class = "float">
@@ -85,10 +110,32 @@ You have <input readonly type="text" name="countdown" size="3" value="140"> char
 
 var post_count = 0;
 
+function postTypeChange(option) {
+	if (option == "text_post") {
+
+		var task_referencer = document.getElementById("task_referencer");
+		task_referencer.style.visibility= 'visible';
+		var limitedtextfield = document.getElementById("limitedtextfield");
+		limitedtextfield.rows = 5
+		limitedtextfield.cols = 30;
+
+	} else {
+
+		var task_referencer = document.getElementById("task_referencer");
+		task_referencer.style.visibility= 'hidden';
+		var limitedtextfield = document.getElementById("limitedtextfield");
+		limitedtextfield.rows = 1;
+		limitedtextfield.cols = 30;
+	}
+
+}
+
 
 function refreshFeed() {
     document.getElementById("stream").innerHTML = "";
-    $.ajax({
+    if(tasks==0) {
+    	$.ajax({
+    	
         type: "GET",
         url: "/rest/feed",
         dataType: "json",
@@ -97,12 +144,29 @@ function refreshFeed() {
             generateFeed(data);
         }
     });
+    } else {
+    	$.ajax({
+    	
+        type: "GET",
+        url: "/rest/tasks",
+        dataType: "json",
+        success: function(data){   
+
+            generateFeed(data);
+        }
+    });
+    }
+    
 }
 
 $(document).ready(refreshFeed);	
 
 
+
 function generateFeed(stream_array) {
+
+	  document.getElementById("tasks").options.length = 1;
+
 
 	document.getElementById("username").innerHTML=userName;
 
@@ -138,13 +202,11 @@ function generateFeed(stream_array) {
 
 		var date_and_time = document.createElement("div");
 		date_and_time.innerHTML = published;
-
-		//var reply_name = document.createElement("input");
-		//reply_name.placeholder="Your name";
 		
 		var reply_message = document.createElement("input");
 		reply_message.placeholder = "Your message"
 		reply_message.type = "text";
+
 					
 		var reply_button = document.createElement("button");
 		reply_button.innerHTML = 'Reply';
@@ -174,10 +236,17 @@ function generateFeed(stream_array) {
 			var task_name = stream_array[i][0]['object']["name"];
 			var task_data = document.createElement("div");
 			post.style.backgroundColor = "#FF6699";
-			task_data.innerHTML = "NEW TASK: " + task_name.bold() + " BY " + publisher.bold();
+			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
+			var task_status = document.createElement("div");
+			task_status.innerHTML = "Completed".bold();
+
+			var option = document.createElement("option");
+			option.text = task_name;
+			var task_referencer = document.getElementById("tasks").add(option, null);
 
 			post.appendChild(date_and_time);
 			post.appendChild(task_data);
+			post.appendChild(task_status);
 			//post.appendChild(reply_name);
 			post.appendChild(reply_message);
 			post.appendChild(reply_button);
@@ -192,6 +261,20 @@ function generateFeed(stream_array) {
                 replyToPost(post_id, reply_message);
             }
         }(post_id, reply_message));
+
+
+		 reply_message.onkeypress = (function(post_id, reply_message) { 
+
+		 	return function() {
+
+		 			if (event.keyCode == 13) {
+		 				replyToPost(post_id, reply_message);
+		 			}
+		 	}
+		 }(post_id, reply_message));
+
+		 
+
 
 
 		var j = 1;
@@ -232,19 +315,32 @@ function generateFeed(stream_array) {
 	
 }
 
+
 function getTimeStamp() {
     var currentdate = new Date();
     return ("" + currentdate.getDate() + "/"
                     + (currentdate.getMonth()+1)  + "/" 
-                    + currentdate.getFullYear() + " at "  
-                    + currentdate.getHours() + ":"  
-                    + currentdate.getMinutes() + ":" 
-                    + currentdate.getSeconds() + "        ");
+                    + currentdate.getFullYear() + " at "
+                    +  getLeadingZeros(currentdate.getHours()) + ":"  
+                    + getLeadingZeros(currentdate.getMinutes()) + ":" 
+                    + getLeadingZeros(currentdate.getSeconds())); 
+}
+
+function getLeadingZeros(number) {
+
+	var numberString = number + "";
+	alert(numberString + " of length " + numberString.length);
+	if (numberString.length < 2) {
+		return "0" + numberString;
+	} else {
+		return number;
+	}
 }
 
 
 
 function replyToPost(post_id, reply_message) {
+
 
 	var post = document.getElementById(post_id);
 	var reply_name_text = userName;
@@ -300,14 +396,23 @@ function postToFeed() {
     var dropdown = document.getElementById("post_type");
     var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
     
-    var date_and_time_stamp = "" + currentdate.getDate() + "/"
-                    + (currentdate.getMonth()+1)  + "/" 
-                    + currentdate.getFullYear() + " at "  
-                    + currentdate.getHours() + ":"  
-                    + currentdate.getMinutes() + ":" 
-                    + currentdate.getSeconds() + "        ";
+    var date_and_time_stamp = getTimeStamp();
     
     if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
+
+    	var taskReferencer = document.getElementById("tasks");
+    	var referencedTask = taskReferencer.options[taskReferencer.selectedIndex].text;
+
+    	if (referencedTask == "-Reference a Task-") {
+
+    		alert("posting without task Reference");
+
+    	} else {
+
+    		alert("posting with referenced task: " + referencedTask);
+
+    	}
+
     
     
       var post = "{\"published\" : \""
@@ -329,7 +434,9 @@ function postToFeed() {
       });
                   
       //document.getElementById("name").value = "";
-      document.getElementById("limitedtextfield").value = "";           
+      document.getElementById("limitedtextfield").value = ""; 
+
+
         
     } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
         
@@ -351,8 +458,8 @@ function postToFeed() {
                 complete: refreshFeed
             });      
                         
-            document.getElementById("name").value = "";
             document.getElementById("limitedtextfield").value = "";
+
         
     } 
     
