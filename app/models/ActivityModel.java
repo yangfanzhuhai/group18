@@ -1,7 +1,11 @@
 package models;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 
+import com.google.gson.Gson;
+
+import play.api.libs.json.JsArray;
 import play.api.libs.json.JsValue;
 import play.api.libs.json.Json;
 
@@ -72,8 +76,9 @@ public class ActivityModel {
 
 		}
 
-		String target = ActivityModel.cleanJsonStringValue(obj.$bslash("target").toString());
-		TargetModel targetModel = new TargetModel(target);
+		String target = obj.$bslash("target").toString();
+		Gson gson = new Gson();
+		TargetModel targetModel = gson.fromJson(target, TargetModel.class);
 		// JsValue target = obj.$bslash("target");
 
 		this.setPublished(published);
@@ -143,5 +148,6 @@ public class ActivityModel {
 				+ getVerb() + "\", \"object\" : " + getObject().toJSON()
 				+ ", \"target\" : " + getTarget().toJSON() + " }";
 	}
+	
 
 }
