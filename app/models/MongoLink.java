@@ -22,14 +22,17 @@ public class MongoLink {
 	private static DB db;
 	private static DBCollection newsFeed;
 	private static DBCollection users;
+	private static DBCollection gitRepos;
 	
 	/**Class linking from Java to the MongoDB**/
 	public MongoLink() throws UnknownHostException {
+		
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
+		
+		gitRepos = db.getCollection("gitRepositories");
 		newsFeed = db.getCollection("newsFeed");
 		users = db.getCollection("userAccounts");
-		System.out.println("Connection Complete");
 	}
 
 	//for testing
@@ -52,7 +55,7 @@ public class MongoLink {
 		} catch (ParseException e) {
 			System.out.println("PArse exception");
 		}*/
-		test();
+	//	test();
 		
 		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
 		for(ArrayList<String> a : list) {
@@ -117,7 +120,7 @@ public class MongoLink {
 	
 	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
 	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
-		return dbFetch(newsFeed, new BasicDBObject("target", ""), postLimit);
+		return dbFetch(newsFeed, new BasicDBObject("target.messageID", ""), postLimit);
 		
 	}
 	
@@ -137,11 +140,23 @@ public class MongoLink {
 		return getTasks(20);
 	}
 	
-	/**Returns all tasks **/
+	/**Returns a list of all tasks **/
 	public ArrayList<ArrayList<String>> getAllTasks(){
 		return getTasks((int) newsFeed.count());
 	}
 	
+	private ArrayList<String> getReferences(String id) throws ParseException {
+		
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target.taskIDs", id)).toArray();
+		ArrayList<String> retList = new ArrayList<String>();		
+		
+		
+		for(DBObject o : list) {
+			retList.add(new ActivityModel(o.toString()).toJSON());
+		}
+		
+		return retList;
+	}
 	
 	
 	/**Inserts obj into newsFeed collection**/
@@ -183,7 +198,7 @@ public class MongoLink {
 	
 	private static ArrayList<String> getReplies(String id) throws ParseException {
 		
-		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", id)).toArray();
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target.messageID", id)).toArray();
 		ArrayList<String> retList = new ArrayList<String>();		
 		
 		

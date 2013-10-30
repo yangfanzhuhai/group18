@@ -335,6 +335,7 @@ function replyToPost(post_id, reply_message) {
 	} else {
 
 		var date_and_time_stamp = getTimeStamp();
+		var references = [];
 
     var reply = "{\"published\" : \""
               + date_and_time_stamp
@@ -348,9 +349,11 @@ function replyToPost(post_id, reply_message) {
               + " : \"MESSAGE\", \"message\" : " 
               + "\"" 
               + reply_message_text
-              + "\"}, \"target\" : \"" 
+              + "\"}, \"target\" : { \"messageID\" : \"" 
               + post_id
-              +  "\"} ";
+	      + "\", \"taskIDs\" : ["
+	      + references
+              +  "]}} ";
 
     $.ajax({
     	type: "POST",
@@ -379,6 +382,8 @@ function postToFeed() {
     var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
     
     var date_and_time_stamp = getTimeStamp();
+
+var references = [];
     
     if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
@@ -396,7 +401,6 @@ function postToFeed() {
     	}
 
     
-    
       var post = "{\"published\" : \""
             + date_and_time_stamp
             + "\", "
@@ -405,7 +409,12 @@ function postToFeed() {
             + "\"" + name_text + "\"}, "
             + "\"verb\" : \"said\", \"object\" : {\"objectType\""
             + " : \"MESSAGE\" , \"message\" : " 
-            + "\"" + message_text + "\"}, \"target\" : \"\"} ";
+            + "\"" + message_text
+	    + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
+	    + references
+            +  "]}} ";
+
+alert(post);
   
       $.ajax({
           type: "POST",
@@ -430,7 +439,10 @@ function postToFeed() {
                   + "\"" + name_text + "\"}, "
                   + "\"verb\" : \"said\", \"object\" : {\"objectType\""
                   + " : \"TASK\" , \"name\" : " 
-                  + "\"" + message_text + "\"}, \"target\" : \"\"} "; 
+                  + "\"" + message_text
+		  + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
+	 	  + references
+         	  +  "]}} ";
 
              $.ajax({
                 type: "POST",

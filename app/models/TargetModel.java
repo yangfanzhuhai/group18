@@ -1,23 +1,49 @@
 package models;
 
+import java.util.List;
+
 public class TargetModel {
 
-	private String id;
+	private String messageID;
+	private List<String> taskIDs;
 	
+	public List<String> getTaskIDs() {
+		return taskIDs;
+	}
+
+	public void setTaskIDs(List<String> taskIDs) {
+		this.taskIDs = taskIDs;
+	}
+
 	public TargetModel(String id){
-		this.id = id;
+		this.messageID = id;
 	}
 
-	public String getId() {
-		return id;
+	public String getMessageID() {
+		return messageID;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setMessageID(String id) {
+		this.messageID = id;
 	}
 
 	public String toJSON() {
-		return "\"" + getId() + "\"";
+		return "{\"messageID\" : \"" + getMessageID() + "\", \"taskIDs\" : "
+		        + printTaskIDs() + "}";
+	}
+	
+	private String printTaskIDs() {
+		String s = "[";
+		
+		if (!taskIDs.isEmpty()) {
+			int i;
+			for (i = 0; i < taskIDs.size() - 1; i++) {
+				s += "\"" + taskIDs.get(i) + "\",";
+			}
+			s += "\"" + taskIDs.get(i) + "\"";
+		}
+		
+		return s += "]";
 	}
 
 }
