@@ -22,116 +22,103 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#">Progress</a>
+        <a class="navbar-brand" href="@routes.Application.login">Progress</a>
       </div>
-      <!--div class="collapse navbar-collapse">
-        <ul class="nav navbar-nav">
+      <div class="collapse navbar-collapse">
+        <!--ul class="nav navbar-nav" role="navigation">
           <li class="active"><a href="#">Home</a></li>
           <li><a href="#about">About</a></li>
           <li><a href="#contact">Contact</a></li>
+        </ul-->
+        <ul class="nav navbar-nav navbar-right" role="navigation">
+          <li><a href="@routes.Application.login">Log In</a></li>
         </ul>
-      </div><!--/.nav-collapse -->
+      </div> <!--/.nav-collapse -->
     </div>
     </div>
-  
-  <ul>
-  <!--li><a href="@routes.Application.feed(0)">News Feed</a></li>
-  <li><a href="@routes.Application.feed(1)">Task List</a></li>
-  <li><a href="@routes.Application.gits">Git Commits</a></li>
-  <li><a href="@routes.Application.builds">Build History</a></li>
-  <li><a href="@routes.Application.about">About</a></li-->
-  <li><a href="@routes.Application.login">Log in</a></li>
-  </ul>
 
-  <div id = "title" align = "center" class ="title" >
-  <img src="@routes.Assets.at("images/title.jpg")" alt="some_text"
-	  width="500">
-  </div>
-	
-	
-	
-  <div id = "login_box" class = "login_box">
+    <div class="container">
+      <div id = "title" align = "center" class ="title" >
+        <img src="@routes.Assets.at("images/title.jpg")" alt="some_text" width="500">
+      </div>
 
-	  <form>
-		  Username: <input type="text" id="username" onKeyDown="if (event.keyCode == 13) { register(); return false; };"><br>
-		  Password: <input type="password" id="password" onKeyDown="if (event.keyCode == 13) { register(); return false; };"><br>
-		  Re-enter Password: <input type="password" id="password_reenter" onKeyDown="if (event.keyCode == 13) { register(); return false; };"><br>
-	  </form>
-
-	  <button name="register_button" class = "remember" id="register_button" onclick="register()" >
-		  Register
-	  </button>
-	
-  </div>
-
-  <div id = "logo" align = "center" class = "title" >
-  <img src="@routes.Assets.at("images/logo.jpg")" alt="some_text"
-	  width="500" >
-  </div>
-
-  <ul>
-  <li><a href="contact.asp">Contact us</a></li>
-  <li><a href="about.asp">About</a></li>
-  </ul>
+      <div id = "login_box" class = "login_box">
+    	  <form>
+    		  <input type="text" id="username" placeholder="Username" onKeyDown="pressEnter()" class="form-control">
+    		  <input type="password" id="password" placeholder="Password" onKeyDown="pressEnter()" class="form-control">
+    		  <input type="password" id="password_reenter" placeholder="Re-enter Password" onKeyDown="pressEnter()" class="form-control">
+    	  </form>
+        <br>
+        <button name="register_button" id="register_button" type="submit" class = "btn btn-success" onclick = "register()" >
+          Register
+        </button>
+      </div>
+      <div id = "logo" align = "center" class = "title" >
+      <img src="@routes.Assets.at("images/logo.jpg")" alt="some_text"
+    	  width="500" >
+      </div>
+    </div>
 
   <script>
+    function pressEnter() {
+      if (event.keyCode == 13) { register(); return false; }
+    }
+    function register() {
 
-  function register() {
+  	  //var first_name = document.getElementById("first_name").value;
+  	  //var last_name = document.getElementById("last_name").value;
+  	  var username = document.getElementById("username").value;
+  	  var password = document.getElementById("password").value;
+  	  var password_reenter = document.getElementById("password_reenter").value;
+  	
+  	  /*if (first_name == "") {
 
-	  //var first_name = document.getElementById("first_name").value;
-	  //var last_name = document.getElementById("last_name").value;
-	  var username = document.getElementById("username").value;
-	  var password = document.getElementById("password").value;
-	  var password_reenter = document.getElementById("password_reenter").value;
-	
-	  /*if (first_name == "") {
+  		  alert("Please enter your first name");
+  	
+  	  } else if (last_name == "") {
 
-		  alert("Please enter your first name");
-	
-	  } else if (last_name == "") {
+  		  alert("Please enter your second name");
 
-		  alert("Please enter your second name");
+  	  } else */if (username == "") {
 
-	  } else */if (username == "") {
+  		  alert("Please enter a username");
 
-		  alert("Please enter a username");
+  	  } else if (password == "") {
+  		
+  		  alert("Please enter a password");
 
-	  } else if (password == "") {
-		
-		  alert("Please enter a password");
+  	  } else if (password_reenter == "") {
 
-	  } else if (password_reenter == "") {
+  		  alert("Please re-enter your password");
 
-		  alert("Please re-enter your password");
+  	  } else if (password != password_reenter) {
 
-	  } else if (password != password_reenter) {
+  		  alert("Passwords do not match");
 
-		  alert("Passwords do not match");
+  	  } else {
+        var credentials = "{\"username\" : "
+            + "\"" + username + "\", "
+            + "\"password\" : "
+            + "\"" + password + "\""
+            + "}";
+        
+        
+        $.ajax({
+            type: "POST",
+            url: "/rest/register",
+            data: {"credentials":credentials},
+            success: function(data){        
+	            window.location.href = '@routes.Application.feed(0)'
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+            	if (xhr.status == 400) {
+            		alert("Username is already take. Please choose another.");
+            	}
+            } 
+        });      
+  	  }
 
-	  } else {
-              var credentials = "{\"username\" : "
-                  + "\"" + username + "\", "
-                  + "\"password\" : "
-                  + "\"" + password + "\""
-                  + "}";
-              
-              
-              $.ajax({
-                  type: "POST",
-                  url: "/rest/register",
-                  data: {"credentials":credentials},
-                  success: function(data){        
-				      window.location.href = '@routes.Application.feed(0)'
-                  },
-                  error: function (xhr, ajaxOptions, thrownError) {
-                  	if (xhr.status == 400) {
-                  		alert("Username is already take. Please choose another.");
-                  	}
-                  } 
-              });      
-	  }
-
-  }
+    }
   </script>
       <!-- Bootstrap core JavaScript
       ================================================== -->
