@@ -22,14 +22,17 @@ public class MongoLink {
 	private static DB db;
 	private static DBCollection newsFeed;
 	private static DBCollection users;
+	private static DBCollection gitRepos;
 	
 	/**Class linking from Java to the MongoDB**/
 	public MongoLink() throws UnknownHostException {
+		
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
+		
+		gitRepos = db.getCollection("gitRepositories");
 		newsFeed = db.getCollection("newsFeed");
 		users = db.getCollection("userAccounts");
-		System.out.println("Connection Complete");
 	}
 
 	//for testing
@@ -137,7 +140,7 @@ public class MongoLink {
 		return getTasks(20);
 	}
 	
-	/**Returns all tasks **/
+	/**Returns a list of all tasks **/
 	public ArrayList<ArrayList<String>> getAllTasks(){
 		return getTasks((int) newsFeed.count());
 	}
