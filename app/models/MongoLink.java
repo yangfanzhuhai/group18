@@ -55,7 +55,7 @@ public class MongoLink {
 		} catch (ParseException e) {
 			System.out.println("PArse exception");
 		}*/
-		test();
+	//	test();
 		
 		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
 		for(ArrayList<String> a : list) {
