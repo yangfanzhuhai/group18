@@ -30,9 +30,9 @@
 <div id = "login_box" class = "login_box">
 
 	<form>
-		Username: <input type="text" id="username"><br>
-		Password: <input type="password" id="password"><br>
-		Re-enter Password: <input type="password" id="password_reenter"><br>
+		Username: <input type="text" id="username" onKeyDown="if (event.keyCode == 13) { register(); return false; };"><br>
+		Password: <input type="password" id="password" onKeyDown="if (event.keyCode == 13) { register(); return false; };"><br>
+		Re-enter Password: <input type="password" id="password_reenter" onKeyDown="if (event.keyCode == 13) { register(); return false; };"><br>
 	</form>
 
 	<button name="register_button" class = "remember" id="register_button" onclick="register()" >

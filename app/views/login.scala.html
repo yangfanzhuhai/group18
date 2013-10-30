@@ -31,9 +31,9 @@
 
 	<div padding = "50px" margin="50">
 		<input name="username" type="text" maxlength="512"
-			placeholder="Username" id="username" align = "center"/>
+			placeholder="Username" id="username" align = "center" onKeyDown="if (event.keyCode == 13) { login(); return false; };"/>
 		<input name="password" type="password" maxlength="512"
-			placeholder="Password" id="password" align = "center"/>
+			placeholder="Password" id="password" align = "center" onKeyDown="if (event.keyCode == 13) { login(); return false; };"/>
 		<button name="login_button" class = "remember" id="login_button" onclick="login()" >
 			Login
 		</button>
