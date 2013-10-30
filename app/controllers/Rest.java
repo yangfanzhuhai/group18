@@ -3,6 +3,7 @@ package controllers;
 import java.net.UnknownHostException;
 import java.util.Map;
 
+
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
@@ -22,9 +23,8 @@ public class Rest extends Controller {
 		String activityJson = values.get("activity")[0];
 
 		try {
-			MongoLink mongoLink = new MongoLink();
 			ActivityModel activity = new ActivityModel(activityJson);
-			mongoLink.insertNews((DBObject)JSON.parse(activity.toJSON()));
+			MongoLink.MONGO_LINK.insertNews((DBObject)JSON.parse(activity.toJSON()));
 			return ok();
 		} catch (Exception e) {
 			return status(400);
@@ -36,13 +36,11 @@ public class Rest extends Controller {
 	}
 	
 	 public static Result getActivities() throws UnknownHostException {
-	    	MongoLink mongoLink = new MongoLink();
-	        return ok(mongoLink.getNewsFeed().toString());
+	        return ok(MongoLink.MONGO_LINK.getNewsFeed().toString());
 	    }
 	 
 	 public static Result getTasks() throws UnknownHostException {
-	    	MongoLink mongoLink = new MongoLink();
-	        return ok(mongoLink.getTasks().toString());
+	        return ok(MongoLink.MONGO_LINK.getTasks().toString());
 	    }
 	 
 	 public static Result registerUser(){
@@ -51,8 +49,7 @@ public class Rest extends Controller {
 			String credentialsJson = values.get("credentials")[0];
 
 			try {
-				MongoLink mongoLink = new MongoLink();
-				if (mongoLink.registerNewUser((DBObject) JSON.parse(credentialsJson))){
+				if (MongoLink.MONGO_LINK.registerNewUser((DBObject) JSON.parse(credentialsJson))){
 				return ok();
 				} else {
 					return status(400);
@@ -73,8 +70,7 @@ public class Rest extends Controller {
 				User user = gson.fromJson(credentialsJson, User.class);
 				String username = user.username;
 				String password = user.password;
-				MongoLink mongoLink = new MongoLink();
-				if (mongoLink.checkLogin(username, password)){
+				if (MongoLink.MONGO_LINK.checkLogin(username, password)){
 					session("connected", username);
 					return ok();
 				} else {

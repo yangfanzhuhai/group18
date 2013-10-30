@@ -13,6 +13,8 @@ import com.mongodb.MongoClientURI;
 
 public class MongoLink {
 	
+	public static MongoLink MONGO_LINK;
+	
 	private final static String DBUSER = "testUser";
 	private final static String DBPASS = "test";
 	private final int DBPORT = 49868;
