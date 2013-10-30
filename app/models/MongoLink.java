@@ -25,19 +25,29 @@ public class MongoLink {
 	private static DBCollection gitRepos;
 	
 	/**Class linking from Java to the MongoDB**/
-	public MongoLink() throws UnknownHostException {
+	public MongoLink(boolean devMode) throws UnknownHostException {
 		
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		
-		gitRepos = db.getCollection("gitRepositories");
-		newsFeed = db.getCollection("newsFeed");
-		users = db.getCollection("userAccounts");
+		if(devMode)
+		{
+			gitRepos = db.getCollection("DEVgitRepositories");
+			newsFeed = db.getCollection("DEVnewsFeed");
+			users = db.getCollection("DEVuserAccounts");
+		}
+		else
+		{
+			gitRepos = db.getCollection("gitRepositories");
+			newsFeed = db.getCollection("newsFeed");
+			users = db.getCollection("userAccounts");
+		}
+
 	}
 
 	//for testing
 	public static void main(String[] args) throws UnknownHostException {
-		MongoLink ml = new MongoLink();
+		MongoLink ml = new MongoLink(true);
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
 		//Prints last 20 items of newsFeed
