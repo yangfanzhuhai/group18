@@ -5,12 +5,26 @@
 <title> News Feed </title>
 
 <ul>
-<li><a href="@routes.Application.tasks">Task List</a></li>
+<li><a href="#" onclick="toggleTasks()" id="firstLink">Task List</a></li>
 <li><a href="@routes.Application.gits">Git Commits</a></li>
 <li><a href="@routes.Application.builds">Build History</a></li>
 <li><a href="@routes.Application.about">About</a></li>
 <li><a href="@routes.Application.login">Log out</a></li>
 </ul>
+
+<script>
+var tasks = 0;
+function toggleTasks() {
+	if(tasks==0) {
+	tasks = 1;
+	document.getElementById("firstLink").innerHTML= "<a href=\"@routes.Application.index\" onclick=\"toggleTasks()\" id=\"firstLink\">News Feed</a>";
+	} else {
+		tasks = 0;
+		document.getElementById("firstLink").innerHTML= "<a href=\"#\" onclick=\"toggleTasks()\" id=\"firstLink\">Task List</a>";
+	}
+	refreshFeed();
+}
+</script>
 
 <script src="http://code.jquery.com/jquery-latest.min.js"
         type="text/javascript"></script>
@@ -118,7 +132,9 @@ function postTypeChange(option) {
 
 function refreshFeed() {
     document.getElementById("stream").innerHTML = "";
-    $.ajax({
+    if(tasks==0) {
+    	  $.ajax({
+    	
         type: "GET",
         url: "/rest/feed",
         dataType: "json",
@@ -127,6 +143,19 @@ function refreshFeed() {
             generateFeed(data);
         }
     });
+    } else {
+    	$.ajax({
+    	
+        type: "GET",
+        url: "/rest/tasks",
+        dataType: "json",
+        success: function(data){   
+
+            generateFeed(data);
+        }
+    });
+    }
+    
 }
 
 $(document).ready(refreshFeed);	
