@@ -206,7 +206,9 @@ function generateFeed(stream_array) {
 			var task_name = stream_array[i][0]['object']["name"];
 			var task_data = document.createElement("div");
 			post.style.backgroundColor = "#FF6699";
-			task_data.innerHTML = "NEW TASK: " + task_name.bold() + " BY " + publisher.bold();
+			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
+			var task_status = document.createElement("div");
+			task_status.innerHTML = "Completed".bold();
 
 			var option = document.createElement("option");
 			option.text = task_name;
@@ -214,6 +216,7 @@ function generateFeed(stream_array) {
 
 			post.appendChild(date_and_time);
 			post.appendChild(task_data);
+			post.appendChild(task_status);
 			//post.appendChild(reply_name);
 			post.appendChild(reply_message);
 			post.appendChild(reply_button);
@@ -287,10 +290,21 @@ function getTimeStamp() {
     var currentdate = new Date();
     return ("" + currentdate.getDate() + "/"
                     + (currentdate.getMonth()+1)  + "/" 
-                    + currentdate.getFullYear() + " at "  
-                    + currentdate.getHours() + ":"  
-                    + currentdate.getMinutes() + ":" 
-                    + currentdate.getSeconds() + "        ");
+                    + currentdate.getFullYear() + " at "
+                    +  getLeadingZeros(currentdate.getHours()) + ":"  
+                    + getLeadingZeros(currentdate.getMinutes()) + ":" 
+                    + getLeadingZeros(currentdate.getSeconds())); 
+}
+
+function getLeadingZeros(number) {
+
+	var numberString = number + "";
+	alert(numberString + " of length " + numberString.length);
+	if (numberString.length < 2) {
+		return "0" + numberString;
+	} else {
+		return number;
+	}
 }
 
 
@@ -352,12 +366,7 @@ function postToFeed() {
     var dropdown = document.getElementById("post_type");
     var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
     
-    var date_and_time_stamp = "" + currentdate.getDate() + "/"
-                    + (currentdate.getMonth()+1)  + "/" 
-                    + currentdate.getFullYear() + " at "  
-                    + currentdate.getHours() + ":"  
-                    + currentdate.getMinutes() + ":" 
-                    + currentdate.getSeconds() + "        ";
+    var date_and_time_stamp = getTimeStamp();
     
     if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
