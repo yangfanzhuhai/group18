@@ -106,7 +106,12 @@ public class MongoLink {
 //		}*/
 	}
 	
-	/**Returns a list of postLimit items containing key from collection**/
+	/** 	 * 
+	 * @param collection - Database collection on which to perform query
+	 * @param key - Criteria to use for search
+	 * @param postLimit - Maximum number of items to fetch
+	 * @return List of Lists containing news feed posts, with their replies
+	 */
 	private ArrayList<ArrayList<String>> dbFetch(DBCollection collection, BasicDBObject key, int postLimit) {
 		
 		ArrayList<DBObject> posts = (ArrayList<DBObject>) collection.find(key).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
@@ -169,6 +174,13 @@ public class MongoLink {
 		return newsFeed.find(obj).toArray().get(0).get("_id").toString();
 	}
 	
+	/**
+	 * Adds new user to the database, only if their username is not already
+	 * in the database
+	 * 
+	 * @param obj - Object containing new user's data
+	 * @return true if user was added, false if not
+	 */
 	public boolean registerNewUser(DBObject obj) {
 		
 		int oldCount = (int) users.getCount();
@@ -181,6 +193,12 @@ public class MongoLink {
 		return (int) users.getCount() == oldCount + 1;
 	}
 	
+	/** Checks whether the username and password supplied in 'obj' match an
+	 * entry in the database
+	 * 
+	 * @param obj - Object containing username and password
+	 * @return true if parameters match some entry in the database, false if not
+	 */
 	public boolean checkLogin(DBObject obj) {
 		return checkLogin( obj.get("username").toString() ,obj.get("password").toString());
 	}
