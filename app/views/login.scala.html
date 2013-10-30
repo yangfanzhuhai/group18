@@ -21,14 +21,14 @@
       <div id = "login_box" class = "login_box"> 
       <div padding = "50px" margin="50">
         <input name="username" type="text" maxlength="512"
-          placeholder="Username" id="username" align = "center" class="form-control"/>
+          placeholder="Username" id="username" onKeyDown="pressEnter()" align = "center" class="form-control"/>
         <input name="password" type="password" maxlength="512"
-          placeholder="Password" id="password" align = "center" class="form-control"/>	    
+          placeholder="Password" id="password" onKeyDown="pressEnter()" align = "center" class="form-control"/>	    
       </div>
       <div class = "remember" id = "remember_me">
         <input type="checkbox" placeholder="Remember me" name = "Remember me">
           Remember Me
-        </input> <br>
+        </input> <br> 
         <button type="submit" class = "btn btn-info" onclick = "register()" >
           Register
         </button>
@@ -43,6 +43,10 @@
     </div> <!-- /container -->	
 
     <script>
+    function pressEnter() {
+      if (event.keyCode == 13) { login(); return false; }
+    }
+
     function register() {
       window.location.href = '@routes.Application.register';
     }
@@ -59,27 +63,34 @@
       var username = document.getElementById("username").value;
       var password = document.getElementById("password").value;
 
-      var credentials = "{\"username\" : "
-                      + "\"" + username + "\", "
-                      + "\"password\" : "
-                      + "\"" + password + "\""
-                      + "}";
-                
-      $.ajax({
-          type: "POST",
-          url: "/rest/login",
-          data: {"credentials":credentials},
-          success: function(data){
-              window.location.href = '@routes.Application.index'
-          },
-          error: function (xhr, ajaxOptions, thrownError) {
-          	if (xhr.status == 400) {
-          		alert("Invalid login. Please register or try again");
-          	}
-          } 
-          
-      });      
+      if (username == "") {
 
+        alert("Please enter your username");
+
+      } else if (password == "") {
+      
+        alert("Please enter your password");
+
+      } else {
+        var credentials = "{\"username\" : "
+                + "\"" + username + "\", "
+                + "\"password\" : "
+                + "\"" + password + "\""
+                + "}";       
+        $.ajax({
+            type: "POST",
+            url: "/rest/login",
+            data: {"credentials":credentials},
+            success: function(data){
+                window.location.href = '@routes.Application.index'
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+              if (xhr.status == 400) {
+                alert("Invalid login. Please register or try again");
+              }
+            }  
+        });   
+      }
     }
         
     </script>
