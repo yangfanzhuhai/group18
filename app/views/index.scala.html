@@ -5,7 +5,7 @@
 <title> News Feed </title>
 
 <ul>
-<li><a href="#" onclick="toggleTasks()" id="firstLink">Task List</a></li>
+<li><a href= "javascript:;" onclick="toggleTasks()" id="firstLink">Task List</a></li>
 <li><a href="@routes.Application.gits">Git Commits</a></li>
 <li><a href="@routes.Application.builds">Build History</a></li>
 <li><a href="@routes.Application.about">About</a></li>
@@ -16,11 +16,12 @@
 var tasks = 0;
 function toggleTasks() {
 	if(tasks==0) {
-	tasks = 1;
-	document.getElementById("firstLink").innerHTML= "<a href=\"@routes.Application.index\" onclick=\"toggleTasks()\" id=\"firstLink\">News Feed</a>";
+		tasks = 1;
+		document.getElementById("firstLink").innerHTML= "<a href=\"@routes.Application.index\" onclick=\"toggleTasks()\" id=\"firstLink\">News Feed</a>";
+		history.pushState("", "Tasks", "tasklist");
 	} else {
 		tasks = 0;
-		document.getElementById("firstLink").innerHTML= "<a href=\"#\" onclick=\"toggleTasks()\" id=\"firstLink\">Task List</a>";
+		document.getElementById("firstLink").innerHTML= "< onclick=\"toggleTasks()\" id=\"firstLink\">Task List</a>";
 	}
 	refreshFeed();
 }
@@ -133,7 +134,7 @@ function postTypeChange(option) {
 function refreshFeed() {
     document.getElementById("stream").innerHTML = "";
     if(tasks==0) {
-    	  $.ajax({
+    	$.ajax({
     	
         type: "GET",
         url: "/rest/feed",
