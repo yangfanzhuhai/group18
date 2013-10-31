@@ -5,12 +5,17 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.bson.types.BasicBSONList;
+import org.bson.types.ObjectId;
+
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.QueryBuilder;
 
 public class MongoLink {
 	
@@ -69,17 +74,19 @@ public class MongoLink {
 			System.out.println("PArse exception");
 		}*/
 		
+		long startTime = System.currentTimeMillis();
 		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
-
+		float totalTime = System.currentTimeMillis() - startTime;
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
 			}
 		}
+		System.out.println("Get news feed took " + totalTime/1000 + " seconds.");
 		try {
-//			System.out.println("REFERENCES");
+			System.out.println("REFERENCES");
 			for(String a : ml.getReferencedBy("52715499b7608d8e9d710f40")) {
-	//				System.out.println(a);
+					System.out.println(a);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -128,6 +135,7 @@ public class MongoLink {
 				post.setID(posts.get(i).get("_id").toString());
 				
 				tempList.add(0, post.toJSON());
+				tempList.addAll(getReferences(posts.get(i)));
 				retList.add(i, tempList);
 				
 				i++;
@@ -223,7 +231,17 @@ public class MongoLink {
 	
 	private ArrayList<String> getReferences(DBObject obj) throws ParseException {
 		
-		return getItemsWithoutReferences(new BasicDBObject("_id", new BasicDBObject("$in", obj.get("target.taskIDs"))));
+		BasicDBList taskIDs = (BasicDBList) ((DBObject)obj.get("target")).get("taskIDs");
+		
+		if(taskIDs.isEmpty()) return new ArrayList<String>();
+		
+		ObjectId[] taskIDObjs = new ObjectId[taskIDs.size()];
+		for(int i = 0; i < taskIDObjs.length; i++)
+		{
+			taskIDObjs[i] = new ObjectId(taskIDs.get(i).toString());
+		}
+		
+		return getItemsWithoutReferences(QueryBuilder.start("_id").in(taskIDObjs).get());
 	}
 	
 	/**
@@ -234,7 +252,7 @@ public class MongoLink {
 	private ArrayList<String> getReferencedBy(String id) throws ParseException {
 		ArrayList<String> l = new ArrayList<String>();
 		l.add(id);
-		return getItemsWithReferences(new BasicDBObject("target.taskIDs", new BasicDBObject("$in", l)));
+		return getItemsWithoutReferences(new BasicDBObject("target.taskIDs", new BasicDBObject("$in", l)));
 	}
 	
 	/**
