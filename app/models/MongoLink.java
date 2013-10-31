@@ -74,22 +74,22 @@ public class MongoLink {
 			System.out.println("PArse exception");
 		}*/
 		
-		long totalTime = 0;
+	//	long totalTime = 0;
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
-		for(int i = 0; i < 100; i++) {
-			long startTime = System.currentTimeMillis();
+	//	for(int i = 0; i < 100; i++) {
+	//		long startTime = System.currentTimeMillis();
 			list = ml.getNewsFeed(20);
-			totalTime += System.currentTimeMillis() - startTime;
-		}
+	//		totalTime += System.currentTimeMillis() - startTime;
+	//	}
 		
-		float avgTime = totalTime / 100000;
+	//	float avgTime = totalTime / 100000;
 
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
 			}
 		}
-		System.out.println("Get news feed took " + avgTime + " seconds on average.");
+//		System.out.println("Get news feed took " + avgTime + " seconds on average.");
 		try {
 			System.out.println("REFERENCES");
 			for(String a : ml.getReferencedBy("52715499b7608d8e9d710f40")) {
