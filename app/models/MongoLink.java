@@ -3,6 +3,7 @@ package models;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -77,7 +78,7 @@ public class MongoLink {
 		}
 		try {
 			System.out.println("REFERENCES");
-			for(String a : ml.getReferences("sadf")) {
+			for(String a : ml.getReferences("52715499b7608d8e9d710f40")) {
 					System.out.println(a);
 			}
 		} catch (ParseException e) {
@@ -162,11 +163,6 @@ public class MongoLink {
 		return getTasks(20);
 	}
 	
-	/**Returns a list of all tasks **/
-	public ArrayList<ArrayList<String>> getAllTasks(){
-		return getTasks((int) newsFeed.count());
-	}
-	
 	/**Inserts obj into newsFeed collection**/
 	public String insertNews(DBObject obj) {
 		
@@ -207,6 +203,14 @@ public class MongoLink {
 		return users.find(new BasicDBObject("username", username).append("password", password)).hasNext();
 	}
 	
+	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
+	 * @throws ParseException **/
+	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
+		ArrayList<String> tasks = getItems(new BasicDBObject("object.objectType", "TASK"));
+		Collections.reverse(tasks);
+		return tasks;
+	}
+
 	/**Shortcut to JSON format for testing inserts**/
 	private BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
 		BasicDBObject news = new BasicDBObject("published", published);
@@ -251,7 +255,9 @@ public class MongoLink {
 		
 		
 		for(DBObject o : list) {
-			retList.add(new ActivityModel(o.toString()).toJSON());
+			ActivityModel am = new ActivityModel(o.toString());
+			am.setID(o.get("_id").toString());
+			retList.add(am.toJSON());
 		}
 		
 		return retList;

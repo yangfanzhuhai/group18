@@ -91,6 +91,7 @@ You have <input readonly type="text" name="countdown" size="3" value="140"> char
 <script>
 
 var post_count = 0;
+var task_ids = [];
 
 function postTypeChange(option) {
 	if (option == "text_post") {
@@ -124,8 +125,18 @@ function refreshFeed() {
         success: function(data){   
 
             generateFeed(data);
-        }
-    });
+        }});
+
+    	$.ajax({
+    	
+        type: "GET",
+        url: "/rest/alltasks",
+        dataType: "json",
+        success: function(data){   
+
+            addTasks(data);
+        }});
+
     } else {
     	$.ajax({
     	
@@ -143,11 +154,27 @@ function refreshFeed() {
 
 $(document).ready(refreshFeed);	
 
+function addTasks(task_array) {
+
+	document.getElementById("tasks").options.length = 1;
+
+	for (var i=0; i < task_array.length; i++) {
+
+		var task_id = task_array[i]['id'];
+		task_ids[i] = task_id;
+
+		var task_name = task_array[i]['object']["name"];
+		var option = document.createElement("option");
+		option.text = task_name;
+		var task_referencer = document.getElementById("tasks").add(option, null);
+	}
+
+}
+
 
 
 function generateFeed(stream_array) {
 
-	  document.getElementById("tasks").options.length = 1;
 
 
 	document.getElementById("username").innerHTML="@userName";
@@ -222,9 +249,6 @@ function generateFeed(stream_array) {
 			var task_status = document.createElement("div");
 			task_status.innerHTML = "Completed".bold();
 
-			var option = document.createElement("option");
-			option.text = task_name;
-			var task_referencer = document.getElementById("tasks").add(option, null);
 
 			post.appendChild(date_and_time);
 			post.appendChild(task_data);
@@ -254,10 +278,6 @@ function generateFeed(stream_array) {
 		 			}
 		 	}
 		 }(post_id, reply_message));
-
-		 
-
-
 
 		var j = 1;
 		while (j < stream_array[i].length) {
@@ -311,7 +331,6 @@ function getTimeStamp() {
 function getLeadingZeros(number) {
 
 	var numberString = number + "";
-	alert(numberString + " of length " + numberString.length);
 	if (numberString.length < 2) {
 		return "0" + numberString;
 	} else {
@@ -382,21 +401,19 @@ function postToFeed() {
     var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
     
     var date_and_time_stamp = getTimeStamp();
-
-var references = [];
     
     if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
     	var taskReferencer = document.getElementById("tasks");
-    	var referencedTask = taskReferencer.options[taskReferencer.selectedIndex].text;
+	var references = [];
 
-    	if (referencedTask == "-Reference a Task-") {
-
-    		alert("posting without task Reference");
+    	if (taskReferencer.selectedIndex == 0) {
 
     	} else {
 
-    		alert("posting with referenced task: " + referencedTask);
+
+    		var referencedTask = task_ids[taskReferencer.selectedIndex-1];
+    		references =  ["\"" + referencedTask + "\""];
 
     	}
 
@@ -414,7 +431,6 @@ var references = [];
 	    + references
             +  "]}} ";
 
-  
       $.ajax({
           type: "POST",
           url: "/rest/message",
@@ -430,6 +446,8 @@ var references = [];
         
     } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
         
+
+        var ref = [];
             var json_post = "{\"published\" : \""
                   + date_and_time_stamp
                   + "\", "
@@ -440,7 +458,7 @@ var references = [];
                   + " : \"TASK\" , \"name\" : " 
                   + "\"" + message_text
 		  + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
-	 	  + references
+	 	  + ref
          	  +  "]}} ";
 
              $.ajax({
