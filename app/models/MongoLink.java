@@ -77,8 +77,8 @@ public class MongoLink {
 			}
 		}
 		try {
-			System.out.println("ALL TASKS");
-			for(String a : ml.getAllTasksWithoutReplies()) {
+			System.out.println("REFERENCES");
+			for(String a : ml.getReferences("52715499b7608d8e9d710f40")) {
 					System.out.println(a);
 			}
 		} catch (ParseException e) {
@@ -255,7 +255,9 @@ public class MongoLink {
 		
 		
 		for(DBObject o : list) {
-			retList.add(new ActivityModel(o.toString()).toJSON());
+			ActivityModel am = new ActivityModel(o.toString());
+			am.setID(o.get("_id").toString());
+			retList.add(am.toJSON());
 		}
 		
 		return retList;

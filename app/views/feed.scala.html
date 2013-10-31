@@ -125,7 +125,7 @@ function refreshFeed() {
         success: function(data){   
 
             generateFeed(data);
-        }
+        }});
 
     	$.ajax({
     	
@@ -135,9 +135,8 @@ function refreshFeed() {
         success: function(data){   
 
             addTasks(data);
-        }
+        }});
 
-    });
     } else {
     	$.ajax({
     	
@@ -157,12 +156,14 @@ $(document).ready(refreshFeed);
 
 function addTasks(task_array) {
 
+	document.getElementById("tasks").options.length = 1;
+
 	for (var i=0; i < task_array.length; i++) {
 
-		var task_id = stream_array[i][0]['id'];
+		var task_id = task_array[i]['id'];
 		task_ids[i] = task_id;
 
-		var task_name = stream_array[i][0]['object']["name"];
+		var task_name = task_array[i]['object']["name"];
 		var option = document.createElement("option");
 		option.text = task_name;
 		var task_referencer = document.getElementById("tasks").add(option, null);
@@ -174,7 +175,6 @@ function addTasks(task_array) {
 
 function generateFeed(stream_array) {
 
-	  document.getElementById("tasks").options.length = 1;
 
 
 	document.getElementById("username").innerHTML="@userName";
@@ -331,7 +331,6 @@ function getTimeStamp() {
 function getLeadingZeros(number) {
 
 	var numberString = number + "";
-	alert(numberString + " of length " + numberString.length);
 	if (numberString.length < 2) {
 		return "0" + numberString;
 	} else {
@@ -406,15 +405,17 @@ function postToFeed() {
     if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
     	var taskReferencer = document.getElementById("tasks");
-    	var referencedTask = task_ids[taskReferencer.selectedIndex];
-    	var references =  ["\"" + referencedTask + "\""];
+	var references = [];
 
-    	if (referencedTask == "-Reference a Task-") {
+    	if (taskReferencer.selectedIndex == 0) {
 
     		alert("posting without task Reference");
 
     	} else {
 
+
+    		var referencedTask = task_ids[taskReferencer.selectedIndex-1];
+    		references =  ["\"" + referencedTask + "\""];
     		alert("posting with referenced task: " + referencedTask);
 
     	}
@@ -430,10 +431,9 @@ function postToFeed() {
             + " : \"MESSAGE\" , \"message\" : " 
             + "\"" + message_text
 	    + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
-	    + referencedTask
+	    + references
             +  "]}} ";
 
-  
       $.ajax({
           type: "POST",
           url: "/rest/message",
