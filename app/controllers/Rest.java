@@ -1,6 +1,7 @@
 package controllers;
 
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.Map;
 
 
@@ -40,6 +41,10 @@ public class Rest extends Controller {
 	 public static Result getTasks() throws UnknownHostException {
 	        return ok(MongoLink.MONGO_LINK.getTasks().toString());
 	    }
+	 
+	 public static Result getAllTasks() throws UnknownHostException, ParseException {
+		 	return ok(MongoLink.MONGO_LINK.getAllTasksWithoutReplies().toString());
+	 }
 	 
 	 public static Result registerUser(){
 		 String credentialsJson = getValueFromRequest("credentials");
