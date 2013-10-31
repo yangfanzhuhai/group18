@@ -409,14 +409,11 @@ function postToFeed() {
 
     	if (taskReferencer.selectedIndex == 0) {
 
-    		alert("posting without task Reference");
-
     	} else {
 
 
     		var referencedTask = task_ids[taskReferencer.selectedIndex-1];
     		references =  ["\"" + referencedTask + "\""];
-    		alert("posting with referenced task: " + referencedTask);
 
     	}
 
