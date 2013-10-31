@@ -10,9 +10,16 @@ import views.html.login;
 import views.html.register;
 
 public class Application extends Controller {
+	
+	/**
+	 * 
+	 * @param toggle 0 for News Feed, 1 for Task View
+	 * @return News Feed/Task View if logged in.
+	 * 		   Else render login screen.
+	 */
 
 	public static Result feed(Integer toggle) {
-		if (session("connected") != null) {
+		if (loggedIn()) {
 			String userName = session("connected");
 			return ok(feed.render(toggle, userName));
 		} else {
@@ -20,34 +27,68 @@ public class Application extends Controller {
 		}
 	}
 
+	/**
+	 * 
+	 * @return Render the about page regardless
+	 * 		   of login status.
+	 */
+	
 	public static Result about() {
 		return ok(about.render());
 	}
 
+	/**
+	 * 
+	 * @return Render builds page if logged in.
+	 * 		   Else render login screen.
+	 */
 	public static Result builds() {
-		if (session("connected") != null) {
+		if (loggedIn()) {
 			return ok(builds.render());
 		} else {
 			return ok(login.render());
 		}
 	}
 
+	/**
+	 * 
+	 * @return Render git page if logged in.
+	 * 		   Else render login screen.
+	 */
 	public static Result gits() {
-		if (session("connected") != null) {
+		if (loggedIn()) {
 			return ok(gits.render());
 		} else {
 			return ok(login.render());
 		}
 	}
-
+	
+	/**
+	 * 
+	 * @return Clear the current session.
+	 * 		   and render login screen.
+	 */
 	public static Result login() {
 		session().clear();
 		return ok(login.render());
 	}
 
-
+	/**
+	 * 
+	 * @return Render the register page
+	 * 		   regardless of login status.
+	 */
 	public static Result register() {
 		return ok(register.render());
+	}
+	
+	/**
+	 * 
+	 * @return Check if there is currently
+	 * 		   a session value
+	 */
+	private static boolean loggedIn(){
+		return session("connected") != null;
 	}
 
 }

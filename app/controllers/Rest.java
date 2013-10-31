@@ -18,9 +18,7 @@ import play.mvc.Result;
 public class Rest extends Controller {
 
 	public static Result createMessage() {
-		final Map<String, String[]> values = request().body()
-				.asFormUrlEncoded();
-		String activityJson = values.get("activity")[0];
+		String activityJson = getValueFromRequest("activity");
 
 		try {
 			ActivityModel activity = new ActivityModel(activityJson);
@@ -44,9 +42,7 @@ public class Rest extends Controller {
 	    }
 	 
 	 public static Result registerUser(){
-		 final Map<String, String[]> values = request().body()
-					.asFormUrlEncoded();
-			String credentialsJson = values.get("credentials")[0];
+		 String credentialsJson = getValueFromRequest("credentials");
 
 			try {
 				if (MongoLink.MONGO_LINK.registerNewUser((DBObject) JSON.parse(credentialsJson))){
@@ -61,9 +57,7 @@ public class Rest extends Controller {
 	 }
 	 
 	 public static Result loginUser(){
-		 final Map<String, String[]> values = request().body()
-					.asFormUrlEncoded();
-			String credentialsJson = values.get("credentials")[0];
+		 String credentialsJson = getValueFromRequest("credentials");
 
 			try {
 				Gson gson = new Gson();
@@ -81,5 +75,15 @@ public class Rest extends Controller {
 			}
 		 
 	 }
+
+	/**
+	 * @return
+	 */
+	private static String getValueFromRequest(String value) {
+		final Map<String, String[]> values = request().body()
+					.asFormUrlEncoded();
+			String stringValue = values.get(value)[0];
+		return stringValue;
+	}
 
 }
