@@ -77,9 +77,9 @@ public class MongoLink {
 			}
 		}
 		try {
-			System.out.println("REFERENCES");
-			for(String a : ml.getReferences("52715499b7608d8e9d710f40")) {
-					System.out.println(a);
+//			System.out.println("REFERENCES");
+			for(String a : ml.getReferencedBy("52715499b7608d8e9d710f40")) {
+	//				System.out.println(a);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
@@ -116,19 +116,19 @@ public class MongoLink {
 	private ArrayList<ArrayList<String>> dbFetch(DBCollection collection, BasicDBObject key, int postLimit) {
 		
 		ArrayList<DBObject> posts = (ArrayList<DBObject>) collection.find(key).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
-		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
 		
 		try {
 			int i = 0;
 			while(i < posts.size())
 			{
-				ArrayList<String> replies = getReplies(posts.get(i).get("_id").toString());
+				ArrayList<String> tempList = getReplies(posts.get(i).get("_id").toString());
 				
 				ActivityModel post = new ActivityModel(posts.get(i).toString());
 				post.setID(posts.get(i).get("_id").toString());
 				
-				replies.add(0, post.toJSON());
-				list.add(i, replies);
+				tempList.add(0, post.toJSON());
+				retList.add(i, tempList);
 				
 				i++;
 			}
@@ -137,7 +137,7 @@ public class MongoLink {
 			e.printStackTrace();
 		}
 		
-		return list;
+		return retList;
 	}
 	
 	
@@ -206,7 +206,7 @@ public class MongoLink {
 	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
-		ArrayList<String> tasks = getItems(new BasicDBObject("object.objectType", "TASK"));
+		ArrayList<String> tasks = getItemsWithReferences(new BasicDBObject("object.objectType", "TASK"));
 		Collections.reverse(tasks);
 		return tasks;
 	}
@@ -221,15 +221,20 @@ public class MongoLink {
 		return news;
 	}
 	
+	private ArrayList<String> getReferences(DBObject obj) throws ParseException {
+		
+		return getItemsWithoutReferences(new BasicDBObject("_id", new BasicDBObject("$in", obj.get("target.taskIDs"))));
+	}
+	
 	/**
 	 * @param id - ID string of the task
 	 * @return ArrayList of all the news feed items that reference the task
 	 * @throws ParseException
 	 */
-	private ArrayList<String> getReferences(String id) throws ParseException {
+	private ArrayList<String> getReferencedBy(String id) throws ParseException {
 		ArrayList<String> l = new ArrayList<String>();
 		l.add(id);
-		return getItems(new BasicDBObject("target.taskIDs", new BasicDBObject("$in", l)));
+		return getItemsWithReferences(new BasicDBObject("target.taskIDs", new BasicDBObject("$in", l)));
 	}
 	
 	/**
@@ -239,7 +244,7 @@ public class MongoLink {
 	 */
 	private ArrayList<String> getReplies(String id) throws ParseException {
 		
-		return getItems(new BasicDBObject("target.messageID", id));
+		return getItemsWithReferences(new BasicDBObject("target.messageID", id));
 	}
 	
 	/** Generic method to find list of objects that satisfy the given query
@@ -248,15 +253,35 @@ public class MongoLink {
 	 * @return ArrayList of objects
 	 * @throws ParseException
 	 */
-	private ArrayList<String> getItems(DBObject query) throws ParseException {
+	private ArrayList<String> getItemsWithReferences(DBObject query) throws ParseException {
 		
 		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).toArray();
 		ArrayList<String> retList = new ArrayList<String>();		
 		
 		
 		for(DBObject o : list) {
+			
 			ActivityModel am = new ActivityModel(o.toString());
 			am.setID(o.get("_id").toString());
+			
+			retList.add(am.toJSON());
+			retList.addAll(getReferences(o));
+		}
+		
+		return retList;
+	}
+	
+	private ArrayList<String> getItemsWithoutReferences(DBObject query) throws ParseException {
+		
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).toArray();
+		ArrayList<String> retList = new ArrayList<String>();		
+		
+		
+		for(DBObject o : list) {
+			
+			ActivityModel am = new ActivityModel(o.toString());
+			am.setID(o.get("_id").toString());
+			
 			retList.add(am.toJSON());
 		}
 		
