@@ -74,15 +74,22 @@ public class MongoLink {
 			System.out.println("PArse exception");
 		}*/
 		
-		long startTime = System.currentTimeMillis();
-		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
-		float totalTime = System.currentTimeMillis() - startTime;
+		long totalTime = 0;
+		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
+		for(int i = 0; i < 100; i++) {
+			long startTime = System.currentTimeMillis();
+			list = ml.getNewsFeed(20);
+			totalTime += System.currentTimeMillis() - startTime;
+		}
+		
+		float avgTime = totalTime / 100000;
+
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
 			}
 		}
-		System.out.println("Get news feed took " + totalTime/1000 + " seconds.");
+		System.out.println("Get news feed took " + avgTime + " seconds on average.");
 		try {
 			System.out.println("REFERENCES");
 			for(String a : ml.getReferencedBy("52715499b7608d8e9d710f40")) {
@@ -120,7 +127,7 @@ public class MongoLink {
 	 * @param postLimit - Maximum number of items to fetch
 	 * @return List of Lists containing news feed posts, with their replies
 	 */
-	private ArrayList<ArrayList<String>> dbFetch(DBCollection collection, BasicDBObject key, int postLimit) {
+	private ArrayList<ArrayList<String>> dbFetch(DBCollection collection, DBObject key, int postLimit) {
 		
 		ArrayList<DBObject> posts = (ArrayList<DBObject>) collection.find(key).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
 		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
@@ -135,7 +142,7 @@ public class MongoLink {
 				post.setID(posts.get(i).get("_id").toString());
 				
 				tempList.add(0, post.toJSON());
-				tempList.addAll(getReferences(posts.get(i)));
+				tempList.addAll(1, getReferences(posts.get(i)));
 				retList.add(i, tempList);
 				
 				i++;
@@ -151,7 +158,7 @@ public class MongoLink {
 	
 	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
 	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
-		return dbFetch(newsFeed, new BasicDBObject("target.messageID", ""), postLimit);
+		return dbFetch(newsFeed, QueryBuilder.start("target.messageID").is("").get(), postLimit);
 		
 	}
 	
@@ -162,7 +169,7 @@ public class MongoLink {
 	
 	/**Returns a list of postLimit tasks**/
 	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
-		return dbFetch(newsFeed, new BasicDBObject("object.objectType", "TASK"), postLimit);
+		return dbFetch(newsFeed, QueryBuilder.start("object.objectType").is("TASK").get(), postLimit);
 		
 	}
 	
@@ -189,7 +196,7 @@ public class MongoLink {
 		
 		int oldCount = (int) users.getCount();
 		
-		if(users.find(new BasicDBObject("username", obj.get("username"))).hasNext())
+		if(users.find(QueryBuilder.start("username").is(obj.get("username")).get()).hasNext())
 			return false;
 		
 		users.insert(obj);
@@ -208,13 +215,13 @@ public class MongoLink {
 	}
 	
 	public boolean checkLogin(String username, String password) {
-		return users.find(new BasicDBObject("username", username).append("password", password)).hasNext();
+		return users.find(QueryBuilder.start("username").is(username).and("password").is(password).get()).hasNext();
 	}
 	
 	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
-		ArrayList<String> tasks = getItemsWithReferences(new BasicDBObject("object.objectType", "TASK"));
+		ArrayList<String> tasks = getItemsWithReferences(QueryBuilder.start("object.objectType").is("TASK").get());
 		Collections.reverse(tasks);
 		return tasks;
 	}
@@ -250,9 +257,8 @@ public class MongoLink {
 	 * @throws ParseException
 	 */
 	private ArrayList<String> getReferencedBy(String id) throws ParseException {
-		ArrayList<String> l = new ArrayList<String>();
-		l.add(id);
-		return getItemsWithoutReferences(new BasicDBObject("target.taskIDs", new BasicDBObject("$in", l)));
+		
+		return getItemsWithoutReferences(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get());
 	}
 	
 	/**
@@ -262,10 +268,11 @@ public class MongoLink {
 	 */
 	private ArrayList<String> getReplies(String id) throws ParseException {
 		
-		return getItemsWithReferences(new BasicDBObject("target.messageID", id));
+		return getItemsWithReferences(QueryBuilder.start("target.messsageID").is(id).get());
 	}
 	
 	/** Generic method to find list of objects that satisfy the given query
+	 * and any task they reference
 	 * 
 	 * @param query - DBObject containing the information about the query
 	 * @return ArrayList of objects
