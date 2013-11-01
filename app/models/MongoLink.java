@@ -77,9 +77,10 @@ public class MongoLink {
 		
 	//	long totalTime = 0;
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
+		list = ml.getTasksByPriority();
 	//	for(int i = 0; i < 100; i++) {
 	//		long startTime = System.currentTimeMillis();
-			list = ml.getNewsFeed(20);
+	//		list = ml.getNewsFeed(20);
 	//		totalTime += System.currentTimeMillis() - startTime;
 	//	}
 		
@@ -228,7 +229,7 @@ public class MongoLink {
 	}
 	
 	public ArrayList<ArrayList<String>> getTasksByPriority(int postLimit) {
-		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(1).get(), postLimit);
+		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(-1).get(), postLimit);
 	}
 	
 	public ArrayList<ArrayList<String>> getTasksByPriority() {
