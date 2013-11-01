@@ -320,47 +320,49 @@ function generateFeed(stream_array) {
 		var j = 1;
 		while (j < stream_array[i].length) {
 
-			var k = j;
-
-			while ( j < stream_array[i].length && stream_array[i][j]['object']["objectType"] == "TASK") {
+			if (stream_array[i][j]['object']["objectType"] == "TASK") {
 
 
 				var task_reference_div = document.createElement("div");
 				task_reference_div.innerHTML = "Referencing: " + stream_array[i][j]['object']["name"];
+				//task_reference_div.style.backgroundColor = "#FF6699";
+				task_reference_div.className = "post";
+				task_reference_div.style["cssFloat"] = "right";
+				task_reference_div.style["background"] = "#FF6699";
 
-				post.appendChild(task_reference_div);
+
+				post.insertBefore(task_reference_div, post.firstChild);
 
 				j++;
 
 
-			}
+			} else {
 
-			if (j < stream_array[i].length) {
 
-			var reply_div = document.createElement("div");
-			reply_div.className = "reply_post";
+				var reply_div = document.createElement("div");
+				reply_div.className = "reply_post";
 
-			reply_div.setAttribute("class", "reply_post");
-    		reply_div.style.padding = "10px";
-			post.appendChild(reply_div);
+				reply_div.setAttribute("class", "reply_post");
+    			reply_div.style.padding = "10px";
+				post.appendChild(reply_div);
 
-			var reply_published = document.createElement("div");
-			reply_published.innerHTML = stream_array[i][j]['published'];
-			reply_div.appendChild(reply_published);
+				var reply_published = document.createElement("div");
+				reply_published.innerHTML = stream_array[i][j]['published'];
+				reply_div.appendChild(reply_published);
 
-			var reply_publisher = document.createElement("div");
-			reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
-			reply_div.appendChild(reply_publisher);
+				var reply_publisher = document.createElement("div");
+				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
+				reply_div.appendChild(reply_publisher);
 
-			var reply_message_text = document.createElement("div");
-			reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
-			reply_div.appendChild(reply_message_text);
+				var reply_message_text = document.createElement("div");
+				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
+				reply_div.appendChild(reply_message_text);
 			
-			var reply_publisherType = stream_array[i][j]['actor']["objectType"];
+				var reply_publisherType = stream_array[i][j]['actor']["objectType"];
 	
-			var reply_verb = stream_array[i][j]['verb'];
+				var reply_verb = stream_array[i][j]['verb'];
 		
-			var reply_message_type = stream_array[i][j]['object']["objectType"];
+				var reply_message_type = stream_array[i][j]['object']["objectType"];
 
 			j++;
 
