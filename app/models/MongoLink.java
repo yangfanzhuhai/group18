@@ -5,12 +5,17 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.bson.types.BasicBSONList;
+import org.bson.types.ObjectId;
+
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.QueryBuilder;
 
 public class MongoLink {
 	
@@ -69,16 +74,25 @@ public class MongoLink {
 			System.out.println("PArse exception");
 		}*/
 		
-		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
+	//	long totalTime = 0;
+		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
+	//	for(int i = 0; i < 100; i++) {
+	//		long startTime = System.currentTimeMillis();
+			list = ml.getNewsFeed(20);
+	//		totalTime += System.currentTimeMillis() - startTime;
+	//	}
+		
+	//	float avgTime = totalTime / 100000;
 
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
 			}
 		}
+//		System.out.println("Get news feed took " + avgTime + " seconds on average.");
 		try {
 			System.out.println("REFERENCES");
-			for(String a : ml.getReferences("52715499b7608d8e9d710f40")) {
+			for(String a : ml.getReferencedBy("52715499b7608d8e9d710f40")) {
 					System.out.println(a);
 			}
 		} catch (ParseException e) {
@@ -113,22 +127,23 @@ public class MongoLink {
 	 * @param postLimit - Maximum number of items to fetch
 	 * @return List of Lists containing news feed posts, with their replies
 	 */
-	private ArrayList<ArrayList<String>> dbFetch(DBCollection collection, BasicDBObject key, int postLimit) {
+	private ArrayList<ArrayList<String>> dbFetch(DBCollection collection, DBObject key, int postLimit) {
 		
 		ArrayList<DBObject> posts = (ArrayList<DBObject>) collection.find(key).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
-		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
+		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
 		
 		try {
 			int i = 0;
 			while(i < posts.size())
 			{
-				ArrayList<String> replies = getReplies(posts.get(i).get("_id").toString());
+				ArrayList<String> tempList = getReplies(posts.get(i).get("_id").toString());
 				
 				ActivityModel post = new ActivityModel(posts.get(i).toString());
 				post.setID(posts.get(i).get("_id").toString());
 				
-				replies.add(0, post.toJSON());
-				list.add(i, replies);
+				tempList.add(0, post.toJSON());
+				tempList.addAll(1, getReferences(posts.get(i)));
+				retList.add(i, tempList);
 				
 				i++;
 			}
@@ -137,13 +152,13 @@ public class MongoLink {
 			e.printStackTrace();
 		}
 		
-		return list;
+		return retList;
 	}
 	
 	
 	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
 	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
-		return dbFetch(newsFeed, new BasicDBObject("target.messageID", ""), postLimit);
+		return dbFetch(newsFeed, QueryBuilder.start("target.messageID").is("").get(), postLimit);
 		
 	}
 	
@@ -154,7 +169,7 @@ public class MongoLink {
 	
 	/**Returns a list of postLimit tasks**/
 	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
-		return dbFetch(newsFeed, new BasicDBObject("object.objectType", "TASK"), postLimit);
+		return dbFetch(newsFeed, QueryBuilder.start("object.objectType").is("TASK").get(), postLimit);
 		
 	}
 	
@@ -181,7 +196,7 @@ public class MongoLink {
 		
 		int oldCount = (int) users.getCount();
 		
-		if(users.find(new BasicDBObject("username", obj.get("username"))).hasNext())
+		if(users.find(QueryBuilder.start("username").is(obj.get("username")).get()).hasNext())
 			return false;
 		
 		users.insert(obj);
@@ -200,13 +215,13 @@ public class MongoLink {
 	}
 	
 	public boolean checkLogin(String username, String password) {
-		return users.find(new BasicDBObject("username", username).append("password", password)).hasNext();
+		return users.find(QueryBuilder.start("username").is(username).and("password").is(password).get()).hasNext();
 	}
 	
 	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
-		ArrayList<String> tasks = getItems(new BasicDBObject("object.objectType", "TASK"));
+		ArrayList<String> tasks = getItemsWithReferences(QueryBuilder.start("object.objectType").is("TASK").get());
 		Collections.reverse(tasks);
 		return tasks;
 	}
@@ -221,15 +236,29 @@ public class MongoLink {
 		return news;
 	}
 	
+	private ArrayList<String> getReferences(DBObject obj) throws ParseException {
+		
+		BasicDBList taskIDs = (BasicDBList) ((DBObject)obj.get("target")).get("taskIDs");
+		
+		if(taskIDs.isEmpty()) return new ArrayList<String>();
+		
+		ObjectId[] taskIDObjs = new ObjectId[taskIDs.size()];
+		for(int i = 0; i < taskIDObjs.length; i++)
+		{
+			taskIDObjs[i] = new ObjectId(taskIDs.get(i).toString());
+		}
+		
+		return getItemsWithoutReferences(QueryBuilder.start("_id").in(taskIDObjs).get());
+	}
+	
 	/**
 	 * @param id - ID string of the task
 	 * @return ArrayList of all the news feed items that reference the task
 	 * @throws ParseException
 	 */
-	private ArrayList<String> getReferences(String id) throws ParseException {
-		ArrayList<String> l = new ArrayList<String>();
-		l.add(id);
-		return getItems(new BasicDBObject("target.taskIDs", new BasicDBObject("$in", l)));
+	private ArrayList<String> getReferencedBy(String id) throws ParseException {
+		
+		return getItemsWithoutReferences(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get());
 	}
 	
 	/**
@@ -239,24 +268,45 @@ public class MongoLink {
 	 */
 	private ArrayList<String> getReplies(String id) throws ParseException {
 		
-		return getItems(new BasicDBObject("target.messageID", id));
+		return getItemsWithReferences(QueryBuilder.start("target.messageID").is(id).get());
 	}
 	
 	/** Generic method to find list of objects that satisfy the given query
+	 * and any task they reference
 	 * 
 	 * @param query - DBObject containing the information about the query
 	 * @return ArrayList of objects
 	 * @throws ParseException
 	 */
-	private ArrayList<String> getItems(DBObject query) throws ParseException {
+	private ArrayList<String> getItemsWithReferences(DBObject query) throws ParseException {
 		
 		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).toArray();
 		ArrayList<String> retList = new ArrayList<String>();		
 		
 		
 		for(DBObject o : list) {
+			
 			ActivityModel am = new ActivityModel(o.toString());
 			am.setID(o.get("_id").toString());
+			
+			retList.add(am.toJSON());
+			retList.addAll(getReferences(o));
+		}
+		
+		return retList;
+	}
+	
+	private ArrayList<String> getItemsWithoutReferences(DBObject query) throws ParseException {
+		
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).toArray();
+		ArrayList<String> retList = new ArrayList<String>();		
+		
+		
+		for(DBObject o : list) {
+			
+			ActivityModel am = new ActivityModel(o.toString());
+			am.setID(o.get("_id").toString());
+			
 			retList.add(am.toJSON());
 		}
 		
