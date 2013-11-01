@@ -31,6 +31,8 @@ public class MongoLink {
 	private static DBCollection users;
 	private static DBCollection gitRepos;
 	
+	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
+	
 	/**Class linking from Java to the MongoDB**/
 	public MongoLink(boolean devMode) throws UnknownHostException {
 		
@@ -126,9 +128,9 @@ public class MongoLink {
 	 * @param postLimit - Maximum number of items to fetch
 	 * @return List of Lists containing news feed posts, with their replies
 	 */
-	private ArrayList<ArrayList<String>> dbFetch(DBCollection collection, DBObject key, int postLimit) {
+	private ArrayList<ArrayList<String>> dbFetch(DBObject searchCriteria, DBObject sortCriteria, int postLimit) {
 		
-		ArrayList<DBObject> posts = (ArrayList<DBObject>) collection.find(key).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
+		ArrayList<DBObject> posts = (ArrayList<DBObject>) newsFeed.find(searchCriteria).sort(sortCriteria).limit(postLimit).toArray();
 		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
 		
 		try {
@@ -157,7 +159,7 @@ public class MongoLink {
 	
 	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
 	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
-		return dbFetch(newsFeed, QueryBuilder.start("target.messageID").is("").get(), postLimit);
+		return dbFetch(QueryBuilder.start("target.messageID").is("").get(), reverseSort, postLimit);
 		
 	}
 	
@@ -168,7 +170,7 @@ public class MongoLink {
 	
 	/**Returns a list of postLimit tasks**/
 	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
-		return dbFetch(newsFeed, QueryBuilder.start("object.objectType").is("TASK").get(), postLimit);
+		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
 		
 	}
 	
@@ -220,9 +222,17 @@ public class MongoLink {
 	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
-		ArrayList<String> tasks = getItemsWithReferences(QueryBuilder.start("object.objectType").is("TASK").get());
+		ArrayList<String> tasks = getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get());
 		Collections.reverse(tasks);
 		return tasks;
+	}
+	
+	public ArrayList<ArrayList<String>> getTasksByPriority(int postLimit) {
+		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(1).get(), postLimit);
+	}
+	
+	public ArrayList<ArrayList<String>> getTasksByPriority() {
+		return getTasksByPriority(20);
 	}
 
 	/**Shortcut to JSON format for testing inserts**/
