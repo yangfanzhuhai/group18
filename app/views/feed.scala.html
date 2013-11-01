@@ -93,6 +93,39 @@ You have <input readonly type="text" name="countdown" size="3" value="140"> char
 var post_count = 0;
 var task_ids = [];
 
+
+function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
+
+    return "{\"published\" : \""
+              + date_and_time_stamp
+              + "\", "
+              + "\"actor\" : "
+              + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+              + "\"" 
+              + person_name
+              + "\"}, "
+              + "\"verb\" : \"said\", \"object\" : " 
+              + object
+              + ", \"target\" : { \"messageID\" : \"" 
+              + post_id
+	      	  + "\", \"taskIDs\" : ["
+	      	  + references
+              +  "]}} ";
+}
+
+
+function generateTaskObject(name, status, priority) {
+  return "{\"objectType\" : \"TASK\" , " 
+         + "\"name\" : \"" + name + "\" , "
+         + "\"status\" : \"" + status + "\" , "
+         + "\"priority\" : \"" + priority + "\"}";
+}
+
+function generatemessageObject(message) {
+  return "{\"objectType\" : \"MESSAGE\" , " 
+         + "\"message\" : \"" + message + "\"}";
+}
+
 function postTypeChange(option) {
 	if (option == "text_post") {
 
@@ -174,8 +207,6 @@ function addTasks(task_array) {
 
 
 function generateFeed(stream_array) {
-
-
 
 	document.getElementById("username").innerHTML="@userName";
 
@@ -284,32 +315,53 @@ function generateFeed(stream_array) {
 		var j = 1;
 		while (j < stream_array[i].length) {
 
-			var reply_div = document.createElement("div");
-			reply_div.className = "reply_post";
+			if (stream_array[i][j]['object']["objectType"] == "TASK") {
 
-			reply_div.setAttribute("class", "reply_post");
-    		reply_div.style.padding = "10px";
-			post.appendChild(reply_div);
 
-			var reply_published = document.createElement("div");
-			reply_published.innerHTML = stream_array[i][j]['published'];
-			reply_div.appendChild(reply_published);
+				var task_reference_div = document.createElement("div");
+				task_reference_div.innerHTML = "Referencing: " + stream_array[i][j]['object']["name"];
+				//task_reference_div.style.backgroundColor = "#FF6699";
+				task_reference_div.className = "post";
+				task_reference_div.style["cssFloat"] = "right";
+				task_reference_div.style["background"] = "#FF6699";
 
-			var reply_publisher = document.createElement("div");
-			reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
-			reply_div.appendChild(reply_publisher);
 
-			var reply_message_text = document.createElement("div");
-			reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
-			reply_div.appendChild(reply_message_text);
+				post.insertBefore(task_reference_div, post.firstChild);
+
+				j++;
+
+
+			} else {
+
+
+				var reply_div = document.createElement("div");
+				reply_div.className = "reply_post";
+
+				reply_div.setAttribute("class", "reply_post");
+    			reply_div.style.padding = "10px";
+				post.appendChild(reply_div);
+
+				var reply_published = document.createElement("div");
+				reply_published.innerHTML = stream_array[i][j]['published'];
+				reply_div.appendChild(reply_published);
+
+				var reply_publisher = document.createElement("div");
+				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
+				reply_div.appendChild(reply_publisher);
+
+				var reply_message_text = document.createElement("div");
+				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
+				reply_div.appendChild(reply_message_text);
 			
-			var reply_publisherType = stream_array[i][j]['actor']["objectType"];
+				var reply_publisherType = stream_array[i][j]['actor']["objectType"];
 	
-			var reply_verb = stream_array[i][j]['verb'];
+				var reply_verb = stream_array[i][j]['verb'];
 		
-			var reply_message_type = stream_array[i][j]['object']["objectType"];
+				var reply_message_type = stream_array[i][j]['object']["objectType"];
 
 			j++;
+
+		}
 		}
 
 
@@ -344,6 +396,8 @@ function getLeadingZeros(number) {
 
 function replyToPost(post_id, reply_message) {
 
+	alert("replying to post " + post_id + " with " + reply_message.value);
+
 
 	var post = document.getElementById(post_id);
 	var reply_name_text = "@userName";
@@ -357,6 +411,9 @@ function replyToPost(post_id, reply_message) {
 
 		var date_and_time_stamp = getTimeStamp();
 		var references = [];
+
+/*	var reply = generateJSON(date_and_time_stamp, reply_name_text, "MESSAGE",
+							 reply_message_text, post_id, references); */
 
     var reply = "{\"published\" : \""
               + date_and_time_stamp
@@ -374,7 +431,7 @@ function replyToPost(post_id, reply_message) {
               + post_id
 	      + "\", \"taskIDs\" : ["
 	      + references
-              +  "]}} ";
+              +  "]}} "; 
 
     $.ajax({
     	type: "POST",
@@ -419,8 +476,11 @@ function postToFeed() {
 
     	}
 
-    
-      var post = "{\"published\" : \""
+    var message_object = generateMessageObject(message)    
+
+    var post = generateJSON(date_and_time_stamp, name_text, message_object,
+    						"", references);
+    /*  var post = "{\"published\" : \""
             + date_and_time_stamp
             + "\", "
             + "\"actor\" : "
@@ -431,7 +491,7 @@ function postToFeed() {
             + "\"" + message_text
 	    + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
 	    + references
-            +  "]}} ";
+            +  "]}} "; */
 
       $.ajax({
           type: "POST",
@@ -449,8 +509,12 @@ function postToFeed() {
     } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
         
 
-        var ref = [];
-            var json_post = "{\"published\" : \""
+        var references = [];
+
+        var task_object = generateTaskObject(message_text, "TO_DO", "1")
+        var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
+
+         /*   var json_post = "{\"published\" : \""
                   + date_and_time_stamp
                   + "\", "
                   + "\"actor\" : "
@@ -461,12 +525,14 @@ function postToFeed() {
                   + "\"" + message_text
 		  + "\" , \"status\" : \"TO_DO\" , \"priority\" : \"1\" }, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
 	 	  + ref
-         	  +  "]}} ";
+         	  +  "]}} "; */
+
+
              $.ajax({
                 type: "POST",
                 url: "/rest/message",
                 dataType: "json",
-                data: {"activity":json_post},
+                data: {"activity":post},
                 complete: refreshFeed
             });      
                         

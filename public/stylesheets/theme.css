@@ -24,6 +24,17 @@ body {
 
 }
 
+.taskRef {
+    background: #FF6699;
+    margin: 10px;
+    border:2px solid;
+    border-color:#AF3838;
+	border-radius:5px;
+
+	padding: 10px;
+
+}
+
 
 .post_options {
 	background: #C0C0C0;
