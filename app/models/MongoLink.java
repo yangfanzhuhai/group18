@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBList;
@@ -236,6 +235,11 @@ public class MongoLink {
 		return news;
 	}
 	
+	/** 
+	 * @param obj - News Feed object
+	 * @return ArrayList respresenting all the tasks that are referenced by the given object
+	 * @throws ParseException
+	 */
 	private ArrayList<String> getReferences(DBObject obj) throws ParseException {
 		
 		BasicDBList taskIDs = (BasicDBList) ((DBObject)obj.get("target")).get("taskIDs");
@@ -253,7 +257,7 @@ public class MongoLink {
 	
 	/**
 	 * @param id - ID string of the task
-	 * @return ArrayList of all the news feed items that reference the task
+	 * @return ArrayList of all the news feed items that reference the given task
 	 * @throws ParseException
 	 */
 	private ArrayList<String> getReferencedBy(String id) throws ParseException {
@@ -296,6 +300,12 @@ public class MongoLink {
 		return retList;
 	}
 	
+	/** Generic method to find list of objects that satisfy the given query
+	 * 
+	 * @param query - DBObject containing the information about the query
+	 * @return ArrayList of objects
+	 * @throws ParseException
+	 */
 	private ArrayList<String> getItemsWithoutReferences(DBObject query) throws ParseException {
 		
 		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).toArray();
