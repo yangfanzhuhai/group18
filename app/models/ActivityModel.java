@@ -1,13 +1,11 @@
 package models;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 
-import com.google.gson.Gson;
-
-import play.api.libs.json.JsArray;
 import play.api.libs.json.JsValue;
 import play.api.libs.json.Json;
+
+import com.google.gson.Gson;
 
 public class ActivityModel {
 
@@ -64,14 +62,18 @@ public class ActivityModel {
 				.$bslash("objectType").toString());
 		switch (ObjectType.valueOf(objectObjectType)) {
 		case MESSAGE:
-			String objectMessage = ActivityModel.cleanJsonStringValue(object
+			String message = ActivityModel.cleanJsonStringValue(object
 					.$bslash("message").toString());
-			objectModel = new MessageObject(objectMessage);
+			objectModel = new MessageObject(message);
 			break;
 		case TASK:
-			String objectName = ActivityModel.cleanJsonStringValue(object
+			String name = ActivityModel.cleanJsonStringValue(object
 					.$bslash("name").toString());
-			objectModel = new TaskObject(objectName);
+			Status status = Status.valueOf(ActivityModel.cleanJsonStringValue(object
+					.$bslash("status").toString()));
+			int priority = Integer.parseInt(ActivityModel.cleanJsonStringValue(object
+					.$bslash("priority").toString()));
+			objectModel = new TaskObject(name, status, priority);
 			break;
 
 		}

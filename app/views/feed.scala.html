@@ -244,15 +244,17 @@ function generateFeed(stream_array) {
 
 			var task_name = stream_array[i][0]['object']["name"];
 			var task_data = document.createElement("div");
+			var task_status = stream_array[i][0]['object']["status"];
+			var task_priority = stream_array[i][0]['object']["priority"];
 			post.style.backgroundColor = "#FF6699";
 			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
-			var task_status = document.createElement("div");
-			task_status.innerHTML = "Completed".bold();
+			var task_details = document.createElement("div");
+			task_details.innerHTML = "Status: ".bold() + task_status + " Priority: ".bold() + task_priority;
 
 
 			post.appendChild(date_and_time);
 			post.appendChild(task_data);
-			post.appendChild(task_status);
+			post.appendChild(task_details);
 			//post.appendChild(reply_name);
 			post.appendChild(reply_message);
 			post.appendChild(reply_button);
@@ -457,10 +459,9 @@ function postToFeed() {
                   + "\"verb\" : \"said\", \"object\" : {\"objectType\""
                   + " : \"TASK\" , \"name\" : " 
                   + "\"" + message_text
-		  + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
+		  + "\" , \"status\" : \"TO_DO\" , \"priority\" : \"1\" }, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
 	 	  + ref
          	  +  "]}} ";
-
              $.ajax({
                 type: "POST",
                 url: "/rest/message",
