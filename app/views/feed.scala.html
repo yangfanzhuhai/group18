@@ -94,20 +94,7 @@ var post_count = 0;
 var task_ids = [];
 
 
-function generateJSON(date_and_time_stamp, person_name, type, message, post_id, references) {
-
-	var post_type;
-
-
-	if (type == "TASK") {
-
-		post_type = "name";
-
-	} else {
-
-		post_type = "message";
-
-	}
+function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
 
     return "{\"published\" : \""
               + date_and_time_stamp
@@ -117,20 +104,26 @@ function generateJSON(date_and_time_stamp, person_name, type, message, post_id, 
               + "\"" 
               + person_name
               + "\"}, "
-              + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-              + " : \"" + type + "\", \"" + post_type + "\" : " 
-              + "\"" 
-              + message
-              + "\"}, \"target\" : { \"messageID\" : \"" 
+              + "\"verb\" : \"said\", \"object\" : " 
+              + object
+              + ", \"target\" : { \"messageID\" : \"" 
               + post_id
 	      	  + "\", \"taskIDs\" : ["
 	      	  + references
               +  "]}} ";
 }
 
-function innerJSONObject() {
 
+function generateTaskObject(name, status, priority) {
+  return "{\"objectType\" : \"TASK\" , " 
+         + "\"name\" : \"" + name + "\" , "
+         + "\"status\" : \"" + status + "\" , "
+         + "\"priority\" : \"" + priority + "\"}";
+}
 
+function generatemessageObject(message) {
+  return "{\"objectType\" : \"MESSAGE\" , " 
+         + "\"message\" : \"" + message + "\"}";
 }
 
 function postTypeChange(option) {
@@ -282,15 +275,17 @@ function generateFeed(stream_array) {
 
 			var task_name = stream_array[i][0]['object']["name"];
 			var task_data = document.createElement("div");
+			var task_status = stream_array[i][0]['object']["status"];
+			var task_priority = stream_array[i][0]['object']["priority"];
 			post.style.backgroundColor = "#FF6699";
 			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
-			var task_status = document.createElement("div");
-			task_status.innerHTML = "Completed".bold();
+			var task_details = document.createElement("div");
+			task_details.innerHTML = "Status: ".bold() + task_status + " Priority: ".bold() + task_priority;
 
 
 			post.appendChild(date_and_time);
 			post.appendChild(task_data);
-			post.appendChild(task_status);
+			post.appendChild(task_details);
 			//post.appendChild(reply_name);
 			post.appendChild(reply_message);
 			post.appendChild(reply_button);
@@ -481,8 +476,9 @@ function postToFeed() {
 
     	}
 
-    
-    var post = generateJSON(date_and_time_stamp, name_text, "MESSAGE", message_text,
+    var message_object = generateMessageObject(message)    
+
+    var post = generateJSON(date_and_time_stamp, name_text, message_object,
     						"", references);
     /*  var post = "{\"published\" : \""
             + date_and_time_stamp
@@ -515,8 +511,8 @@ function postToFeed() {
 
         var references = [];
 
-
-        var post = generateJSON(date_and_time_stamp, name_text, "TASK", message_text, "", references);
+        var task_object = generateTaskObject(message_text, "TO_DO", "1")
+        var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
 
          /*   var json_post = "{\"published\" : \""
                   + date_and_time_stamp
@@ -527,9 +523,10 @@ function postToFeed() {
                   + "\"verb\" : \"said\", \"object\" : {\"objectType\""
                   + " : \"TASK\" , \"name\" : " 
                   + "\"" + message_text
-		  + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
+		  + "\" , \"status\" : \"TO_DO\" , \"priority\" : \"1\" }, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
 	 	  + ref
          	  +  "]}} "; */
+
 
              $.ajax({
                 type: "POST",
