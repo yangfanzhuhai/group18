@@ -121,7 +121,7 @@ function generateTaskObject(name, status, priority) {
          + "\"priority\" : \"" + priority + "\"}";
 }
 
-function generatemessageObject(message) {
+function generateMessageObject(message) {
   return "{\"objectType\" : \"MESSAGE\" , " 
          + "\"message\" : \"" + message + "\"}";
 }
@@ -476,7 +476,7 @@ function postToFeed() {
 
     	}
 
-    var message_object = generateMessageObject(message)    
+    var message_object = generateMessageObject(message_text)    
 
     var post = generateJSON(date_and_time_stamp, name_text, message_object,
     						"", references);
