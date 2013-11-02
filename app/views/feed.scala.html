@@ -346,7 +346,7 @@
   		//	priority_button.style.cssFloat = "right";
   			priority_button.onclick = function () {
   				var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
-  				if (priority <  4 && priority > 0) {
+  				if (new_priority <  4 && new_priority > 0) {
 					post_new_task_details(new_priority, "p", post_id);
 				} else {
 					alert("Value entered is not between 1 and 3");
@@ -359,7 +359,7 @@
   			//status_button.style.cssFloat = "right";
   			status_button.onclick = function () {
   				var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
-  				post_new_task_details(new_priority, "s", post_id);
+  				post_new_task_details(new_status, "s", post_id);
   			}
 
 
