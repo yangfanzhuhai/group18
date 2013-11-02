@@ -97,33 +97,13 @@
       document.getElementById("newsfeed_nav").setAttribute("class","");
     }
 
-    function outputUpdate(value) {
-    	alert(value);
-		var val = document.querySelector('#task_status').value;
-
-		if (val == "0") {
-
-			document.querySelector('#task_status').value = value;
-			document.getElementById("status").innerHTML = "To Do";
-
-		} else if (val == "1") {
-
-			document.querySelector('#task_status').value = value;
-						document.getElementById("status").innerHTML = "Doing";
-
-		} else {
-			document.querySelector('#task_status').value = value;
-						document.getElementById("status").innerHTML = "Done";
-		}
-	}
-
 
     function postFormOnKeyDown (currentElement) {
       if (event.keyCode == 13) { 
         postToFeed(); 
         return false; 
       }
-      limitText(currentElement.form.limitedtextfield,currentElement.form.countdown,140);
+
     }
 
     function limitText(limitField, limitCount, limitNum) {
@@ -318,9 +298,9 @@
 
   		post_options.style.padding = "10px";
 
-
-  		if (message_type == "MESSAGE") {
-
+  		
+  		switch(message_type){
+  		case "MESSAGE":
   			var user = document.createElement("div");
   			user.innerHTML = publisher  + ":";
   		
@@ -336,10 +316,8 @@
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
   			//post.appendChild(post_options);
-
-
-  		} else if (message_type == "TASK") {
-
+  			break;
+  		case "TASK":
   			var task_name = stream_array[i][0]['object']["name"];
   			var task_data = document.createElement("div");
   			var task_status = stream_array[i][0]['object']["status"];
@@ -377,8 +355,24 @@
   			}(post_id));
 
 
+
+
   			post_options.appendChild(priority_button);
   			post_options.appendChild(status_button);
+
+  			if (publisher == "@userName") {
+  				var assign_button = document.createElement("button");
+  				assign_button.innerHTML = "Assign members";
+  				post_options.appendChild(assign_button);
+
+  		 		assign_button.onclick = (function(post_id) {
+            		  return function() {
+            	 	    // delete_post(post_id);
+             	 }
+         		}(post_id));
+  			}
+
+
 
   			post.appendChild(task_details);
   			post.appendChild(date_and_time);
@@ -386,8 +380,8 @@
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
   			//post.appendChild(post_options);
-
-  		} else if (message_type == "JENKINS") {
+			break;
+  		case "JENKINS" :
   			var jenkins = document.createElement("div");
   			jenkins.innerHTML = publisher  + ":";
   			
@@ -411,10 +405,29 @@
 			build_data.appendChild(build_link);
   			
   			post.appendChild(date_and_time);
+  			post.appendChild(jenkins);
   			post.appendChild(build_data);
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
-  		}	
+  			break;
+  		case "GIT":
+  			var repo = stream_array[i][0]['object']['repository'];
+  			var repo_name = repo["name"];
+  			var repo_url = repo["url"];
+  			var branch = stream_array[i][0]['object']['branch'];
+  			var branch_name = branch["name"];
+  			var branch_url = branch["url"];
+  			var git_data = document.createElement("div");
+  			git_data.innerHTML = publisher + " pushed to branch " + branch_name.bold() + " at repoistory " + repo_name.bold();
+  			
+  			post.style.backgroundColor = "#FFFDC6";
+  			
+  			post.appendChild(date_and_time);
+  			post.appendChild(git_data);
+  			post.appendChild(reply_message);
+  			post.appendChild(reply_button);
+  			break;
+  		}
 
   		 reply_button.onclick = (function(post_id, reply_message) {
               return function() {
