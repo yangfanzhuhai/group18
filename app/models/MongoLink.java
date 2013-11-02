@@ -135,11 +135,11 @@ public class MongoLink {
 //		}*/
 	}
 	
-	/** 	 * 
-	 * @param collection - Database collection on which to perform query
-	 * @param key - Criteria to use for search
+	/**
+	 * @param searchCriteria - Criteria to use for search
+	 * @param sortCriteria - Criteria by which to sort results
 	 * @param postLimit - Maximum number of items to fetch
-	 * @return List of Lists containing news feed posts, with their replies
+	 * @return List of Lists containing news feed posts, with their replies and references
 	 */
 	private ArrayList<ArrayList<String>> dbFetch(DBObject searchCriteria, DBObject sortCriteria, int postLimit) {
 		
@@ -301,11 +301,6 @@ public class MongoLink {
 		deletePost(obj.get("id").toString());
 	}
 	
-	private void deletePost(String id) {
-		deleteReplies(id);
-		newsFeed.remove(new BasicDBObject("_id", new ObjectId(id)));
-	}
-	
 	/** 
 	 * @param obj - News Feed object
 	 * @return ArrayList respresenting all the tasks that are referenced by the given object
@@ -394,6 +389,11 @@ public class MongoLink {
 		return retList;
 	}
 	
+	private void deletePost(String id) {
+		deleteReplies(id);
+		newsFeed.remove(new BasicDBObject("_id", new ObjectId(id)));
+	}
+
 	private void deleteReplies(String id) {
 		newsFeed.remove(QueryBuilder.start("target.messageID").is(id).get());
 	}
