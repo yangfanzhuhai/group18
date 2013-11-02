@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 
@@ -295,6 +296,17 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getGitCommits() {
 		return getGitCommits(20);
+	}
+	
+	public ArrayList<String> getUsers() {
+		List<DBObject> allusers = users.find().toArray();
+		ArrayList<String> retList = new ArrayList<String>();
+		
+		for(DBObject obj : allusers)
+		{
+			retList.add(obj.get("username").toString());
+		}
+		return retList;
 	}
 	
 	public void deletePost(DBObject obj) {
