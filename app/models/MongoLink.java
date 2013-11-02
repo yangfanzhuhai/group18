@@ -101,6 +101,25 @@ System.out.println("UPDATE TASK PRIORITY");
 			}
 		}
 		
+		System.out.println("GETTING TASKS WITH STATUS TO_DO");
+		
+		list = ml.getTasksWithStatus("TO_DO");
+		for(ArrayList<String> a : list) {
+			for(String o : a) {
+				System.out.println(o);
+			}
+		}
+		
+		System.out.println("UPDATE TASK STATUS");
+		ml.updateStatus("5273dd1064607276a2c6206f", "DONE");
+		
+		list = ml.getTasksWithStatus("TO_DO");
+		for(ArrayList<String> a : list) {
+			for(String o : a) {
+				System.out.println(o);
+			}
+		}
+		
 		if(ml.checkLogin(new BasicDBObject("username", "Piotr").append("password","pass")))
 			System.out.println("Success");
 		
@@ -274,6 +293,10 @@ System.out.println("UPDATE TASK PRIORITY");
 	public ArrayList<ArrayList<String>> getTasksByPriority() {
 		return getTasksByPriority(20);
 	}
+	
+	public ArrayList<ArrayList<String>> getTasksWithStatus(String status) {
+		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit());
+	}
 
 	/**Shortcut to JSON format for testing inserts**/
 	private BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
@@ -371,5 +394,9 @@ System.out.println("UPDATE TASK PRIORITY");
 		}
 		
 		return retList;
+	}
+	
+	private int noLimit() {
+		return (int) newsFeed.getCount();
 	}
 }
