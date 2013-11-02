@@ -297,6 +297,10 @@ public class MongoLink {
 		return getGitCommits(20);
 	}
 	
+	public void deletePost(DBObject obj) {
+		deletePost(obj.get("id").toString());
+	}
+	
 	private void deletePost(String id) {
 		deleteReplies(id);
 		newsFeed.remove(new BasicDBObject("_id", new ObjectId(id)));
