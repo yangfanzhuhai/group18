@@ -11,14 +11,14 @@ import java.lang.reflect.Field;
  */
 public abstract class DatabaseBaseModel<T extends DatabaseBaseModel<T>> {
 
-  private Integer id = null;
+  private String id = null;
 
   /**
    * The id of the model.
    * 
    * @return Model id as an Integer.
    */
-  public Integer getId() {
+  public String getId() {
     return this.id;
   }
 
@@ -27,7 +27,7 @@ public abstract class DatabaseBaseModel<T extends DatabaseBaseModel<T>> {
    * 
    * @param id
    */
-  private void setId(Integer id) {
+  private void setId(String id) {
     this.id = id;
   }
 
@@ -52,7 +52,7 @@ public abstract class DatabaseBaseModel<T extends DatabaseBaseModel<T>> {
    * Insert the current model into the database as a new entry. Should return
    * the id of the new insertion.
    */
-  protected abstract Integer insertNewInstanceIntoDatabase()
+  protected abstract String insertNewInstanceIntoDatabase()
       throws DatabaseWriteException;
 
   /**

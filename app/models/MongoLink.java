@@ -25,7 +25,7 @@ public class MongoLink {
 	private static DBCollection newsFeed;
 	private static DBCollection users;
 	
-	//a link from Java to the MongoDB
+	/**Class linking from Java to the MongoDB**/
 	public MongoLink() throws UnknownHostException {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
@@ -40,6 +40,22 @@ public class MongoLink {
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
 		//Prints last 20 items of newsFeed
+		
+	/*	try {
+			System.out.println(new ActivityModel("{\"published\" : \""
+			          + "234/324/423"
+			          + "\", "
+			          + "\"actor\" : "
+			          + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+			          + "\"" + "abc" + "\"}, "
+			          + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+			          + " : \"MESSAGE\" , \"message\" : " 
+			          + "\"" + "Hello" + "\"}, \"target\" : \"\"} ").toJSON());
+		} catch (ParseException e) {
+			System.out.println("PArse exception");
+		}*/
+		test();
+		
 		ArrayList<ArrayList<String>> list = ml.getNewsFeed(20);
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
@@ -47,7 +63,7 @@ public class MongoLink {
 			}
 		}
 		
-		if(ml.checkLogin("Piotr","pass"))
+		if(ml.checkLogin(new BasicDBObject("username", "Piotr").append("password","pass")))
 			System.out.println("Success");
 		
 	//	ml.registerNewUser(new BasicDBObject("username", "Rob").append("password", "pass2"));
@@ -68,10 +84,14 @@ public class MongoLink {
 //		}*/
 	}
 
-	//returns the last postLimit posts with replies
-	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
-
-		ArrayList<DBObject> posts = (ArrayList<DBObject>) newsFeed.find(new BasicDBObject("target", "")).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
+	private static void test(){
+		System.out.println(newsFeed.find(new BasicDBObject("object.objectType", "TASK")).toArray());
+	}
+	
+	/**Returns a list of postLimit items containing key from collection**/
+	private ArrayList<ArrayList<String>> dbFetch(DBCollection collection, BasicDBObject key, int postLimit) {
+		
+		ArrayList<DBObject> posts = (ArrayList<DBObject>) collection.find(key).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
 		
 		try {
@@ -79,8 +99,17 @@ public class MongoLink {
 			while(i < posts.size())
 			{
 				ArrayList<String> replies = getReplies(posts.get(i).get("_id").toString());
+<<<<<<< HEAD
 				replies.add(0, new Activity(posts.get(i).toString()).toJSON());
+=======
+				
+				ActivityModel post = new ActivityModel(posts.get(i).toString());
+				post.setID(posts.get(i).get("_id").toString());
+				
+				replies.add(0, post.toJSON());
+>>>>>>> master
 				list.add(i, replies);
+				
 				i++;
 			}
 		} catch (ParseException e) {
@@ -91,15 +120,35 @@ public class MongoLink {
 		return list;
 	}
 	
+	
+	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
+	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
+		return dbFetch(newsFeed, new BasicDBObject("target", ""), postLimit);
+		
+	}
+	
+	/**Default method to return last 20 items from newsFeed collection**/
 	public ArrayList<ArrayList<String>> getNewsFeed(){
 		return getNewsFeed(20);
 	}
 	
-	//use dbFormat to insert a formed message into the newsFeed DB
+	/**Returns a list of postLimit tasks**/
+	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
+		return dbFetch(newsFeed, new BasicDBObject("object.objectType", "TASK"), postLimit);
+		
+	}
+	
+	/**Default method to return last 20 tasks**/
+	public ArrayList<ArrayList<String>> getTasks(){
+		return getTasks(20);
+	}
+	
+	
+	
+	/**Inserts obj into newsFeed collection**/
 	public String insertNews(DBObject obj) {
 		
 		newsFeed.insert(obj);
-		
 		return newsFeed.find(obj).toArray().get(0).get("_id").toString();
 	}
 	
@@ -115,11 +164,15 @@ public class MongoLink {
 		return (int) users.getCount() == oldCount + 1;
 	}
 	
-	public boolean checkLogin(String username, String pass) {
-		return users.find(new BasicDBObject("username", username).append("password", pass)).hasNext();
+	public boolean checkLogin(DBObject obj) {
+		return checkLogin( obj.get("username").toString() ,obj.get("password").toString());
 	}
 	
-	//shortcut for testing inserting in correct form
+	public boolean checkLogin(String username, String password) {
+		return users.find(new BasicDBObject("username", username).append("password", password)).hasNext();
+	}
+	
+	/**Shortcut to JSON format for testing inserts**/
 	private BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
 		BasicDBObject news = new BasicDBObject("published", published);
 		news.append("actor", new BasicDBObject("objectType", actorType).append("displayName", dispName));

@@ -26,8 +26,26 @@ public class Activity extends DatabaseBaseModel<Activity> {
   private Object object;
   private Target target;
 
+  /**
+   * Initialize a new Activity given the Date, Actor, Verb, Object and Target.
+   * 
+   * @param published
+   * @param actor
+   * @param verb
+   * @param object
+   * @param target
+   */
   public Activity(Date published, Actor actor, String verb, Object object,
       Target target) {
+    this.setPublished(published);
+    this.setActor(actor);
+    this.setVerb(verb);
+    this.setObject(object);
+    this.setTarget(target);
+  }
+  
+  public Activity(String id, Date published, Actor actor, String verb,
+      Object object, Target target) {
     this.setPublished(published);
     this.setActor(actor);
     this.setVerb(verb);
@@ -126,7 +144,7 @@ public class Activity extends DatabaseBaseModel<Activity> {
   }
 
   @Override
-  protected Integer insertNewInstanceIntoDatabase()
+  protected String insertNewInstanceIntoDatabase()
       throws DatabaseWriteException {
     
     MongoLink mongoLink;
@@ -137,9 +155,9 @@ public class Activity extends DatabaseBaseModel<Activity> {
       throw new DatabaseWriteException();
     }
     
-    mongoLink.insertNews((DBObject) JSON.parse(this.toJson()));
+    mongoLink.insertNews((DBObject) JSON.parse(this.toJsonWithoutId()));
     
-    return 0;
+    return "";
   }
 
   @Override
@@ -156,15 +174,44 @@ public class Activity extends DatabaseBaseModel<Activity> {
     return null;
   }
 
-  public String toJson() {
-    return "{\"published\" : \"" + getPublished().toString()
-        + "\", \"actor\" : " + getActor().toJson() + ", \"verb\" : \""
-        + getVerb() + "\", \"object\" : " + getObject().toJson()
-        + ", \"target\" : " + getTarget().toJson() + " }";
+  /**
+   * Serialize this Activity to JSON without the id.
+   * 
+   * @return
+   */
+  public String toJsonWithoutId() {
+    return toJson(false);
+  }
+  
+  
+  /**
+   * Serialize this Activity to JSON with the id.
+   * @return
+   */
+  public String toJsonWithId() {
+    return toJson(true);
+  }
+  
+  
+  /**
+   * Serialize this Activity to JSON (with / without the id).
+   * 
+   * @param withId
+   * @return
+   */
+  private String toJson(Boolean withId) {
+    String prefix = withId ? "\"id\" : \"" + getId() + "\", " : "";
+    
+    return "{" + prefix + "\"published\" : \"" + getPublished().toString()
+            + "\", \"actor\" : " + getActor().toJson() + ", \"verb\" : \""
+            + getVerb() + "\", \"object\" : " + getObject().toJson()
+            + ", \"target\" : " + getTarget().toJson() + " }";
   }
 
   public static Activity initializeFromJson(JsValue json) throws JsonException {
 
+    String id
+    
     // Establish published date.
     Date published;
     try {

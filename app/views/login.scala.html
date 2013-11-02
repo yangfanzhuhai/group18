@@ -1,6 +1,16 @@
 <link rel="stylesheet" type="text/css" href ="@routes.Assets.at("stylesheets/theme.css")">
 <html>
 <head>
+<title> Login </title>
+
+<ul>
+<!--li><a href="@routes.Application.index">News Feed</a></li>
+<li><a href="@routes.Application.tasks">Task List</a></li>
+<li><a href="@routes.Application.gits">Git Commits</a></li>
+<li><a href="@routes.Application.builds">Build History</a></li>
+<li><a href="@routes.Application.about">About</a></li>
+<li><a href="@routes.Application.login">Log out</a></li-->
+</ul>
 
 <script src="http://code.jquery.com/jquery-latest.min.js"
         type="text/javascript"></script>
@@ -33,7 +43,7 @@
 		<input type="checkbox" placeholder="Remember me" name = "Remember me">
 			Remember Me
 		</input>
-		<button class = "remember" >
+		<button class = "remember" onclick = "register()" >
 			Register
 		</button>
 	</div>
@@ -45,12 +55,11 @@
 	width="500" >
 </div>
 
-<ul>
-<li><a href="contact.asp">Contact us</a></li>
-<li><a href="about.asp">About</a></li>
-</ul>
-
 <script>
+
+function register() {
+  window.location.href = '@routes.Application.register';
+}
 
 function login() {
 
@@ -64,16 +73,29 @@ function login() {
 	var username = document.getElementById("username").value;
 	var password = document.getElementById("password").value;
 	
-	alert(username);
-	alert(password);
+	var credentials = "{\"username\" : "
+                  + "\"" + username + "\", "
+                  + "\"password\" : "
+                  + "\"" + password + "\""
+                  + "}";
+            
 	
-	window.location.href = 'NewsFeed.html'
-	
-	
-	
+	$.ajax({
+                type: "POST",
+                url: "/rest/login",
+                data: {"credentials":credentials},
+                success: function(data){
+                    window.location.href = '@routes.Application.index'
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                	if (xhr.status == 400) {
+                		alert("Invalid login. Please register or try again");
+                	}
+                } 
+                
+            });      
+
 }
-
-
 
 </script>
 
