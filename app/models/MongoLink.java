@@ -220,6 +220,18 @@ public class MongoLink {
 		return users.find(QueryBuilder.start("username").is(username).and("password").is(password).get()).hasNext();
 	}
 	
+	private void updateStatus(String id, String status) {
+		updateObject(id, new BasicDBObject("$set", new BasicDBObject("object.status", status)));
+	}
+	
+	private void updatePriority(String id, int priority) {
+		updateObject(id, new BasicDBObject("$set", new BasicDBObject("object.priority", priority)));
+	}
+	
+	private void updateObject(String id, DBObject updateWith) {
+		newsFeed.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), updateWith);
+	}
+	
 	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
