@@ -101,7 +101,7 @@ public class TaskObject extends ObjectModel {
    * @return
    */
   public boolean assignedToUser() {
-    return this.getAssignedUsername() == null;
+    return this.getAssignedUsername() != null;
   }
 
   /**
