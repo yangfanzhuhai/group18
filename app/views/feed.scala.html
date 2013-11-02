@@ -84,6 +84,20 @@
   </div> <!-- /container -->  
 
   <script>
+  $.fn.outerHTML = function(){
+
+	    // IE, Chrome & Safari will comply with the non-standard outerHTML, all others (FF) will have a fall-back for cloning
+	    return (!this.length) ? this : (this[0].outerHTML || (
+	      function(el){
+	          var div = document.createElement('div');
+	          div.appendChild(el.cloneNode(true));
+	          var contents = div.innerHTML;
+	          div = null;
+	          return contents;
+	    })(this[0]));
+
+	}
+  
     if (@toggle == 0) {
     	document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
@@ -435,17 +449,61 @@
   			var branch = stream_array[i][0]['object']['branch'];
   			var branch_name = branch["name"];
   			var branch_url = branch["url"];
+  			
+  			var branch_link = document.createElement('a');
+  			branch_link.href = branch_url;
+  			branch_link.innerHTML = branch_name.bold()
+  			
+  			var repo_link = document.createElement('a');
+  			repo_link.href = repo_url;
+  			repo_link.innerHTML = repo_name.bold()
+  			
+  			
   			var git_data = document.createElement("div");
-  			git_data.innerHTML = publisher + " pushed to branch " + branch_name.bold() + " at repoistory " + repo_name.bold();
+  			git_data.innerHTML = publisher.bold() + " pushed to branch " + $(branch_link).outerHTML() + " at repository " + $(repo_link).outerHTML();
+  			
+  			var commits = stream_array[i][0]['object']['commits'];
+  			var commit_total = stream_array[i][0]['object']['totalCommits'];
+  			var commit_data = document.createElement("div");
+  			var commit_list = document.createElement("ul");
+  			commit_data.appendChild(commit_list);
+  			for(var k = 0; k < Math.min(2,commit_total); k++) {
+  				var commit = commits[k];
+  				var commit_url = commit["url"];
+  				var commit_author = commit["author"];
+  				var commit_message = commit["message"];
+  				var commit_link = document.createElement('a');
+  				commit_link.href = commit_url;
+  				commit_link.innerHTML = "See commit"
+  				
+  				
+  				var commit_list_entry = document.createElement("li");
+  				commit_list_entry.style.display="block";
+  				commit_list_entry.innerHTML = commit_author.bold() + ": " + commit_message + " " + $(commit_link).outerHTML();
+  				commit_list.appendChild(commit_list_entry);
+  				
+  			}
+  			if (commit_total > 2){
+  				var summary_link = document.createElement('a');
+  				summary_link.href = branch_url;
+  				summary_link.innerHTML = "... and " + (commit_total - 2) + " more commits";
+  				var commit_summary = document.createElement("li");
+  				commit_summary.appendChild(summary_link);
+  				commit_summary.style.display="block";
+  				commit_list.appendChild(commit_summary);
+  				
+  			}
+  			
   			
   			post.style.backgroundColor = "#fcf8e3";
         //post_body.setAttribute("class", "alert, alert-info");
   			
   			post_body.appendChild(date_and_time);
   			post_body.appendChild(git_data);
-  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(commit_data);
+  			post_body.appendChild(reply_message);
   			post_body.appendChild(reply_button);
-        post.appendChild(post_body);
+  			post.appendChild(post_body);
   			break;
   		}
 
