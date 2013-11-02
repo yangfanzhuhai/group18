@@ -79,6 +79,10 @@ public class ActivityModel {
 			break;
 		case GIT:
 			objectModel = gson.fromJson(object.toString(), GitObject.class);
+			break;
+		case JENKINS:
+			objectModel = gson.fromJson(object.toString(), JenkinsObject.class);
+			break;
 		}
 
 		String target = obj.$bslash("target").toString();

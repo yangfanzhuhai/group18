@@ -15,7 +15,6 @@ public class GitObject extends ObjectModel {
 
 	public GitObject(Repository repository, Branch branch,
 			List<Commit> commits, int totalCommits) {
-		super();
 		this.repository = repository;
 		this.branch = branch;
 		this.commits = commits;

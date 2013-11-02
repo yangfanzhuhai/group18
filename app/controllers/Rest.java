@@ -11,6 +11,7 @@ import java.util.Map;
 import models.ActivityModel;
 import models.ActorModel;
 import models.GitObject;
+import models.JenkinsObject;
 import models.MongoLink;
 import models.ObjectModel;
 import models.PersonActor;
@@ -96,6 +97,47 @@ public class Rest extends Controller {
 
 	public static Result parseGitHook() {
 		JsonNode json = request().body().asJson();
+		ActivityModel activity = createActivityModelFromGitHook(json);
+		activity.save();
+		return ok();
+
+	}
+
+
+	public static Result parseJenkinsNotfication() {
+		JsonNode json = request().body().asJson();
+		JsonNode build = json.findValue("build");
+		String phase = getStringValueFromJson(build, "phase");
+		if(phase.equals("FINISHED")){
+		ActivityModel activity = createActivityModelFromJenkinsNotification(
+				json, build);
+		activity.save();
+		}
+		return ok();
+	}
+
+	
+	private static ActivityModel createActivityModelFromJenkinsNotification(
+			JsonNode json, JsonNode build) {
+		String published = createDate();
+		ActorModel actor = new PersonActor("Jenkins");
+		String verb = "reported";
+		ObjectModel object = createJenkinsObject(json, build);
+		TargetModel target = new TargetModel("", new ArrayList<String>());
+		ActivityModel activity = new ActivityModel(published, actor, verb,
+				object, target);
+		return activity;
+	}
+
+	private static JenkinsObject createJenkinsObject(JsonNode json, JsonNode build) {
+		String name = getStringValueFromJson(json, "name");
+		int number = build.findValue("number").asInt();
+		String status = getStringValueFromJson(build, "status");
+		String url = getStringValueFromJson(build, "full_url");
+		return new JenkinsObject(name, number, status, url);
+	}
+	
+	private static ActivityModel createActivityModelFromGitHook(JsonNode json) {
 		String published = createDate();
 
 		ActorModel actor = new PersonActor(getStringValueFromJson(json,
@@ -105,24 +147,7 @@ public class Rest extends Controller {
 		TargetModel target = new TargetModel("", new ArrayList<String>());
 		ActivityModel activity = new ActivityModel(published, actor, verb,
 				object, target);
-		activity.save();
-		return ok();
-
-	}
-
-	private static String createDate() {
-		Calendar rightNow = Calendar.getInstance();
-		java.text.SimpleDateFormat df1 = new java.text.SimpleDateFormat(
-				"d/MM/yyyy 'at' HH:mm:ss");
-		return df1.format(rightNow.getTime());
-	}
-
-	private static String getLeadingZero(String number) {
-		if (number.length() < 2) {
-			return "0" + number;
-		} else {
-			return number;
-		}
+		return activity;
 	}
 
 	private static GitObject createGitObject(JsonNode json) {
@@ -178,16 +203,14 @@ public class Rest extends Controller {
 		Commit commit = new Commit(url, author, message);
 		return commit;
 	}
-
-	public static Result parseJenkinsNotfication() {
-		JsonNode json = request().body().asJson();
-		System.out.println(json.toString());
-		return TODO;
+	
+	private static String createDate() {
+		Calendar rightNow = Calendar.getInstance();
+		java.text.SimpleDateFormat df1 = new java.text.SimpleDateFormat(
+				"d/MM/yyyy 'at' HH:mm:ss");
+		return df1.format(rightNow.getTime());
 	}
-
-	/**
-	 * @return
-	 */
+	
 	private static String getValueFromRequest(String value) {
 		final Map<String, String[]> values = request().body()
 				.asFormUrlEncoded();
