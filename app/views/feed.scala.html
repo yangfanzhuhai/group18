@@ -48,15 +48,16 @@
     	width="200" >
     </a>
 
-    <div id = "post_options" class = "post_options" align = "center">
-      <div id="username"> </div>	
+    <div id = "post_options" align="center">
+      <h1 id="username"> </h1>	
     		
       <form name="myform" role="form">
         <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
-        onKeyDown="postFormOnKeyDown(this)" maxlength="140"> </textarea>
+        onKeyDown="postFormOnKeyDown(this)" maxlength="140" class="form-control" 
+        placeholder="what's on your mind?"> </textarea>
         <br>
-        <font size="1">(Maximum characters: 140)<br>
-        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
+        <small align="right"> <!--(Maximum characters: 140)-->
+        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</small>
 
       </form>
 
@@ -77,8 +78,6 @@
 
 
     <div id = "posts" class = "float">
-    	<p class="posts_title">Posts:</p>
-
     </div>
 
     <ul id = "stream" class = "media-list" ></ul>
