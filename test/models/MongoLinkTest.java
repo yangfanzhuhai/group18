@@ -136,6 +136,11 @@ public class MongoLinkTest {
 		}
 	}
 	
+
+	/**
+	 * Adds a task with priority 1 to collection, then changes priority
+	 * and tests that the priority was changed in the database
+	 */
 	@Test
 	public void testChangingTaskPriority()
 	{
@@ -165,6 +170,10 @@ public class MongoLinkTest {
 		}
 	}
 	
+	/**
+	 * Test which adds a lot of tasks with different priorities to collection,
+	 * then sorts them by priority and makes sure the order is as expected
+	 */
 	@Test
 	public void testSortingByPriority()
 	{

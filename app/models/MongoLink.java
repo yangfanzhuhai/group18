@@ -284,16 +284,6 @@ System.out.println("UPDATE TASK PRIORITY");
 	public ArrayList<ArrayList<String>> getTasksWithStatus(String status) {
 		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit());
 	}
-
-	/**Shortcut to JSON format for testing inserts**/
-	private BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
-		BasicDBObject news = new BasicDBObject("published", published);
-		news.append("actor", new BasicDBObject("objectType", actorType).append("displayName", dispName));
-		news.append("verb", verb);
-		news.append("object", new BasicDBObject("objectType", objType).append("message", msg ));
-		news.append("target", tar);
-		return news;
-	}
 	
 	/** 
 	 * @param obj - News Feed object
