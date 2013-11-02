@@ -48,15 +48,16 @@
     	width="200" >
     </a>
 
-    <div id = "post_options" class = "post_options" align = "center">
-      <div id="username"> </div>	
+    <div id = "post_options" align="center">
+      <h1 id="username"> </h1>	
     		
       <form name="myform" role="form">
         <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
-        onKeyDown="postFormOnKeyDown(this)" maxlength="140"> </textarea>
+        onKeyDown="postFormOnKeyDown(this)" maxlength="140" class="form-control" 
+        placeholder="what's on your mind?"> </textarea>
         <br>
-        <font size="1">(Maximum characters: 140)<br>
-        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
+        <small align="right"> <!--(Maximum characters: 140)-->
+        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</small>
 
       </form>
 
@@ -77,8 +78,6 @@
 
 
     <div id = "posts" class = "float">
-    	<p class="posts_title">Posts:</p>
-
     </div>
 
     <ul id = "stream" class = "media-list" ></ul>
@@ -354,7 +353,8 @@
   			var task_data = document.createElement("div");
   			var task_status = stream_array[i][0]['object']["status"];
   			var task_priority = stream_array[i][0]['object']["priority"];
-  			post.style.backgroundColor = "#FF8598";
+  			post.style.backgroundColor = "#d9edf7";
+        //post.setAttribute("class", "alert, alert-warning");
   			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
   			var task_details = document.createElement("div");
   			task_details.style.cssFloat = "right";
@@ -425,13 +425,15 @@
   			build_link.innerHTML = "See build";
   			
   			if (build_status == "SUCCESS") {
-  				post.style.backgroundColor = "#6EFF60";	
+  				post.style.backgroundColor = "#AFD772";	
+          //post_body.setAttribute("class", "alert alert-success");
   			} else {
-  				post.style.backgroundColor = "#FF4137";	
+  				post.style.backgroundColor = "#FF7A70";	
+          //post_body.setAttribute("class", "alert alert-danger");
   			}
   			
   			build_data.innerHTML = build_name + " build " + build_number + " finished with status: " + build_status + ". ";
-			build_data.appendChild(build_link);
+			  build_data.appendChild(build_link);
   			
   			post_body.appendChild(date_and_time);
   			post_body.appendChild(jenkins);
@@ -493,7 +495,8 @@
   			}
   			
   			
-  			post.style.backgroundColor = "#FFFDC6";
+  			post.style.backgroundColor = "#fcf8e3";
+        //post_body.setAttribute("class", "alert, alert-info");
   			
   			post_body.appendChild(date_and_time);
   			post_body.appendChild(git_data);
@@ -527,7 +530,7 @@
   				//task_reference_div.style.backgroundColor = "#FF6699";
   				task_reference_div.className = "post";
   				task_reference_div.style["cssFloat"] = "right";
-  				task_reference_div.style["background"] = "#FF8598";
+  				task_reference_div.style["background"] = "#d9edf7";
 
   				post.insertBefore(task_reference_div, post.firstChild);
   				j++;
