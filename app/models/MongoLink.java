@@ -14,6 +14,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
 
 public class MongoLink {
@@ -244,31 +245,17 @@ System.out.println("UPDATE TASK PRIORITY");
 		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
 	}
 	
-	/** Updates the status of the task with ID id
-	 * 
-	 * @param id - ID of task to be updated
-	 * @param status - New status value to be set
-	 */
-	private void updateStatus(String id, String status) {
-		updateObject(id, new BasicDBObject("$set", new BasicDBObject("object.status", status)));
-	}
-	
-	/** Updates the priority of the task with ID id
-	 * 
-	 * @param id - ID of task to be updated
-	 * @param priority - New priority value to be set
-	 */
-	private void updatePriority(String id, int priority) {
-		updateObject(id, new BasicDBObject("$set", new BasicDBObject("object.priority", priority)));
-	}
-	
-	/** Generic method which updates object with ID 'id' using the parameters in 'updateWith'
-	 * 
-	 * @param id - ID of object to be updated
-	 * @param updateWith - Information on what the update should change
-	 */
-	private void updateObject(String id, DBObject updateWith) {
-		newsFeed.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), updateWith);
+	public void updateStatusOrPriority(DBObject obj) throws MongoException {
+		if(obj.containsField("status"))
+		{
+			updateStatus(obj.get("id").toString(), obj.get("status").toString());
+		}
+		else if(obj.containsField("priority"))
+		{
+			updatePriority(obj.get("id").toString(), (Integer) obj.get("priority"));
+		}
+		else
+			throw new MongoException("Neither field status or priority exist. Update failed");
 	}
 	
 	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
@@ -396,6 +383,33 @@ System.out.println("UPDATE TASK PRIORITY");
 		return retList;
 	}
 	
+	/** Updates the status of the task with ID id
+	 * 
+	 * @param id - ID of task to be updated
+	 * @param status - New status value to be set
+	 */
+	private void updateStatus(String id, String status) {
+		updateObject(id, new BasicDBObject("$set", new BasicDBObject("object.status", status)));
+	}
+
+	/** Updates the priority of the task with ID id
+	 * 
+	 * @param id - ID of task to be updated
+	 * @param priority - New priority value to be set
+	 */
+	private void updatePriority(String id, int priority) {
+		updateObject(id, new BasicDBObject("$set", new BasicDBObject("object.priority", priority)));
+	}
+
+	/** Generic method which updates object with ID 'id' using the parameters in 'updateWith'
+	 * 
+	 * @param id - ID of object to be updated
+	 * @param updateWith - Information on what the update should change
+	 */
+	private void updateObject(String id, DBObject updateWith) {
+		newsFeed.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), updateWith);
+	}
+
 	private int noLimit() {
 		return (int) newsFeed.getCount();
 	}
