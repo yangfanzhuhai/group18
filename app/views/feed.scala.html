@@ -61,10 +61,9 @@
       </form>
 
     	<div id = "task_referencer" align = "center">
-    		<select id="tasks">
+    		<select id="tasks" width = "80%">
     			<option value="default">-Reference a Task-</option>
     		</select>
-
     	</div>
 
     <select id="post_type" onchange="postTypeChange(this.value)">
@@ -354,23 +353,30 @@
   			priority_button.innerHTML= "Change Task Priority";
   			priority_button.type = "text";
   		//	priority_button.style.cssFloat = "right";
-  			priority_button.onclick = function () {
-  				var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
-  				if (new_priority <  4 && new_priority > 0) {
-					post_new_task_details(new_priority, "p", post_id);
-				} else {
-					alert("Value entered is not between 1 and 3");
+  			priority_button.onclick = (function (post_id) {
+  				return function() {
+  					var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
+  					if (new_priority <  4 && new_priority > 0) {
+						post_new_task_details(new_priority, "p", post_id);
+					} else {
+						alert("Value entered is not between 1 and 3");
+					}
 				}
-  			}
+  			}(post_id));
 
   			var status_button = document.createElement("button");
   			status_button.innerHTML= "Change Task Status";
   			status_button.type = "text";
-  			//status_button.style.cssFloat = "right";
-  			status_button.onclick = function () {
-  				var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
-  				post_new_task_details(new_status, "s", post_id);
-  			}
+  			status_button.onclick = (function (post_id) {
+  				return function() {
+					var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
+  					if (new_priority <  4 && new_priority > 0) {
+						post_new_task_details(new_priority, "p", post_id);
+					} else {
+						alert("Value entered is not between 1 and 3");
+					}
+				}
+  			}(post_id));
 
 
   			post_options.appendChild(priority_button);
