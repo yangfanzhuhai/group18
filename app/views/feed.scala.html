@@ -49,15 +49,16 @@
     </a>
 
     <div id = "post_options" class = "post_options" align = "center">
-    <div id="username"> </div>	
+      <div id="username"> </div>	
     		
-    <form name="myform">
-    <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
-    onKeyDown="if (event.keyCode == 13) { postToFeed(); return false; }; limitText(this.form.limitedtextfield,this.form.countdown,140);" 
-    onKeyUp="limitText(this.form.limitedtextfield,this.form.countdown,140);" maxlength="140"> </textarea><br>
-    <font size="1">(Maximum characters: 140)<br>
-    You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
-    </form>
+      <form name="myform" role="form">
+        <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
+        onKeyDown="postFormOnKeyDown(this)" maxlength="140"> </textarea>
+        <br>
+        <font size="1">(Maximum characters: 140)<br>
+        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
+
+      </form>
 
     	<div id = "task_referencer" align = "center">
     		<select id="tasks">
@@ -71,9 +72,7 @@
       <option value="task">Task</option>
     </select>
      		
-    	<button type="button" onclick="postToFeed()">Post to Feed</button>
-
-    	
+    	<button type="button" class="btn btn-success" onclick="postToFeed()">Post</button>
     </div>
 
     <div id = "posts" class = "float">
@@ -96,6 +95,14 @@
       document.getElementById("newsfeed_nav").setAttribute("class","");
     }
 
+    function postFormOnKeyDown (currentElement) {
+      if (event.keyCode == 13) { 
+        postToFeed(); 
+        return false; 
+      }
+      limitText(currentElement.form.limitedtextfield,currentElement.form.countdown,140);
+    }
+
     function limitText(limitField, limitCount, limitNum) {
       if (limitField.value.length > limitNum) {
         limitField.value = limitField.value.substring(0, limitNum);
@@ -106,7 +113,6 @@
 
   var post_count = 0;
   var task_ids = [];
-
 
   function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
 
@@ -122,11 +128,10 @@
                 + object
                 + ", \"target\" : { \"messageID\" : \"" 
                 + post_id
-  	      	  + "\", \"taskIDs\" : ["
-  	      	  + references
+  	      	    + "\", \"taskIDs\" : ["
+  	      	    + references
                 +  "]}} ";
   }
-
 
   function generateTaskObject(name, status, priority) {
     return "{\"objectType\" : \"TASK\" , " 
@@ -142,7 +147,6 @@
 
   function postTypeChange(option) {
   	if (option == "text_post") {
-
   		var task_referencer = document.getElementById("task_referencer");
   		task_referencer.style.visibility= 'visible';
   		var limitedtextfield = document.getElementById("limitedtextfield");
@@ -150,7 +154,6 @@
   		limitedtextfield.cols = 30;
 
   	} else {
-
   		var task_referencer = document.getElementById("task_referencer");
   		task_referencer.style.visibility= 'hidden';
   		var limitedtextfield = document.getElementById("limitedtextfield");
@@ -280,7 +283,6 @@
   			post.appendChild(date_and_time);
   			post.appendChild(user);
   			post.appendChild(message);
-  			//post.appendChild(reply_name);
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
 
@@ -291,7 +293,8 @@
   			var task_data = document.createElement("div");
   			var task_status = stream_array[i][0]['object']["status"];
   			var task_priority = stream_array[i][0]['object']["priority"];
-  			post.style.backgroundColor = "#FF6699";
+  			post.style.backgroundColor = "#FF8598";
+        //post.setAttribute("class", "taskPost");
   			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
   			var task_details = document.createElement("div");
   			task_details.innerHTML = "Status: ".bold() + task_status + " Priority: ".bold() + task_priority;
@@ -300,26 +303,19 @@
   			post.appendChild(date_and_time);
   			post.appendChild(task_data);
   			post.appendChild(task_details);
-  			//post.appendChild(reply_name);
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
 
   		}	
-  		
-
 
   		 reply_button.onclick = (function(post_id, reply_message) {
               return function() {
-                  //alert("you just clicked button" + x);
                   replyToPost(post_id, reply_message);
               }
           }(post_id, reply_message));
 
-
   		 reply_message.onkeypress = (function(post_id, reply_message) { 
-
   		 	return function() {
-
   		 			if (event.keyCode == 13) {
   		 				replyToPost(post_id, reply_message);
   		 			}
@@ -330,29 +326,21 @@
   		while (j < stream_array[i].length) {
 
   			if (stream_array[i][j]['object']["objectType"] == "TASK") {
-
-
   				var task_reference_div = document.createElement("div");
   				task_reference_div.innerHTML = "Referencing: " + stream_array[i][j]['object']["name"];
   				//task_reference_div.style.backgroundColor = "#FF6699";
   				task_reference_div.className = "post";
   				task_reference_div.style["cssFloat"] = "right";
-  				task_reference_div.style["background"] = "#FF6699";
-
+  				task_reference_div.style["background"] = "#FF8598";
 
   				post.insertBefore(task_reference_div, post.firstChild);
-
   				j++;
-
-
   			} else {
-
-
   				var reply_div = document.createElement("div");
   				reply_div.className = "reply_post";
 
   				reply_div.setAttribute("class", "reply_post");
-      			reply_div.style.padding = "10px";
+      		reply_div.style.padding = "10px";
   				post.appendChild(reply_div);
 
   				var reply_published = document.createElement("div");
@@ -385,19 +373,17 @@
   	
   }
 
-
   function getTimeStamp() {
-      var currentdate = new Date();
-      return ("" + currentdate.getDate() + "/"
-                      + (currentdate.getMonth()+1)  + "/" 
-                      + currentdate.getFullYear() + " at "
-                      +  getLeadingZeros(currentdate.getHours()) + ":"  
-                      + getLeadingZeros(currentdate.getMinutes()) + ":" 
-                      + getLeadingZeros(currentdate.getSeconds())); 
+    var currentdate = new Date();
+    return ("" + currentdate.getDate() + "/"
+                    + (currentdate.getMonth()+1)  + "/" 
+                    + currentdate.getFullYear() + " at "
+                    +  getLeadingZeros(currentdate.getHours()) + ":"  
+                    + getLeadingZeros(currentdate.getMinutes()) + ":" 
+                    + getLeadingZeros(currentdate.getSeconds())); 
   }
 
   function getLeadingZeros(number) {
-
   	var numberString = number + "";
   	if (numberString.length < 2) {
   		return "0" + numberString;
@@ -406,21 +392,16 @@
   	}
   }
 
-
-
   function replyToPost(post_id, reply_message) {
 
   	alert("replying to post " + post_id + " with " + reply_message.value);
-
 
   	var post = document.getElementById(post_id);
   	var reply_name_text = "@userName";
   	var reply_message_text = reply_message.value;
 
   	if (reply_message_text == "") {
-
   		alert("Reply cannot be empty.");
-
   	} else {
 
   		var date_and_time_stamp = getTimeStamp();
@@ -478,7 +459,7 @@
       if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
       	var taskReferencer = document.getElementById("tasks");
-  	var references = [];
+  	    var references = [];
 
       	if (taskReferencer.selectedIndex == 0) {
 
