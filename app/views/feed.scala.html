@@ -295,14 +295,26 @@
 
   		var post_options = document.createElement("div");
 
-  		var delete_button = document.createElement("button");
-  		delete_button.innerHTML = "Delete";
-  		post_options.appendChild(delete_button);
-  		delete_button.onclick = function() {
+  		if (publisher == "@userName") {
+  			var delete_button = document.createElement("button");
+  			delete_button.innerHTML = "Delete";
+  			post_options.appendChild(delete_button);
 
-  			delete_post(post_id);
+  		 	delete_button.onclick = (function(post_id) {
+            	  return function() {
+            	      delete_post(post_id);
+              }
+         	 }(post_id));
 
   		}
+
+
+  		 reply_button.onclick = (function(post_id, reply_message) {
+              return function() {
+                  replyToPost(post_id, reply_message);
+              }
+          }(post_id, reply_message));
+
 
   		post_options.style.padding = "10px";
 
@@ -335,10 +347,8 @@
   			post.style.backgroundColor = "#FF8598";
   			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
   			var task_details = document.createElement("div");
-  			task_details.innerHTML = "Status: ".bold() + task_status + " Priority: ".bold() + task_priority;
-
-
-
+  			task_details.style.cssFloat = "right";
+  			task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
 
   			var priority_button = document.createElement("button");
   			priority_button.innerHTML= "Change Task Priority";
@@ -366,9 +376,9 @@
   			post_options.appendChild(priority_button);
   			post_options.appendChild(status_button);
 
+  			post.appendChild(task_details);
   			post.appendChild(date_and_time);
   			post.appendChild(task_data);
-  			post.appendChild(task_details);
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
   			//post.appendChild(post_options);
@@ -438,6 +448,7 @@
   		  		post.appendChild(post_options);
 
 
+
   		post_no = post_no + 1;
   	}
 
@@ -476,7 +487,15 @@
 
   function delete_post(post_id) {
 
-  		alert("need to implement json delete call");
+  	var json = "{\"id\" : \"" + post_id + "\"}"
+
+  	$.ajax({
+		type: "POST",
+		url: "/rest/delete",
+		dataType: "json",
+		data: {"activity":json},
+		complete: refreshFeed
+	});    
 
 
   }
@@ -583,18 +602,6 @@
 
       var post = generateJSON(date_and_time_stamp, name_text, message_object,
       						"", references);
-      /*  var post = "{\"published\" : \""
-              + date_and_time_stamp
-              + "\", "
-              + "\"actor\" : "
-              + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-              + "\"" + name_text + "\"}, "
-              + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-              + " : \"MESSAGE\" , \"message\" : " 
-              + "\"" + message_text
-  	    + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
-  	    + references
-              +  "]}} "; */
 
         $.ajax({
             type: "POST",
@@ -617,18 +624,6 @@
           var task_object = generateTaskObject(message_text, "TO_DO", "1")
           var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
 
-           /*   var json_post = "{\"published\" : \""
-                    + date_and_time_stamp
-                    + "\", "
-                    + "\"actor\" : "
-                    + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-                    + "\"" + name_text + "\"}, "
-                    + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-                    + " : \"TASK\" , \"name\" : " 
-                    + "\"" + message_text
-  		  + "\" , \"status\" : \"TO_DO\" , \"priority\" : \"1\" }, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
-  	 	  + ref
-           	  +  "]}} "; */
 
 
                $.ajax({
