@@ -1,6 +1,6 @@
 package models;
 
 public enum ObjectType {
-	MESSAGE, TASK
+	MESSAGE, TASK, GIT
 }
 
