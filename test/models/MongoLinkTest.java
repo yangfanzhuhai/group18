@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -239,6 +240,39 @@ public class MongoLinkTest {
 		}
 	}
 	
+	@Test
+	public void testSearchByStatus()
+	{
+		DBCollection coll = null;
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			coll = db.getCollection("testCollection");
+			
+			coll.insert(createNewTask());
+			coll.insert(createNewTask());
+			coll.insert(createNewTask());
+			coll.insert(createNewTask());
+			
+			if(getTasksByStatus(coll, "TO_DO").count() != 4)
+				fail("Tasks were not found correctly");
+			
+			
+			DBObject obj = coll.findOne();
+			
+			updateStatus(coll, obj.get("_id").toString(), "DONE");
+			
+			if(getTasksByStatus(coll, "TO_DO").count() != 3)
+				fail("Task status was not modified correctly");
+			
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
+		}
+	}
+	
 	private boolean registerNewUser(DBCollection coll, DBObject obj) {
 		
 		int oldCount = (int) coll.getCount();
@@ -273,5 +307,9 @@ public class MongoLinkTest {
 	
 	private List<DBObject> getTasksByPriority(DBCollection coll) {
 		return coll.find().sort(QueryBuilder.start("object.priority").is(-1).get()).toArray();
+	}
+	
+	private DBCursor getTasksByStatus(DBCollection coll, String status) {
+		return coll.find(QueryBuilder.start("object.status").is(status).get());
 	}
 }
