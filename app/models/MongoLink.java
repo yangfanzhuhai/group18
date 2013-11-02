@@ -215,18 +215,39 @@ System.out.println("UPDATE TASK PRIORITY");
 		return checkLogin( obj.get("username").toString() ,obj.get("password").toString());
 	}
 	
+	/** Checks the validity of the given username and password
+	 * 
+	 * @param username - Username entered by user
+	 * @param password - Password entered by user
+	 * @return True if there is an entry in the database with that exact username and password, False otherwise
+	 */
 	public boolean checkLogin(String username, String password) {
 		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
 	}
 	
+	/** Updates the status of the task with ID id
+	 * 
+	 * @param id - ID of task to be updated
+	 * @param status - New status value to be set
+	 */
 	private void updateStatus(String id, String status) {
 		updateObject(id, new BasicDBObject("$set", new BasicDBObject("object.status", status)));
 	}
 	
+	/** Updates the priority of the task with ID id
+	 * 
+	 * @param id - ID of task to be updated
+	 * @param priority - New priority value to be set
+	 */
 	private void updatePriority(String id, int priority) {
 		updateObject(id, new BasicDBObject("$set", new BasicDBObject("object.priority", priority)));
 	}
 	
+	/** Generic method which updates object with ID 'id' using the parameters in 'updateWith'
+	 * 
+	 * @param id - ID of object to be updated
+	 * @param updateWith - Information on what the update should change
+	 */
 	private void updateObject(String id, DBObject updateWith) {
 		newsFeed.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), updateWith);
 	}
@@ -239,10 +260,17 @@ System.out.println("UPDATE TASK PRIORITY");
 		return tasks;
 	}
 	
+	/**
+	 * @param postLimit - Number of tasks to fetch from the database
+	 * @return List of tasks (with replies) sorted by priority in descending order
+	 */
 	public ArrayList<ArrayList<String>> getTasksByPriority(int postLimit) {
 		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(-1).get(), postLimit);
 	}
 	
+	/**
+	 * @return List of 20 tasks (with replies) sorted by priority in descending order
+	 */
 	public ArrayList<ArrayList<String>> getTasksByPriority() {
 		return getTasksByPriority(20);
 	}
