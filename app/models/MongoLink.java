@@ -395,7 +395,7 @@ public class MongoLink {
 	}
 	
 	private void deleteReplies(String id) {
-		newsFeed.remove(QueryBuilder.start("target.messageID").is(new ObjectId(id)).get());
+		newsFeed.remove(QueryBuilder.start("target.messageID").is(id).get());
 	}
 	
 	/** Updates the status of the task with ID id
