@@ -75,8 +75,11 @@
     	<button type="button" class="btn btn-success" onclick="postToFeed()">Post</button>
     </div>
 
+
+
     <div id = "posts" class = "float">
     	<p class="posts_title">Posts:</p>
+
     </div>
 
     <div id = "stream" class = "stream">
@@ -94,6 +97,27 @@
       document.getElementById("tasklist_nav").setAttribute("class","active");
       document.getElementById("newsfeed_nav").setAttribute("class","");
     }
+
+    function outputUpdate(value) {
+    	alert(value);
+		var val = document.querySelector('#task_status').value;
+
+		if (val == "0") {
+
+			document.querySelector('#task_status').value = value;
+			document.getElementById("status").innerHTML = "To Do";
+
+		} else if (val == "1") {
+
+			document.querySelector('#task_status').value = value;
+						document.getElementById("status").innerHTML = "Doing";
+
+		} else {
+			document.querySelector('#task_status').value = value;
+						document.getElementById("status").innerHTML = "Done";
+		}
+	}
+
 
     function postFormOnKeyDown (currentElement) {
       if (event.keyCode == 13) { 
@@ -269,6 +293,20 @@
   		reply_button.innerHTML = 'Reply';
   		reply_button.align = "right"; 	
 
+  		var post_options = document.createElement("div");
+
+  		var delete_button = document.createElement("button");
+  		delete_button.innerHTML = "Delete";
+  		post_options.appendChild(delete_button);
+  		delete_button.onclick = function() {
+
+  			delete_post(post_id);
+
+  		}
+
+  		post_options.style.padding = "10px";
+
+
   		if (message_type == "MESSAGE") {
 
   			var user = document.createElement("div");
@@ -285,6 +323,7 @@
   			post.appendChild(message);
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
+  			//post.appendChild(post_options);
 
 
   		} else if (message_type == "TASK") {
@@ -294,17 +333,45 @@
   			var task_status = stream_array[i][0]['object']["status"];
   			var task_priority = stream_array[i][0]['object']["priority"];
   			post.style.backgroundColor = "#FF8598";
-        //post.setAttribute("class", "taskPost");
   			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
   			var task_details = document.createElement("div");
   			task_details.innerHTML = "Status: ".bold() + task_status + " Priority: ".bold() + task_priority;
 
+
+
+
+  			var priority_button = document.createElement("button");
+  			priority_button.innerHTML= "Change Task Priority";
+  			priority_button.type = "text";
+  		//	priority_button.style.cssFloat = "right";
+  			priority_button.onclick = function () {
+  				var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
+  				if (priority <  4 && priority > 0) {
+					post_new_task_details(new_priority, "p", post_id);
+				} else {
+					alert("Value entered is not between 1 and 3");
+				}
+  			}
+
+  			var status_button = document.createElement("button");
+  			status_button.innerHTML= "Change Task Status";
+  			status_button.type = "text";
+  			//status_button.style.cssFloat = "right";
+  			status_button.onclick = function () {
+  				var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
+  				post_new_task_details(new_priority, "s", post_id);
+  			}
+
+
+  			post_options.appendChild(priority_button);
+  			post_options.appendChild(status_button);
 
   			post.appendChild(date_and_time);
   			post.appendChild(task_data);
   			post.appendChild(task_details);
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
+  			//post.appendChild(post_options);
 
   		}	
 
@@ -335,12 +402,13 @@
 
   				post.insertBefore(task_reference_div, post.firstChild);
   				j++;
+
   			} else {
   				var reply_div = document.createElement("div");
   				reply_div.className = "reply_post";
 
   				reply_div.setAttribute("class", "reply_post");
-      		reply_div.style.padding = "10px";
+      			reply_div.style.padding = "10px";
   				post.appendChild(reply_div);
 
   				var reply_published = document.createElement("div");
@@ -364,13 +432,53 @@
   			j++;
 
   		}
+
+
   		}
+  		  		post.appendChild(post_options);
 
 
   		post_no = post_no + 1;
   	}
 
   	
+  }
+
+
+  function post_new_task_details(value, id, post_id) {
+
+  	var json = "{\"id\" : \"" + post_id + "\", "
+
+  	if (id == "p") {
+
+  		json += "\"priority\": " + value;
+
+  	}
+
+  	if (id == "s") {
+
+  		json += "\"status\": \"" + value + "\"";
+
+  	}
+
+  	json += "}";
+
+
+   	$.ajax({
+		type: "POST",
+		url: "/rest/update/task",
+		dataType: "json",
+		data: {"activity":json},
+		complete: refreshFeed
+	});      
+
+  }
+
+  function delete_post(post_id) {
+
+  		alert("need to implement json delete call");
+
+
   }
 
   function getTimeStamp() {
