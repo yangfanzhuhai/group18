@@ -3,7 +3,11 @@ package models;
 import static org.junit.Assert.fail;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.bson.BasicBSONObject;
+import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import com.mongodb.BasicDBObject;
@@ -12,6 +16,8 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.QueryBuilder;
+import com.mongodb.util.JSON;
 
 public class MongoLinkTest {
 
@@ -34,48 +40,55 @@ public class MongoLinkTest {
 	@Test
 	public void testInsert()
 	{
+		DBCollection coll = null;
 		try {
 			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
 			db.createCollection("testCollection", null);
-			DBCollection coll = db.getCollection("testCollection");
+			coll = db.getCollection("testCollection");
 			
 			coll.insert(new BasicDBObject("parametername", "value"));
 			
 			if(coll.count() != 1)
 				fail("Item was not inserted correctly");
 			
-			coll.drop();
 		} catch (UnknownHostException e) {
 			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
 		}
 	}
 	
 	@Test
 	public void testInsertedCorrectly()
 	{
+		DBCollection coll = null;
 		try {
 			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
 			db.createCollection("testCollection", null);
-			DBCollection coll = db.getCollection("testCollection");
+			coll = db.getCollection("testCollection");
 			
 			coll.insert(new BasicDBObject("name", "Bob"));
 			
 			if(!"Bob".equals(coll.findOne().get("name")))
 				fail("Item was not inserted correctly");
 			
-			coll.drop();
 		} catch (UnknownHostException e) {
 			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
 		}
 	}
 	
 	@Test
 	public void testManyInsertedCorrectly()
 	{
+		DBCollection coll = null;
 		try {
 			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
 			db.createCollection("testCollection", null);
-			DBCollection coll = db.getCollection("testCollection");
+			coll = db.getCollection("testCollection");
 			
 			coll.insert(new BasicDBObject("name", "Bob"));
 			coll.insert(new BasicDBObject("name", "Fred"));
@@ -86,9 +99,11 @@ public class MongoLinkTest {
 			if(coll.find(new BasicDBObject("name", "Bob")).count() != 3)
 				fail("Items were not inserted correctly");
 			
-			coll.drop();
 		} catch (UnknownHostException e) {
 			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
 		}
 	}
 	
@@ -99,10 +114,11 @@ public class MongoLinkTest {
 	@Test
 	public void testUserRegisterAndLogin()
 	{
+		DBCollection coll = null;
 		try {
 			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
 			db.createCollection("testCollection", null);
-			DBCollection coll = db.getCollection("testCollection");
+			coll = db.getCollection("testCollection");
 			
 			DBObject obj = new BasicDBObject("username", "Bob").append("password", "pass1");
 			
@@ -112,9 +128,82 @@ public class MongoLinkTest {
 			if(!checkLogin(coll, obj))
 				fail("Register and Login test failed");
 			
-			coll.drop();
 		} catch (UnknownHostException e) {
 			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
+		}
+	}
+	
+
+	/**
+	 * Adds a task with priority 1 to collection, then changes priority
+	 * and tests that the priority was changed in the database
+	 */
+	@Test
+	public void testChangingTaskPriority()
+	{
+		DBCollection coll = null;
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			coll = db.getCollection("testCollection");
+			
+			
+			coll.insert(createNewTask());
+			
+			DBObject addedTask = coll.findOne();
+			if((Integer) ((DBObject) addedTask.get("object")).get("priority") != 1)
+				fail("Task was not added correctly");
+			
+			updatePriority(coll, addedTask.get("_id").toString(), 2);
+			
+			if((Integer) ((DBObject) coll.findOne().get("object")).get("priority") != 2)
+				fail("Task priority was not updated correctly");
+			
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
+		}
+	}
+	
+	/**
+	 * Test which adds a lot of tasks with different priorities to collection,
+	 * then sorts them by priority and makes sure the order is as expected
+	 */
+	@Test
+	public void testSortingByPriority()
+	{
+		DBCollection coll = null;
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			coll = db.getCollection("testCollection");
+			
+			coll.insert(createNewTask(1));
+			coll.insert(createNewTask(5));
+			coll.insert(createNewTask(1));
+			coll.insert(createNewTask(3));
+			coll.insert(createNewTask(2));
+			coll.insert(createNewTask(4));
+			coll.insert(createNewTask(1));
+			
+			List<DBObject> byPrio = getTasksByPriority(coll);
+			
+			if((Integer) ((DBObject) byPrio.get(6).get("object")).get("priority") != 1
+					|| (Integer) ((DBObject) byPrio.get(3).get("object")).get("priority") != 2
+					|| (Integer) ((DBObject) byPrio.get(0).get("object")).get("priority") != 5)
+				fail("Tasks weren't sorted by priority correctly");
+				
+			
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
 		}
 	}
 	
@@ -132,5 +221,21 @@ public class MongoLinkTest {
 	
 	private boolean checkLogin(DBCollection coll, DBObject obj) {
 		return coll.find(new BasicDBObject("username", obj.get("username")).append("password", obj.get("password"))).hasNext();
+	}
+	
+	private void updatePriority(DBCollection coll, String id, int priority) {
+		coll.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), new BasicDBObject("object", new BasicDBObject("priority", priority)));
+	}
+	
+	private DBObject createNewTask() {
+		return new BasicDBObject("object", new BasicDBObject("priority", 1));
+	}
+	
+	private DBObject createNewTask(int priority) {
+		return new BasicDBObject("object", new BasicDBObject("priority", priority));
+	}
+	
+	private List<DBObject> getTasksByPriority(DBCollection coll) {
+		return coll.find().sort(QueryBuilder.start("object.priority").is(-1).get()).toArray();
 	}
 }
