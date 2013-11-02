@@ -207,6 +207,38 @@ public class MongoLinkTest {
 		}
 	}
 	
+	/**
+	 * Test to make sure changing an existing task's status works
+	 */
+	@Test
+	public void testChangingStatus()
+	{
+		DBCollection coll = null;
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			coll = db.getCollection("testCollection");
+			
+			coll.insert(createNewTask());
+			
+			DBObject obj = coll.findOne();
+			
+			if(!"TO_DO".equals(((DBObject) obj.get("object")).get("status")))
+					fail("Task was not added to collection correctly");
+			
+			updateStatus(coll, obj.get("_id").toString(), "DONE");
+			
+			if(!"DONE".equals(((DBObject) coll.findOne().get("object")).get("status")))
+				fail("Task was not added to collection correctly");
+			
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
+		}
+	}
+	
 	private boolean registerNewUser(DBCollection coll, DBObject obj) {
 		
 		int oldCount = (int) coll.getCount();
@@ -227,12 +259,16 @@ public class MongoLinkTest {
 		coll.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), new BasicDBObject("object", new BasicDBObject("priority", priority)));
 	}
 	
+	private void updateStatus(DBCollection coll, String id, String status) {
+		coll.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), new BasicDBObject("object", new BasicDBObject("status", status)));
+	}
+	
 	private DBObject createNewTask() {
-		return new BasicDBObject("object", new BasicDBObject("priority", 1));
+		return createNewTask(1);
 	}
 	
 	private DBObject createNewTask(int priority) {
-		return new BasicDBObject("object", new BasicDBObject("priority", priority));
+		return new BasicDBObject("object", new BasicDBObject("priority", priority).append("status", "TO_DO"));
 	}
 	
 	private List<DBObject> getTasksByPriority(DBCollection coll) {
