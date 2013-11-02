@@ -317,9 +317,9 @@
 
   		post_options.style.padding = "10px";
 
-
-  		if (message_type == "MESSAGE") {
-
+  		
+  		switch(message_type){
+  		case "MESSAGE":
   			var user = document.createElement("div");
   			user.innerHTML = publisher  + ":";
   		
@@ -335,10 +335,8 @@
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
   			//post.appendChild(post_options);
-
-
-  		} else if (message_type == "TASK") {
-
+  			break;
+  		case "TASK":
   			var task_name = stream_array[i][0]['object']["name"];
   			var task_data = document.createElement("div");
   			var task_status = stream_array[i][0]['object']["status"];
@@ -385,8 +383,8 @@
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
   			//post.appendChild(post_options);
-
-  		} else if (message_type == "JENKINS") {
+			break;
+  		case "JENKINS" :
   			var jenkins = document.createElement("div");
   			jenkins.innerHTML = publisher  + ":";
   			
@@ -410,10 +408,29 @@
 			build_data.appendChild(build_link);
   			
   			post.appendChild(date_and_time);
+  			post.appendChild(jenkins);
   			post.appendChild(build_data);
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
-  		}	
+  			break;
+  		case "GIT":
+  			var repo = stream_array[i][0]['object']['repository'];
+  			var repo_name = repo["name"];
+  			var repo_url = repo["url"];
+  			var branch = stream_array[i][0]['object']['branch'];
+  			var branch_name = branch["name"];
+  			var branch_url = branch["url"];
+  			var git_data = document.createElement("div");
+  			git_data.innerHTML = publisher + " pushed to branch " + branch_name.bold() + " at repoistory " + repo_name.bold();
+  			
+  			post.style.backgroundColor = "#FFFDC6";
+  			
+  			post.appendChild(date_and_time);
+  			post.appendChild(git_data);
+  			post.appendChild(reply_message);
+  			post.appendChild(reply_button);
+  			break;
+  		}
 
   		 reply_button.onclick = (function(post_id, reply_message) {
               return function() {
