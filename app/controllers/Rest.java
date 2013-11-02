@@ -26,6 +26,7 @@ import play.mvc.Result;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
 import com.mongodb.DBObject;
+import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
 public class Rest extends Controller {
@@ -114,6 +115,18 @@ public class Rest extends Controller {
 		activity.save();
 		}
 		return ok();
+	}
+	
+	
+	public static Result updateStatusAndPriority() {
+		try {
+			
+			MongoLink.MONGO_LINK.updateStatusOrPriority((DBObject) JSON.parse(getValueFromRequest("activity")));
+			return ok();
+			
+		} catch (MongoException e) {
+			return status(422);
+		}
 	}
 
 	

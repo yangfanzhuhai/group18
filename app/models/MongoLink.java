@@ -177,28 +177,6 @@ System.out.println("UPDATE TASK PRIORITY");
 	}
 	
 	
-	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
-	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
-		return dbFetch(QueryBuilder.start("target.messageID").is("").get(), reverseSort, postLimit);
-		
-	}
-	
-	/**Default method to return last 20 items from newsFeed collection**/
-	public ArrayList<ArrayList<String>> getNewsFeed(){
-		return getNewsFeed(20);
-	}
-	
-	/**Returns a list of postLimit tasks**/
-	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
-		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
-		
-	}
-	
-	/**Default method to return last 20 tasks**/
-	public ArrayList<ArrayList<String>> getTasks(){
-		return getTasks(20);
-	}
-	
 	/**Inserts obj into newsFeed collection**/
 	public String insertNews(DBObject obj) {
 		
@@ -258,6 +236,28 @@ System.out.println("UPDATE TASK PRIORITY");
 			throw new MongoException("Neither field status or priority exist. Update failed");
 	}
 	
+	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
+	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
+		return dbFetch(QueryBuilder.start("target.messageID").is("").get(), reverseSort, postLimit);
+		
+	}
+
+	/**Default method to return last 20 items from newsFeed collection**/
+	public ArrayList<ArrayList<String>> getNewsFeed(){
+		return getNewsFeed(20);
+	}
+
+	/**Returns a list of postLimit tasks**/
+	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
+		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
+		
+	}
+
+	/**Default method to return last 20 tasks**/
+	public ArrayList<ArrayList<String>> getTasks(){
+		return getTasks(20);
+	}
+
 	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
@@ -268,21 +268,40 @@ System.out.println("UPDATE TASK PRIORITY");
 	
 	/**
 	 * @param postLimit - Number of tasks to fetch from the database
-	 * @return List of tasks (with replies) sorted by priority in descending order
+	 * @return List of tasks (with replies and associated objects) sorted by priority in descending order
 	 */
 	public ArrayList<ArrayList<String>> getTasksByPriority(int postLimit) {
 		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(-1).get(), postLimit);
 	}
 	
 	/**
-	 * @return List of 20 tasks (with replies) sorted by priority in descending order
+	 * @return List of 20 tasks (with replies and associated objects) sorted by priority in descending order
 	 */
 	public ArrayList<ArrayList<String>> getTasksByPriority() {
 		return getTasksByPriority(20);
 	}
 	
+	/**
+	 * @param status - Status of task
+	 * @return List of all the tasks with the given status, sorted from newest to oldest, with replies and associated objects
+	 */
 	public ArrayList<ArrayList<String>> getTasksWithStatus(String status) {
 		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit());
+	}
+	
+	/**
+	 * @param postLimit - Maximum number of git commits to fetch
+	 * @return List of git commits (with replies and associated objects) sorted from newest to oldest
+	 */
+	public ArrayList<ArrayList<String>> getGitCommits(int postLimit) {
+		return dbFetch(QueryBuilder.start("object.objectType").is("GIT").get(), reverseSort, postLimit);
+	}
+	
+	/**
+	 * @return List of (at most) 20 git commits (with replies and associated objects) sorted from newest to oldest
+	 */
+	public ArrayList<ArrayList<String>> getGitCommits() {
+		return getGitCommits(20);
 	}
 	
 	/** 
