@@ -5,6 +5,7 @@ body {
   font-weight: 300;
 }
 
+
 .post {  
   background: #FFFFFF;
   margin: 10px;
@@ -77,7 +78,7 @@ body {
 	
 }
 
-ul {
+/*ul {
 	list-style-type:none;
 	margin:0;
 	float: right;
@@ -85,7 +86,7 @@ ul {
 
 li {
 	display: inline;
-}
+}*/
 
 .title {
 	padding: 50px;
@@ -118,9 +119,9 @@ li {
 .reply_post {
 	background: #eee;
 	width: 75%;
-  margin: 20px;
-  border:2px solid
-  border-color:#AF3838;
+  	margin: 20px;
+  	border:2px solid
+  	border-color:#AF3838;
 	border-radius:5px;
 	margin-left: auto;
 	margin-right: auto;

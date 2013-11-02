@@ -42,7 +42,7 @@
     </div>
     </div>
 
-  <div class="container">
+  <div class="container col-md-offset-2 col-md-8">
     <a href="@routes.Application.feed(0)">
       <img src="@routes.Assets.at("images/progress_all.jpg")" alt="some_text"
     	width="200" >
@@ -81,9 +81,7 @@
 
     </div>
 
-    <div id = "stream" class = "stream">
-
-    </div>
+    <ul id = "stream" class = "media-list" ></ul>
   </div> <!-- /container -->  
 
   <script>
@@ -225,8 +223,6 @@
 
   }
 
-
-
   function generateFeed(stream_array) {
 
   	document.getElementById("username").innerHTML="@userName";
@@ -248,35 +244,47 @@
   	
   		var verb = stream_array[i][0]['verb'];
 
-  		var post = document.createElement("div");
+  		var post = document.createElement("li");
+      post.setAttribute("class", "media");
   		post.id = post_id;
   		post.className = "post";
 
+      var post_body = document.createElement("div");
+      post_body.setAttribute("class", "media-body");
   	
   		if (post_count > 0) {
-
   			var stream = document.getElementById("stream");
   			stream.insertBefore(post, stream.childNodes[0]);
   		} else {
   			document.getElementById("stream").insertBefore(post);
   		}
 
-  		var date_and_time = document.createElement("div");
-  		date_and_time.innerHTML = published;
-  		
+  		var date_and_time = document.createElement("small");
+  		date_and_time.innerHTML = published + "<br>";
+
+      var reply_message_div = document.createElement("div");
+      reply_message_div.setAttribute("class", "col-xs-8");
+
   		var reply_message = document.createElement("input");
   		reply_message.placeholder = "Your message"
   		reply_message.type = "text";
-
+      reply_message.setAttribute("class", "form-control input-sm");
   					
   		var reply_button = document.createElement("button");
+      reply_button.setAttribute("class", "btn btn-default btn-sm");
   		reply_button.innerHTML = 'Reply';
-  		reply_button.align = "right"; 	
+  		//reply_button.align = "right"; 	
+
+      //reply_form.appendChild(reply_message);
+      //reply_form.appendChild(reply_button);
+      //reply_form_div.appendChild(reply_form);
+      reply_message_div.appendChild(reply_message);
 
   		var post_options = document.createElement("div");
 
   		if (publisher == "@userName") {
   			var delete_button = document.createElement("button");
+        delete_button.setAttribute("class", "btn btn-danger btn-xs");
   			delete_button.innerHTML = "Delete";
   			post_options.appendChild(delete_button);
 
@@ -297,27 +305,37 @@
 
 
   		post_options.style.padding = "10px";
-
   		
   		switch(message_type){
   		case "MESSAGE":
-  			var user = document.createElement("div");
-  			user.innerHTML = publisher  + ":";
+  			var user = document.createElement("h4");
+        user.setAttribute("class", "media-heading");
+  			user.innerHTML = publisher;
   		
   			var message_text = stream_array[i][0]['object']["message"];
-  			var message = document.createElement("div");
+  			var message = document.createElement("p");
   			message_text = message_text.replace("\n", "<br>");
   			message.innerHTML = message_text;
 
-
+        /*
   			post.appendChild(date_and_time);
   			post.appendChild(user);
   			post.appendChild(message);
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
   			//post.appendChild(post_options);
-  			break;
-  		case "TASK":
+        */
+  			
+  			post_body.appendChild(user);
+  			post_body.appendChild(message);
+        post_body.appendChild(date_and_time);
+  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(reply_button);
+        //post_body.appendChild(reply_form_div);
+        post.appendChild(post_body);
+
+        break;
+      case "TASK":
   			var task_name = stream_array[i][0]['object']["name"];
   			var task_data = document.createElement("div");
   			var task_status = stream_array[i][0]['object']["status"];
@@ -355,8 +373,6 @@
   			}(post_id));
 
 
-
-
   			post_options.appendChild(priority_button);
   			post_options.appendChild(status_button);
 
@@ -372,13 +388,12 @@
          		}(post_id));
   			}
 
-
-
-  			post.appendChild(task_details);
-  			post.appendChild(date_and_time);
-  			post.appendChild(task_data);
-  			post.appendChild(reply_message);
-  			post.appendChild(reply_button);
+        post_body.appendChild(task_details);
+  			post_body.appendChild(date_and_time);
+  			post_body.appendChild(task_data);		
+  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(reply_button);
+        post.appendChild(post_body);
   			//post.appendChild(post_options);
 			break;
   		case "JENKINS" :
@@ -404,11 +419,12 @@
   			build_data.innerHTML = build_name + " build " + build_number + " finished with status: " + build_status + ". ";
 			build_data.appendChild(build_link);
   			
-  			post.appendChild(date_and_time);
-  			post.appendChild(jenkins);
-  			post.appendChild(build_data);
-  			post.appendChild(reply_message);
-  			post.appendChild(reply_button);
+  			post_body.appendChild(date_and_time);
+  			post_body.appendChild(jenkins);
+  			post_body.appendChild(build_data);
+  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(reply_button);
+        post.appendChild(post_body);
   			break;
   		case "GIT":
   			var repo = stream_array[i][0]['object']['repository'];
@@ -422,10 +438,11 @@
   			
   			post.style.backgroundColor = "#FFFDC6";
   			
-  			post.appendChild(date_and_time);
-  			post.appendChild(git_data);
-  			post.appendChild(reply_message);
-  			post.appendChild(reply_button);
+  			post_body.appendChild(date_and_time);
+  			post_body.appendChild(git_data);
+  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(reply_button);
+        post.appendChild(post_body);
   			break;
   		}
 
@@ -459,23 +476,22 @@
 
   			} else {
   				var reply_div = document.createElement("div");
-  				reply_div.className = "reply_post";
+  				//reply_div.className = "reply_post";
+  				reply_div.setAttribute("class", "media");
+      	  reply_div.style.paddingLeft = "10%";
 
-  				reply_div.setAttribute("class", "reply_post");
-      			reply_div.style.padding = "10px";
-  				post.appendChild(reply_div);
-
-  				var reply_published = document.createElement("div");
+          var reply_div_body = document.createElement("div");
+          reply_div_body.setAttribute("class", "media-body");
+  				
+  				var reply_published = document.createElement("small");
   				reply_published.innerHTML = stream_array[i][j]['published'];
-  				reply_div.appendChild(reply_published);
 
-  				var reply_publisher = document.createElement("div");
+  				var reply_publisher = document.createElement("h4");
+          reply_publisher.setAttribute("class", "media-heading");
   				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
-  				reply_div.appendChild(reply_publisher);
 
-  				var reply_message_text = document.createElement("div");
+  				var reply_message_text = document.createElement("p");
   				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
-  				reply_div.appendChild(reply_message_text);
   			
   				var reply_publisherType = stream_array[i][j]['actor']["objectType"];
   	
@@ -483,13 +499,18 @@
   		
   				var reply_message_type = stream_array[i][j]['object']["objectType"];
 
+          post_body.appendChild(reply_div);
+          reply_div.appendChild(reply_div_body);
+          reply_div_body.appendChild(reply_publisher);
+          reply_div_body.appendChild(reply_published);
+          reply_div_body.appendChild(reply_message_text);
   			j++;
 
   		}
 
 
   		}
-  		  		post.appendChild(post_options);
+  	  post.appendChild(post_options);
 
 
 
@@ -666,17 +687,15 @@
           var task_object = generateTaskObject(message_text, "TO_DO", "1")
           var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
 
-
-
-               $.ajax({
-                  type: "POST",
-                  url: "/rest/message",
-                  dataType: "json",
-                  data: {"activity":post},
-                  complete: refreshFeed
-              });      
-                          
-              document.getElementById("limitedtextfield").value = "";
+         $.ajax({
+            type: "POST",
+            url: "/rest/message",
+            dataType: "json",
+            data: {"activity":post},
+            complete: refreshFeed
+        });      
+                    
+        document.getElementById("limitedtextfield").value = "";
 
           
       } 
