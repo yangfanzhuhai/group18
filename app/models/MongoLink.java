@@ -91,15 +91,14 @@ public class MongoLink {
 				System.out.println(o);
 			}
 		}
-//		System.out.println("Get news feed took " + avgTime + " seconds on average.");
-		try {
-			System.out.println("REFERENCES");
-			for(String a : ml.getReferencedBy("52715499b7608d8e9d710f40")) {
-					System.out.println(a);
+System.out.println("UPDATE TASK PRIORITY");
+		ml.updatePriority("5273dd1064607276a2c6206f", 1);
+		
+		list = ml.getTasksByPriority();
+		for(ArrayList<String> a : list) {
+			for(String o : a) {
+				System.out.println(o);
 			}
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		
 		if(ml.checkLogin(new BasicDBObject("username", "Piotr").append("password","pass")))
@@ -184,7 +183,7 @@ public class MongoLink {
 	public String insertNews(DBObject obj) {
 		
 		newsFeed.insert(obj);
-		return newsFeed.find(obj).toArray().get(0).get("_id").toString();
+		return newsFeed.findOne(obj).get("_id").toString();
 	}
 	
 	/**
@@ -198,7 +197,7 @@ public class MongoLink {
 		
 		int oldCount = (int) users.getCount();
 		
-		if(users.find(QueryBuilder.start("username").is(obj.get("username")).get()).hasNext())
+		if(users.findOne(QueryBuilder.start("username").is(obj.get("username")).get()) != null)
 			return false;
 		
 		users.insert(obj);
@@ -217,7 +216,7 @@ public class MongoLink {
 	}
 	
 	public boolean checkLogin(String username, String password) {
-		return users.find(QueryBuilder.start("username").is(username).and("password").is(password).get()).hasNext();
+		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
 	}
 	
 	private void updateStatus(String id, String status) {
