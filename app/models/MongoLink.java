@@ -268,27 +268,38 @@ System.out.println("UPDATE TASK PRIORITY");
 	
 	/**
 	 * @param postLimit - Number of tasks to fetch from the database
-	 * @return List of tasks (with replies) sorted by priority in descending order
+	 * @return List of tasks (with replies and associated objects) sorted by priority in descending order
 	 */
 	public ArrayList<ArrayList<String>> getTasksByPriority(int postLimit) {
 		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(-1).get(), postLimit);
 	}
 	
 	/**
-	 * @return List of 20 tasks (with replies) sorted by priority in descending order
+	 * @return List of 20 tasks (with replies and associated objects) sorted by priority in descending order
 	 */
 	public ArrayList<ArrayList<String>> getTasksByPriority() {
 		return getTasksByPriority(20);
 	}
 	
+	/**
+	 * @param status - Status of task
+	 * @return List of all the tasks with the given status, sorted from newest to oldest, with replies and associated objects
+	 */
 	public ArrayList<ArrayList<String>> getTasksWithStatus(String status) {
 		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit());
 	}
 	
+	/**
+	 * @param postLimit - Maximum number of git commits to fetch
+	 * @return List of git commits (with replies and associated objects) sorted from newest to oldest
+	 */
 	public ArrayList<ArrayList<String>> getGitCommits(int postLimit) {
 		return dbFetch(QueryBuilder.start("object.objectType").is("GIT").get(), reverseSort, postLimit);
 	}
 	
+	/**
+	 * @return List of (at most) 20 git commits (with replies and associated objects) sorted from newest to oldest
+	 */
 	public ArrayList<ArrayList<String>> getGitCommits() {
 		return getGitCommits(20);
 	}
