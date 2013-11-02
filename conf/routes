@@ -28,3 +28,5 @@ POST	/rest/git					controllers.Rest.parseGitHook()
 POST	/rest/jenkins				controllers.Rest.parseJenkinsNotfication()
 
 POST	/rest/update/task			controllers.Rest.updateStatusAndPriority()
+
+POST	/rest/delete/post			controllers.Rest.deletePost()

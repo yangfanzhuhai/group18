@@ -128,6 +128,12 @@ public class Rest extends Controller {
 			return status(422);
 		}
 	}
+	
+	public static Result deletePost() {
+		
+		MongoLink.MONGO_LINK.deletePost((DBObject) JSON.parse(getValueFromRequest("activity")));
+		return ok();
+	}
 
 	
 	private static ActivityModel createActivityModelFromJenkinsNotification(

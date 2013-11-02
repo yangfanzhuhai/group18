@@ -71,8 +71,8 @@ public class ActivityModel {
 		case TASK:
 			String name = ActivityModel.cleanJsonStringValue(object
 					.$bslash("name").toString());
-			Status status = Status.valueOf(ActivityModel.cleanJsonStringValue(object
-					.$bslash("status").toString()));
+			String status = ActivityModel.cleanJsonStringValue(object
+					.$bslash("status").toString());
 			int priority = Integer.parseInt(ActivityModel.cleanJsonStringValue(object
 					.$bslash("priority").toString()));
 			objectModel = new TaskObject(name, status, priority);
