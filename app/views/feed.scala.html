@@ -60,8 +60,8 @@
 
       </form>
 
-    	<div id = "task_referencer" align = "center">
-    		<select id="tasks" width = "80%">
+    	<div id = "task_referencer" width = "100px" position = "relative">
+    		<select id="tasks" display = "absolute" width = "100px">
     			<option value="default">-Reference a Task-</option>
     		</select>
     	</div>
@@ -97,33 +97,13 @@
       document.getElementById("newsfeed_nav").setAttribute("class","");
     }
 
-    function outputUpdate(value) {
-    	alert(value);
-		var val = document.querySelector('#task_status').value;
-
-		if (val == "0") {
-
-			document.querySelector('#task_status').value = value;
-			document.getElementById("status").innerHTML = "To Do";
-
-		} else if (val == "1") {
-
-			document.querySelector('#task_status').value = value;
-						document.getElementById("status").innerHTML = "Doing";
-
-		} else {
-			document.querySelector('#task_status').value = value;
-						document.getElementById("status").innerHTML = "Done";
-		}
-	}
-
 
     function postFormOnKeyDown (currentElement) {
       if (event.keyCode == 13) { 
         postToFeed(); 
         return false; 
       }
-      limitText(currentElement.form.limitedtextfield,currentElement.form.countdown,140);
+
     }
 
     function limitText(limitField, limitCount, limitNum) {
@@ -239,6 +219,7 @@
   		var task_name = task_array[i]['object']["name"];
   		var option = document.createElement("option");
   		option.text = task_name;
+  		option.style.width = "100px";
   		var task_referencer = document.getElementById("tasks").add(option, null);
   	}
 
@@ -374,8 +355,24 @@
   			}(post_id));
 
 
+
+
   			post_options.appendChild(priority_button);
   			post_options.appendChild(status_button);
+
+  			if (publisher == "@userName") {
+  				var assign_button = document.createElement("button");
+  				assign_button.innerHTML = "Assign members";
+  				post_options.appendChild(assign_button);
+
+  		 		assign_button.onclick = (function(post_id) {
+            		  return function() {
+            	 	    // delete_post(post_id);
+             	 }
+         		}(post_id));
+  			}
+
+
 
   			post.appendChild(task_details);
   			post.appendChild(date_and_time);
