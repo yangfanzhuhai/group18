@@ -370,11 +370,8 @@
   			status_button.onclick = (function (post_id) {
   				return function() {
 					var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
-  					if (new_priority <  4 && new_priority > 0) {
-						post_new_task_details(new_priority, "p", post_id);
-					} else {
-						alert("Value entered is not between 1 and 3");
-					}
+					post_new_task_details(new_status, "s", post_id);
+				
 				}
   			}(post_id));
 
