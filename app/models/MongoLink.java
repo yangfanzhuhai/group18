@@ -78,7 +78,7 @@ public class MongoLink {
 		
 	//	long totalTime = 0;
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
-		list = ml.getTasksByPriority();
+		list = ml.getNewsFeed();
 	//	for(int i = 0; i < 100; i++) {
 	//		long startTime = System.currentTimeMillis();
 	//		list = ml.getNewsFeed(20);
@@ -92,10 +92,13 @@ public class MongoLink {
 				System.out.println(o);
 			}
 		}
-System.out.println("UPDATE TASK PRIORITY");
-		ml.updatePriority("5273dd1064607276a2c6206f", 1);
 		
-		list = ml.getTasksByPriority();
+		System.out.println("DELETING A POST");
+		
+		ml.deletePost("52743c59c2e69027b2302da2");
+		
+		System.out.println("NEW NEWS FEED");
+		list = ml.getNewsFeed();
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
@@ -103,16 +106,6 @@ System.out.println("UPDATE TASK PRIORITY");
 		}
 		
 		System.out.println("GETTING TASKS WITH STATUS TO_DO");
-		
-		list = ml.getTasksWithStatus("TO_DO");
-		for(ArrayList<String> a : list) {
-			for(String o : a) {
-				System.out.println(o);
-			}
-		}
-		
-		System.out.println("UPDATE TASK STATUS");
-		ml.updateStatus("5273dd1064607276a2c6206f", "DONE");
 		
 		list = ml.getTasksWithStatus("TO_DO");
 		for(ArrayList<String> a : list) {
@@ -142,11 +135,11 @@ System.out.println("UPDATE TASK PRIORITY");
 //		}*/
 	}
 	
-	/** 	 * 
-	 * @param collection - Database collection on which to perform query
-	 * @param key - Criteria to use for search
+	/**
+	 * @param searchCriteria - Criteria to use for search
+	 * @param sortCriteria - Criteria by which to sort results
 	 * @param postLimit - Maximum number of items to fetch
-	 * @return List of Lists containing news feed posts, with their replies
+	 * @return List of Lists containing news feed posts, with their replies and references
 	 */
 	private ArrayList<ArrayList<String>> dbFetch(DBObject searchCriteria, DBObject sortCriteria, int postLimit) {
 		
@@ -304,6 +297,10 @@ System.out.println("UPDATE TASK PRIORITY");
 		return getGitCommits(20);
 	}
 	
+	public void deletePost(DBObject obj) {
+		deletePost(obj.get("id").toString());
+	}
+	
 	/** 
 	 * @param obj - News Feed object
 	 * @return ArrayList respresenting all the tasks that are referenced by the given object
@@ -390,6 +387,15 @@ System.out.println("UPDATE TASK PRIORITY");
 		}
 		
 		return retList;
+	}
+	
+	private void deletePost(String id) {
+		deleteReplies(id);
+		newsFeed.remove(new BasicDBObject("_id", new ObjectId(id)));
+	}
+
+	private void deleteReplies(String id) {
+		newsFeed.remove(QueryBuilder.start("target.messageID").is(id).get());
 	}
 	
 	/** Updates the status of the task with ID id
