@@ -306,6 +306,33 @@
   			post.appendChild(reply_message);
   			post.appendChild(reply_button);
 
+  		} else if (message_type == "JENKINS") {
+  			var jenkins = document.createElement("div");
+  			jenkins.innerHTML = publisher  + ":";
+  			
+  			var build_data = document.createElement("div");
+  			var build_name = stream_array[i][0]['object']["name"];
+  			var build_number = stream_array[i][0]['object']["number"];
+  			var build_status = stream_array[i][0]['object']["status"];
+  			var build_url = stream_array[i][0]['object']["url"];
+  			
+  			var build_link = document.createElement('a');
+  			build_link.href = build_url;
+  			build_link.innerHTML = "See build";
+  			
+  			if (build_status == "SUCCESS") {
+  				post.style.backgroundColor = "#6EFF60";	
+  			} else {
+  				post.style.backgroundColor = "#FF4137";	
+  			}
+  			
+  			build_data.innerHTML = build_name + " build " + build_number + " finished with status: " + build_status + ". ";
+			build_data.appendChild(build_link);
+  			
+  			post.appendChild(date_and_time);
+  			post.appendChild(build_data);
+  			post.appendChild(reply_message);
+  			post.appendChild(reply_button);
   		}	
 
   		 reply_button.onclick = (function(post_id, reply_message) {
