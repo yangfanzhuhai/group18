@@ -12,7 +12,7 @@ public abstract class ActorModel {
     return displayName;
   }
 
-  private void setDisplayName(String displayName) {
+  public void setDisplayName(String displayName) {
     this.displayName = displayName;
   }
 
