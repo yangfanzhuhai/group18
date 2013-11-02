@@ -1,378 +1,379 @@
 @(toggle: Integer, userName: String)
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap core CSS -->
+    <link href="@routes.Assets.at("stylesheets/bootstrap.min.css")" rel="stylesheet">
+      
+    <!-- Our own style -->
+    <link href ="@routes.Assets.at("stylesheets/theme.css")" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.ico")">
 
-<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/theme.css")">
-<link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.ico")">
-<html>
-<head>
-<script>
-	if (@toggle == 0) {
-		document.title = "News Feed";
-	} else {
-		document.title = "Task List"
-	}
-</script> 
+    <!-- jQuery -->
+    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+  </head>
 
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="@routes.Application.feed(0)">Progress</a>
+      </div>
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav" role="navigation">
+          <li id="newsfeed_nav" class = "active">
+            <a href="@routes.Application.feed(0)">News Feed</a>
+          </li>
+          <li id="tasklist_nav"><a href="@routes.Application.feed(1)">Task List</a></li>
+          <li><a href="@routes.Application.gits">Git Commits</a></li>
+          <li><a href="@routes.Application.about">About</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right" role="navigation">
+          <li><a href="@routes.Application.login">Log Out</a></li>
+        </ul>
+      </div> <!--/.nav-collapse -->
+    </div>
+    </div>
 
-<ul>
-<li><a href="@routes.Application.feed(0)">News Feed</a></li>
-<li><a href="@routes.Application.feed(1)">Task List</a></li>
-<li><a href="@routes.Application.gits">Git Commits</a></li>
-<li><a href="@routes.Application.about">About</a></li>
-<li><a href="@routes.Application.login">Log out</a></li>
-</ul>
+  <div class="container">
+    <a href="@routes.Application.feed(0)">
+      <img src="@routes.Assets.at("images/progress_all.jpg")" alt="some_text"
+    	width="200" >
+    </a>
 
+    <div id = "post_options" class = "post_options" align = "center">
+      <div id="username"> </div>	
+    		
+      <form name="myform" role="form">
+        <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
+        onKeyDown="postFormOnKeyDown(this)" maxlength="140"> </textarea>
+        <br>
+        <font size="1">(Maximum characters: 140)<br>
+        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
 
-<script src="http://code.jquery.com/jquery-latest.min.js"
-        type="text/javascript"></script>
+      </form>
 
+    	<div id = "task_referencer" align = "center">
+    		<select id="tasks">
+    			<option value="default">-Reference a Task-</option>
+    		</select>
 
-<script language="javascript" type="text/javascript">
+    	</div>
 
-function limitText(limitField, limitCount, limitNum) {
-	if (limitField.value.length > limitNum) {
-		limitField.value = limitField.value.substring(0, limitNum);
-	} else {
-		limitCount.value = limitNum - limitField.value.length;
-	}
-}
+    <select id="post_type" onchange="postTypeChange(this.value)">
+      <option value="text_post">Text Post</option>
+      <option value="task">Task</option>
+    </select>
+     		
+    	<button type="button" class="btn btn-success" onclick="postToFeed()">Post</button>
+    </div>
 
-</script>
+    <div id = "posts" class = "float">
+    	<p class="posts_title">Posts:</p>
+    </div>
 
-</head>
+    <div id = "stream" class = "stream">
 
-<body>
+    </div>
+  </div> <!-- /container -->  
 
-
-<img src="@routes.Assets.at("images/progress_all.jpg")" alt="some_text"
-	width="200" >
-
-<div id = "post_options" class = "post_options" align = "center">
-
-	<!--input name="name" type="text" maxlength="512"
-		placeholder="Your name" id="name"/-->
-	<div id="username"> </div>	
-		
-<form name="myform">
-<textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
-onKeyDown="if (event.keyCode == 13) { postToFeed(); return false; }; limitText(this.form.limitedtextfield,this.form.countdown,140);" 
-onKeyUp="limitText(this.form.limitedtextfield,this.form.countdown,140);" maxlength="140"> </textarea><br>
-<font size="1">(Maximum characters: 140)<br>
-You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
-</form>
-
-	<div id = "task_referencer" align = "center">
-		<select id="tasks">
-			<option value="default">-Reference a Task-</option>
-		</select>
-
-	</div>
-
-<select id="post_type" onchange="postTypeChange(this.value)">
-  <option value="text_post">Text Post</option>
-  <option value="task">Task</option>
-</select>
- 		
-	<button type="button" onclick="postToFeed()">Post to Feed</button>
-
-	
-</div>
-
-
-
-
-<div id = "posts" class = "float">
-	<p class="posts_title">Posts:</p>
-</div>
-
-<div id = "stream" class = "stream">
-
-</div>
-
-<script>
-
-var post_count = 0;
-var task_ids = [];
-
-
-function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
-
-    return "{\"published\" : \""
-              + date_and_time_stamp
-              + "\", "
-              + "\"actor\" : "
-              + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-              + "\"" 
-              + person_name
-              + "\"}, "
-              + "\"verb\" : \"said\", \"object\" : " 
-              + object
-              + ", \"target\" : { \"messageID\" : \"" 
-              + post_id
-	      	  + "\", \"taskIDs\" : ["
-	      	  + references
-              +  "]}} ";
-}
-
-
-function generateTaskObject(name, status, priority) {
-  return "{\"objectType\" : \"TASK\" , " 
-         + "\"name\" : \"" + name + "\" , "
-         + "\"status\" : \"" + status + "\" , "
-         + "\"priority\" : \"" + priority + "\"}";
-}
-
-function generateMessageObject(message) {
-  return "{\"objectType\" : \"MESSAGE\" , " 
-         + "\"message\" : \"" + message + "\"}";
-}
-
-function postTypeChange(option) {
-	if (option == "text_post") {
-
-		var task_referencer = document.getElementById("task_referencer");
-		task_referencer.style.visibility= 'visible';
-		var limitedtextfield = document.getElementById("limitedtextfield");
-		limitedtextfield.rows = 5
-		limitedtextfield.cols = 30;
-
-	} else {
-
-		var task_referencer = document.getElementById("task_referencer");
-		task_referencer.style.visibility= 'hidden';
-		var limitedtextfield = document.getElementById("limitedtextfield");
-		limitedtextfield.rows = 1;
-		limitedtextfield.cols = 30;
-	}
-
-}
-
-
-function refreshFeed() {
-    document.getElementById("stream").innerHTML = "";
-    if(@toggle==0) {
-    	$.ajax({
-    	
-        type: "GET",
-        url: "/rest/feed",
-        dataType: "json",
-        success: function(data){   
-
-            generateFeed(data);
-        }});
-
-    	$.ajax({
-    	
-        type: "GET",
-        url: "/rest/alltasks",
-        dataType: "json",
-        success: function(data){   
-
-            addTasks(data);
-        }});
-
+  <script>
+    if (@toggle == 0) {
+    	document.title = "News Feed";
+      document.getElementById("newsfeed_nav").setAttribute("class","active");
+      document.getElementById("tasklist_nav").setAttribute("class","");
     } else {
-    	$.ajax({
-    	
-        type: "GET",
-        url: "/rest/tasks",
-        dataType: "json",
-        success: function(data){   
-
-            generateFeed(data);
-        }
-    });
+    	document.title = "Task List"
+      document.getElementById("tasklist_nav").setAttribute("class","active");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
     }
-    
-}
 
-$(document).ready(refreshFeed);	
+    function postFormOnKeyDown (currentElement) {
+      if (event.keyCode == 13) { 
+        postToFeed(); 
+        return false; 
+      }
+      limitText(currentElement.form.limitedtextfield,currentElement.form.countdown,140);
+    }
 
-function addTasks(task_array) {
+    function limitText(limitField, limitCount, limitNum) {
+      if (limitField.value.length > limitNum) {
+        limitField.value = limitField.value.substring(0, limitNum);
+      } else {
+        limitCount.value = limitNum - limitField.value.length;
+      }
+    }
 
-	document.getElementById("tasks").options.length = 1;
+  var post_count = 0;
+  var task_ids = [];
 
-	for (var i=0; i < task_array.length; i++) {
+  function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
 
-		var task_id = task_array[i]['id'];
-		task_ids[i] = task_id;
+      return "{\"published\" : \""
+                + date_and_time_stamp
+                + "\", "
+                + "\"actor\" : "
+                + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+                + "\"" 
+                + person_name
+                + "\"}, "
+                + "\"verb\" : \"said\", \"object\" : " 
+                + object
+                + ", \"target\" : { \"messageID\" : \"" 
+                + post_id
+  	      	    + "\", \"taskIDs\" : ["
+  	      	    + references
+                +  "]}} ";
+  }
 
-		var task_name = task_array[i]['object']["name"];
-		var option = document.createElement("option");
-		option.text = task_name;
-		var task_referencer = document.getElementById("tasks").add(option, null);
-	}
+  function generateTaskObject(name, status, priority) {
+    return "{\"objectType\" : \"TASK\" , " 
+           + "\"name\" : \"" + name + "\" , "
+           + "\"status\" : \"" + status + "\" , "
+           + "\"priority\" : \"" + priority + "\"}";
+  }
 
-}
+  function generateMessageObject(message) {
+    return "{\"objectType\" : \"MESSAGE\" , " 
+           + "\"message\" : \"" + message + "\"}";
+  }
 
+  function postTypeChange(option) {
+  	if (option == "text_post") {
+  		var task_referencer = document.getElementById("task_referencer");
+  		task_referencer.style.visibility= 'visible';
+  		var limitedtextfield = document.getElementById("limitedtextfield");
+  		limitedtextfield.rows = 5
+  		limitedtextfield.cols = 30;
 
+  	} else {
+  		var task_referencer = document.getElementById("task_referencer");
+  		task_referencer.style.visibility= 'hidden';
+  		var limitedtextfield = document.getElementById("limitedtextfield");
+  		limitedtextfield.rows = 1;
+  		limitedtextfield.cols = 30;
+  	}
 
-function generateFeed(stream_array) {
-
-	document.getElementById("username").innerHTML="@userName";
-
-	for (var i=0; i < stream_array.length;i++) {
-
-
-		var message_type = stream_array[i][0]['object']["objectType"];
-
-		var post_no = 0;
-
-		var post_id = stream_array[i][0]['id'];
-
-		var published = stream_array[i][0]['published'];
-
-		var publisher = stream_array[i][0]['actor']["displayName"];
-		
-		var publisherType = stream_array[i][0]['actor']["objectType"];
-	
-		var verb = stream_array[i][0]['verb'];
-
-		var post = document.createElement("div");
-		post.id = post_id;
-		post.className = "post";
-
-	
-		if (post_count > 0) {
-
-			var stream = document.getElementById("stream");
-			stream.insertBefore(post, stream.childNodes[0]);
-		} else {
-			document.getElementById("stream").insertBefore(post);
-		}
-
-		var date_and_time = document.createElement("div");
-		date_and_time.innerHTML = published;
-		
-		var reply_message = document.createElement("input");
-		reply_message.placeholder = "Your message"
-		reply_message.type = "text";
-
-					
-		var reply_button = document.createElement("button");
-		reply_button.innerHTML = 'Reply';
-		reply_button.align = "right"; 	
-
-		if (message_type == "MESSAGE") {
-
-			var user = document.createElement("div");
-			user.innerHTML = publisher  + ":";
-		
-			var message_text = stream_array[i][0]['object']["message"];
-			var message = document.createElement("div");
-			message_text = message_text.replace("\n", "<br>");
-			message.innerHTML = message_text;
+  }
 
 
-			post.appendChild(date_and_time);
-			post.appendChild(user);
-			post.appendChild(message);
-			//post.appendChild(reply_name);
-			post.appendChild(reply_message);
-			post.appendChild(reply_button);
+  function refreshFeed() {
+      document.getElementById("stream").innerHTML = "";
+      if(@toggle==0) {
+      	$.ajax({
+      	
+          type: "GET",
+          url: "/rest/feed",
+          dataType: "json",
+          success: function(data){   
+
+              generateFeed(data);
+          }});
+
+      	$.ajax({
+      	
+          type: "GET",
+          url: "/rest/alltasks",
+          dataType: "json",
+          success: function(data){   
+
+              addTasks(data);
+          }});
+
+      } else if (@toggle==1){
+      	$.ajax({
+      	
+          type: "GET",
+          url: "/rest/tasks",
+          dataType: "json",
+          success: function(data){   
+
+              generateFeed(data);
+          }
+      });
+      }
+      
+  }
+
+  $(document).ready(refreshFeed);	
+
+  function addTasks(task_array) {
+
+  	document.getElementById("tasks").options.length = 1;
+
+  	for (var i=0; i < task_array.length; i++) {
+
+  		var task_id = task_array[i]['id'];
+  		task_ids[i] = task_id;
+
+  		var task_name = task_array[i]['object']["name"];
+  		var option = document.createElement("option");
+  		option.text = task_name;
+  		var task_referencer = document.getElementById("tasks").add(option, null);
+  	}
+
+  }
 
 
-		} else if (message_type == "TASK") {
 
-			var task_name = stream_array[i][0]['object']["name"];
-			var task_data = document.createElement("div");
-			var task_status = stream_array[i][0]['object']["status"];
-			var task_priority = stream_array[i][0]['object']["priority"];
-			post.style.backgroundColor = "#FF6699";
-			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
-			var task_details = document.createElement("div");
-			task_details.innerHTML = "Status: ".bold() + task_status + " Priority: ".bold() + task_priority;
+  function generateFeed(stream_array) {
+
+  	document.getElementById("username").innerHTML="@userName";
+
+  	for (var i=0; i < stream_array.length;i++) {
 
 
-			post.appendChild(date_and_time);
-			post.appendChild(task_data);
-			post.appendChild(task_details);
-			//post.appendChild(reply_name);
-			post.appendChild(reply_message);
-			post.appendChild(reply_button);
+  		var message_type = stream_array[i][0]['object']["objectType"];
 
-		}	
-		
+  		var post_no = 0;
 
+  		var post_id = stream_array[i][0]['id'];
 
-		 reply_button.onclick = (function(post_id, reply_message) {
-            return function() {
-                //alert("you just clicked button" + x);
-                replyToPost(post_id, reply_message);
-            }
-        }(post_id, reply_message));
+  		var published = stream_array[i][0]['published'];
 
+  		var publisher = stream_array[i][0]['actor']["displayName"];
+  		
+  		var publisherType = stream_array[i][0]['actor']["objectType"];
+  	
+  		var verb = stream_array[i][0]['verb'];
 
-		 reply_message.onkeypress = (function(post_id, reply_message) { 
+  		var post = document.createElement("div");
+  		post.id = post_id;
+  		post.className = "post";
 
-		 	return function() {
+  	
+  		if (post_count > 0) {
 
-		 			if (event.keyCode == 13) {
-		 				replyToPost(post_id, reply_message);
-		 			}
-		 	}
-		 }(post_id, reply_message));
+  			var stream = document.getElementById("stream");
+  			stream.insertBefore(post, stream.childNodes[0]);
+  		} else {
+  			document.getElementById("stream").insertBefore(post);
+  		}
 
-		var j = 1;
-		while (j < stream_array[i].length) {
+  		var date_and_time = document.createElement("div");
+  		date_and_time.innerHTML = published;
+  		
+  		var reply_message = document.createElement("input");
+  		reply_message.placeholder = "Your message"
+  		reply_message.type = "text";
 
-			if (stream_array[i][j]['object']["objectType"] == "TASK") {
+  					
+  		var reply_button = document.createElement("button");
+  		reply_button.innerHTML = 'Reply';
+  		reply_button.align = "right"; 	
 
+  		if (message_type == "MESSAGE") {
 
-				var task_reference_div = document.createElement("div");
-				task_reference_div.innerHTML = "Referencing: " + stream_array[i][j]['object']["name"];
-				//task_reference_div.style.backgroundColor = "#FF6699";
-				task_reference_div.className = "post";
-				task_reference_div.style["cssFloat"] = "right";
-				task_reference_div.style["background"] = "#FF6699";
-
-
-				post.insertBefore(task_reference_div, post.firstChild);
-
-				j++;
-
-
-			} else {
-
-
-				var reply_div = document.createElement("div");
-				reply_div.className = "reply_post";
-
-				reply_div.setAttribute("class", "reply_post");
-    			reply_div.style.padding = "10px";
-				post.appendChild(reply_div);
-
-				var reply_published = document.createElement("div");
-				reply_published.innerHTML = stream_array[i][j]['published'];
-				reply_div.appendChild(reply_published);
-
-				var reply_publisher = document.createElement("div");
-				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
-				reply_div.appendChild(reply_publisher);
-
-				var reply_message_text = document.createElement("div");
-				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
-				reply_div.appendChild(reply_message_text);
-			
-				var reply_publisherType = stream_array[i][j]['actor']["objectType"];
-	
-				var reply_verb = stream_array[i][j]['verb'];
-		
-				var reply_message_type = stream_array[i][j]['object']["objectType"];
-
-			j++;
-
-		}
-		}
+  			var user = document.createElement("div");
+  			user.innerHTML = publisher  + ":";
+  		
+  			var message_text = stream_array[i][0]['object']["message"];
+  			var message = document.createElement("div");
+  			message_text = message_text.replace("\n", "<br>");
+  			message.innerHTML = message_text;
 
 
-		post_no = post_no + 1;
-	}
+  			post.appendChild(date_and_time);
+  			post.appendChild(user);
+  			post.appendChild(message);
+  			post.appendChild(reply_message);
+  			post.appendChild(reply_button);
 
-	
-}
+
+  		} else if (message_type == "TASK") {
+
+  			var task_name = stream_array[i][0]['object']["name"];
+  			var task_data = document.createElement("div");
+  			var task_status = stream_array[i][0]['object']["status"];
+  			var task_priority = stream_array[i][0]['object']["priority"];
+  			post.style.backgroundColor = "#FF8598";
+        //post.setAttribute("class", "taskPost");
+  			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
+  			var task_details = document.createElement("div");
+  			task_details.innerHTML = "Status: ".bold() + task_status + " Priority: ".bold() + task_priority;
 
 
-function getTimeStamp() {
+  			post.appendChild(date_and_time);
+  			post.appendChild(task_data);
+  			post.appendChild(task_details);
+  			post.appendChild(reply_message);
+  			post.appendChild(reply_button);
+
+  		}	
+
+  		 reply_button.onclick = (function(post_id, reply_message) {
+              return function() {
+                  replyToPost(post_id, reply_message);
+              }
+          }(post_id, reply_message));
+
+  		 reply_message.onkeypress = (function(post_id, reply_message) { 
+  		 	return function() {
+  		 			if (event.keyCode == 13) {
+  		 				replyToPost(post_id, reply_message);
+  		 			}
+  		 	}
+  		 }(post_id, reply_message));
+
+  		var j = 1;
+  		while (j < stream_array[i].length) {
+
+  			if (stream_array[i][j]['object']["objectType"] == "TASK") {
+  				var task_reference_div = document.createElement("div");
+  				task_reference_div.innerHTML = "Referencing: " + stream_array[i][j]['object']["name"];
+  				//task_reference_div.style.backgroundColor = "#FF6699";
+  				task_reference_div.className = "post";
+  				task_reference_div.style["cssFloat"] = "right";
+  				task_reference_div.style["background"] = "#FF8598";
+
+  				post.insertBefore(task_reference_div, post.firstChild);
+  				j++;
+  			} else {
+  				var reply_div = document.createElement("div");
+  				reply_div.className = "reply_post";
+
+  				reply_div.setAttribute("class", "reply_post");
+      		reply_div.style.padding = "10px";
+  				post.appendChild(reply_div);
+
+  				var reply_published = document.createElement("div");
+  				reply_published.innerHTML = stream_array[i][j]['published'];
+  				reply_div.appendChild(reply_published);
+
+  				var reply_publisher = document.createElement("div");
+  				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
+  				reply_div.appendChild(reply_publisher);
+
+  				var reply_message_text = document.createElement("div");
+  				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
+  				reply_div.appendChild(reply_message_text);
+  			
+  				var reply_publisherType = stream_array[i][j]['actor']["objectType"];
+  	
+  				var reply_verb = stream_array[i][j]['verb'];
+  		
+  				var reply_message_type = stream_array[i][j]['object']["objectType"];
+
+  			j++;
+
+  		}
+  		}
+
+
+  		post_no = post_no + 1;
+  	}
+
+  	
+  }
+
+  function getTimeStamp() {
     var currentdate = new Date();
     return ("" + currentdate.getDate() + "/"
                     + (currentdate.getMonth()+1)  + "/" 
@@ -380,170 +381,168 @@ function getTimeStamp() {
                     +  getLeadingZeros(currentdate.getHours()) + ":"  
                     + getLeadingZeros(currentdate.getMinutes()) + ":" 
                     + getLeadingZeros(currentdate.getSeconds())); 
-}
+  }
 
-function getLeadingZeros(number) {
+  function getLeadingZeros(number) {
+  	var numberString = number + "";
+  	if (numberString.length < 2) {
+  		return "0" + numberString;
+  	} else {
+  		return number;
+  	}
+  }
 
-	var numberString = number + "";
-	if (numberString.length < 2) {
-		return "0" + numberString;
-	} else {
-		return number;
-	}
-}
+  function replyToPost(post_id, reply_message) {
+
+  	alert("replying to post " + post_id + " with " + reply_message.value);
+
+  	var post = document.getElementById(post_id);
+  	var reply_name_text = "@userName";
+  	var reply_message_text = reply_message.value;
+
+  	if (reply_message_text == "") {
+  		alert("Reply cannot be empty.");
+  	} else {
+
+  		var date_and_time_stamp = getTimeStamp();
+  		var references = [];
+
+  /*	var reply = generateJSON(date_and_time_stamp, reply_name_text, "MESSAGE",
+  							 reply_message_text, post_id, references); */
+
+      var reply = "{\"published\" : \""
+                + date_and_time_stamp
+                + "\", "
+                + "\"actor\" : "
+                + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+                + "\"" 
+                + reply_name_text
+                + "\"}, "
+                + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+                + " : \"MESSAGE\", \"message\" : " 
+                + "\"" 
+                + reply_message_text
+                + "\"}, \"target\" : { \"messageID\" : \"" 
+                + post_id
+  	      + "\", \"taskIDs\" : ["
+  	      + references
+                +  "]}} "; 
+
+      $.ajax({
+      	type: "POST",
+      	url: "/rest/message",
+      	dataType: "json",
+      	data: {"activity":reply},
+      	complete: refreshFeed 
+      });
+
+  	}
+
+  }
 
 
+  function postToFeed() {
 
-function replyToPost(post_id, reply_message) {
+      var currentdate = new Date();
+      
+      var name_text = "@userName";
+      /*document.getElementById("name").value;*/
+      var message_text = document.getElementById("limitedtextfield").value;
+      
+      message_text = message_text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+      
+      var dropdown = document.getElementById("post_type");
+      var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
+      
+      var date_and_time_stamp = getTimeStamp();
+      
+      if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
-	alert("replying to post " + post_id + " with " + reply_message.value);
+      	var taskReferencer = document.getElementById("tasks");
+  	    var references = [];
+
+      	if (taskReferencer.selectedIndex == 0) {
+
+      	} else {
 
 
-	var post = document.getElementById(post_id);
-	var reply_name_text = "@userName";
-	var reply_message_text = reply_message.value;
+      		var referencedTask = task_ids[taskReferencer.selectedIndex-1];
+      		references =  ["\"" + referencedTask + "\""];
 
-	if (reply_message_text == "") {
+      	}
 
-		alert("Reply cannot be empty.");
+      var message_object = generateMessageObject(message_text)    
 
-	} else {
-
-		var date_and_time_stamp = getTimeStamp();
-		var references = [];
-
-/*	var reply = generateJSON(date_and_time_stamp, reply_name_text, "MESSAGE",
-							 reply_message_text, post_id, references); */
-
-    var reply = "{\"published\" : \""
+      var post = generateJSON(date_and_time_stamp, name_text, message_object,
+      						"", references);
+      /*  var post = "{\"published\" : \""
               + date_and_time_stamp
               + "\", "
               + "\"actor\" : "
               + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-              + "\"" 
-              + reply_name_text
-              + "\"}, "
+              + "\"" + name_text + "\"}, "
               + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-              + " : \"MESSAGE\", \"message\" : " 
-              + "\"" 
-              + reply_message_text
-              + "\"}, \"target\" : { \"messageID\" : \"" 
-              + post_id
-	      + "\", \"taskIDs\" : ["
-	      + references
-              +  "]}} "; 
+              + " : \"MESSAGE\" , \"message\" : " 
+              + "\"" + message_text
+  	    + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
+  	    + references
+              +  "]}} "; */
 
-    $.ajax({
-    	type: "POST",
-    	url: "/rest/message",
-    	dataType: "json",
-    	data: {"activity":reply},
-    	complete: refreshFeed 
-    });
-
-	}
-
-}
+        $.ajax({
+            type: "POST",
+            url: "/rest/message",
+            dataType: "json",
+            data: {"activity":post},
+  	        complete: refreshFeed                
+        });
+                    
+        //document.getElementById("name").value = "";
+        document.getElementById("limitedtextfield").value = ""; 
 
 
-function postToFeed() {
+          
+      } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
+          
 
-    var currentdate = new Date();
-    
-    var name_text = "@userName";
-    /*document.getElementById("name").value;*/
-    var message_text = document.getElementById("limitedtextfield").value;
-    
-    message_text = message_text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
-    
-    var dropdown = document.getElementById("post_type");
-    var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
-    
-    var date_and_time_stamp = getTimeStamp();
-    
-    if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
+          var references = [];
 
-    	var taskReferencer = document.getElementById("tasks");
-	var references = [];
+          var task_object = generateTaskObject(message_text, "TO_DO", "1")
+          var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
 
-    	if (taskReferencer.selectedIndex == 0) {
-
-    	} else {
+           /*   var json_post = "{\"published\" : \""
+                    + date_and_time_stamp
+                    + "\", "
+                    + "\"actor\" : "
+                    + "{\"objectType\" : \"PERSON\", \"displayName\" : "
+                    + "\"" + name_text + "\"}, "
+                    + "\"verb\" : \"said\", \"object\" : {\"objectType\""
+                    + " : \"TASK\" , \"name\" : " 
+                    + "\"" + message_text
+  		  + "\" , \"status\" : \"TO_DO\" , \"priority\" : \"1\" }, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
+  	 	  + ref
+           	  +  "]}} "; */
 
 
-    		var referencedTask = task_ids[taskReferencer.selectedIndex-1];
-    		references =  ["\"" + referencedTask + "\""];
+               $.ajax({
+                  type: "POST",
+                  url: "/rest/message",
+                  dataType: "json",
+                  data: {"activity":post},
+                  complete: refreshFeed
+              });      
+                          
+              document.getElementById("limitedtextfield").value = "";
 
-    	}
+          
+      } 
+      
+  }
 
-    var message_object = generateMessageObject(message_text)    
-
-    var post = generateJSON(date_and_time_stamp, name_text, message_object,
-    						"", references);
-    /*  var post = "{\"published\" : \""
-            + date_and_time_stamp
-            + "\", "
-            + "\"actor\" : "
-            + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-            + "\"" + name_text + "\"}, "
-            + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-            + " : \"MESSAGE\" , \"message\" : " 
-            + "\"" + message_text
-	    + "\"}, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
-	    + references
-            +  "]}} "; */
-
-      $.ajax({
-          type: "POST",
-          url: "/rest/message",
-          dataType: "json",
-          data: {"activity":post},
-	        complete: refreshFeed                
-      });
-                  
-      //document.getElementById("name").value = "";
-      document.getElementById("limitedtextfield").value = ""; 
-
-
-        
-    } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
-        
-
-        var references = [];
-
-        var task_object = generateTaskObject(message_text, "TO_DO", "1")
-        var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
-
-         /*   var json_post = "{\"published\" : \""
-                  + date_and_time_stamp
-                  + "\", "
-                  + "\"actor\" : "
-                  + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-                  + "\"" + name_text + "\"}, "
-                  + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-                  + " : \"TASK\" , \"name\" : " 
-                  + "\"" + message_text
-		  + "\" , \"status\" : \"TO_DO\" , \"priority\" : \"1\" }, \"target\" : { \"messageID\" : \"\", \"taskIDs\" : ["
-	 	  + ref
-         	  +  "]}} "; */
-
-
-             $.ajax({
-                type: "POST",
-                url: "/rest/message",
-                dataType: "json",
-                data: {"activity":post},
-                complete: refreshFeed
-            });      
-                        
-            document.getElementById("limitedtextfield").value = "";
-
-        
-    } 
-    
-}
-
-</script>
-</body>
+  </script>
+      <!-- Bootstrap core JavaScript
+      ================================================== -->
+      <!-- Placed at the end of the document so the pages load faster -->
+      <script src="@routes.Assets.at("javascripts/bootstrap.min.js")"></script>
+  </body>
 </html>
 

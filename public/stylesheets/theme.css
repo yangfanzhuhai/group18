@@ -1,12 +1,15 @@
 body {
 	background-color:#FFFFFF;
+	padding-top: 50px;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue";
+  font-weight: 300;
 }
 
-.post {
-    background: #FFFFFF;
-    margin: 10px;
-    border:2px solid;
-    border-color:#AF3838;
+.post {  
+  background: #FFFFFF;
+  margin: 10px;
+  border:2px solid;
+  border-color:#AF3838;
 	border-radius:5px;
 
 	padding: 10px;
@@ -14,10 +17,10 @@ body {
 }
 
 .task {
-    background: #FF6699;
-    margin: 10px;
-    border:2px solid;
-    border-color:#AF3838;
+  background: #FE4365; 
+  margin: 10px;
+  border:2px solid;
+  border-color:#AF3838;
 	border-radius:5px;
 
 	padding: 10px;
@@ -25,10 +28,10 @@ body {
 }
 
 .taskRef {
-    background: #FF6699;
-    margin: 10px;
-    border:2px solid;
-    border-color:#AF3838;
+  background: #FE4365;
+  margin: 10px;
+  border:2px solid;
+  border-color:#AF3838;
 	border-radius:5px;
 
 	padding: 10px;
@@ -37,11 +40,11 @@ body {
 
 
 .post_options {
-	background: #C0C0C0;
+	background: #eee;
 	width: 40%;
-    margin: 20px;
-    border:2px solid;
-    border-color:#AF3838;
+  margin: 20px;
+  border:2px solid;
+  border-color:#AF3838;
 	border-radius:5px;
 	margin-left: auto;
 	margin-right: auto;
@@ -51,24 +54,23 @@ body {
 }
 
 .stream {
-	background: #C0C0C0;
-    margin: 2px;
-    width: 50%;
-    margin-left: auto;
+	background: #eee;
+  margin: 2px;
+  width: 50%;
+  margin-left: auto;
 	margin-right: auto;
-    border:2px solid;
-    border-color:#AF3838;
+  border:2px solid;
+  border-color:#AF3838;
 	border-radius:5px;
 
 	padding: 1px;
 	
 }
 
-ul
-{
-list-style-type:none;
-margin:0;
-float: right;
+ul {
+	list-style-type:none;
+	margin:0;
+	float: right;
 }
 
 li {
@@ -81,11 +83,10 @@ li {
 }
 
 .login_box {
-background-color: #eee;
-
-    margin: 2px;
-    border:2px solid;
-    border-color:#AF3838;
+	background-color: #eee;
+  margin: 2px;
+  border:2px solid;
+  border-color:#AF3838;
 	border-radius:5px;
 	text-align: center;
 	margin-left: 250px;
@@ -101,16 +102,15 @@ background-color: #eee;
 }
 
 .register {
-	
 	text-align: right;
 }
 
 .reply_post {
-	background: #C0C0C0;
+	background: #eee;
 	width: 75%;
-    margin: 20px;
-    border:2px solid;
-    border-color:#AF3838;
+  margin: 20px;
+  border:2px solid
+  border-color:#AF3838;
 	border-radius:5px;
 	margin-left: auto;
 	margin-right: auto;
@@ -120,12 +120,5 @@ background-color: #eee;
 
 }
 
-
-
-
 h1 {text-align:right}
 
-body {
-   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue";
-   font-weight: 300;
-}
