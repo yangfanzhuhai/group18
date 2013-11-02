@@ -3,10 +3,10 @@ package models;
 public class TaskObject extends ObjectModel {
 
 	private String name;
-	private Status status;
+	private String status;
 	private int priority;
 	
-	public TaskObject(String name, Status status, int priority) {
+	public TaskObject(String name, String status, int priority) {
 		this.setName(name);
 		this.setStatus(status);
 		this.setPriority(priority);
@@ -20,11 +20,11 @@ public class TaskObject extends ObjectModel {
 		this.name = name;
 	}
 	
-	public Status getStatus() {
+	public String getStatus() {
 		return status;
 	}
 
-	public void setStatus(Status status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 
