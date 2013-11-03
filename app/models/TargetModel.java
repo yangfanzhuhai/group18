@@ -2,16 +2,18 @@ package models;
 
 import java.util.List;
 
+import models.utils.ListPrinter;
+
 public class TargetModel {
 
 	private String messageID;
 	private List<String> taskIDs;
-	
-	public TargetModel(String messageID, List<String> taskIDs){
+
+	public TargetModel(String messageID, List<String> taskIDs) {
 		this.messageID = messageID;
 		this.taskIDs = taskIDs;
 	}
-	
+
 	public List<String> getTaskIDs() {
 		return taskIDs;
 	}
@@ -30,21 +32,7 @@ public class TargetModel {
 
 	public String toJSON() {
 		return "{\"messageID\" : \"" + getMessageID() + "\", \"taskIDs\" : "
-		        + printTaskIDs() + "}";
-	}
-	
-	private String printTaskIDs() {
-		String s = "[";
-		
-		if (!taskIDs.isEmpty()) {
-			int i;
-			for (i = 0; i < taskIDs.size() - 1; i++) {
-				s += "\"" + taskIDs.get(i) + "\",";
-			}
-			s += "\"" + taskIDs.get(i) + "\"";
-		}
-		
-		return s += "]";
+				+ ListPrinter.print(getTaskIDs()) + "}";
 	}
 
 }

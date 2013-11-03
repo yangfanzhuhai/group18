@@ -6,6 +6,8 @@ import play.api.libs.json.JsValue;
 import play.api.libs.json.Json;
 
 import com.google.gson.Gson;
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 
 public class ActivityModel {
 
@@ -32,7 +34,7 @@ public class ActivityModel {
 
 	public ActivityModel(String jsonString) throws ParseException {
 		JsValue obj = Json.parse(jsonString);
-
+		Gson gson = new Gson();
 		// Date published = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
 		// Locale.ENGLISH).parse(ActivityModel.cleanJsonStringValue(
 		// obj.$bslash("published").toString()));
@@ -69,17 +71,22 @@ public class ActivityModel {
 		case TASK:
 			String name = ActivityModel.cleanJsonStringValue(object
 					.$bslash("name").toString());
-			Status status = Status.valueOf(ActivityModel.cleanJsonStringValue(object
-					.$bslash("status").toString()));
+			String status = ActivityModel.cleanJsonStringValue(object
+					.$bslash("status").toString());
 			int priority = Integer.parseInt(ActivityModel.cleanJsonStringValue(object
 					.$bslash("priority").toString()));
 			objectModel = new TaskObject(name, status, priority);
 			break;
-
+		case GIT:
+			objectModel = gson.fromJson(object.toString(), GitObject.class);
+			break;
+		case JENKINS:
+			objectModel = gson.fromJson(object.toString(), JenkinsObject.class);
+			break;
 		}
 
 		String target = obj.$bslash("target").toString();
-		Gson gson = new Gson();
+
 		TargetModel targetModel = gson.fromJson(target, TargetModel.class);
 		// JsValue target = obj.$bslash("target");
 
@@ -149,6 +156,11 @@ public class ActivityModel {
 				+ "\", \"actor\" : " + getActor().toJSON() + ", \"verb\" : \""
 				+ getVerb() + "\", \"object\" : " + getObject().toJSON()
 				+ ", \"target\" : " + getTarget().toJSON() + " }";
+	}
+	
+	public void save(){
+		MongoLink.MONGO_LINK.insertNews((DBObject) JSON.parse(this
+				.toJSON()));
 	}
 	
 

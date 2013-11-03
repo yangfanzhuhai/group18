@@ -4,8 +4,8 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBList;
@@ -15,6 +15,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
 
 public class MongoLink {
@@ -31,6 +32,8 @@ public class MongoLink {
 	private static DBCollection newsFeed;
 	private static DBCollection users;
 	private static DBCollection gitRepos;
+	
+	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 	
 	/**Class linking from Java to the MongoDB**/
 	public MongoLink(boolean devMode) throws UnknownHostException {
@@ -76,9 +79,10 @@ public class MongoLink {
 		
 	//	long totalTime = 0;
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
+		list = ml.getNewsFeed();
 	//	for(int i = 0; i < 100; i++) {
 	//		long startTime = System.currentTimeMillis();
-			list = ml.getNewsFeed(20);
+	//		list = ml.getNewsFeed(20);
 	//		totalTime += System.currentTimeMillis() - startTime;
 	//	}
 		
@@ -89,15 +93,26 @@ public class MongoLink {
 				System.out.println(o);
 			}
 		}
-//		System.out.println("Get news feed took " + avgTime + " seconds on average.");
-		try {
-			System.out.println("REFERENCES");
-			for(String a : ml.getReferencedBy("52715499b7608d8e9d710f40")) {
-					System.out.println(a);
+		
+		System.out.println("DELETING A POST");
+		
+		ml.deletePost("52743c59c2e69027b2302da2");
+		
+		System.out.println("NEW NEWS FEED");
+		list = ml.getNewsFeed();
+		for(ArrayList<String> a : list) {
+			for(String o : a) {
+				System.out.println(o);
 			}
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		}
+		
+		System.out.println("GETTING TASKS WITH STATUS TO_DO");
+		
+		list = ml.getTasksWithStatus("TO_DO");
+		for(ArrayList<String> a : list) {
+			for(String o : a) {
+				System.out.println(o);
+			}
 		}
 		
 		if(ml.checkLogin(new BasicDBObject("username", "Piotr").append("password","pass")))
@@ -121,15 +136,15 @@ public class MongoLink {
 //		}*/
 	}
 	
-	/** 	 * 
-	 * @param collection - Database collection on which to perform query
-	 * @param key - Criteria to use for search
+	/**
+	 * @param searchCriteria - Criteria to use for search
+	 * @param sortCriteria - Criteria by which to sort results
 	 * @param postLimit - Maximum number of items to fetch
-	 * @return List of Lists containing news feed posts, with their replies
+	 * @return List of Lists containing news feed posts, with their replies and references
 	 */
-	private ArrayList<ArrayList<String>> dbFetch(DBCollection collection, DBObject key, int postLimit) {
+	private ArrayList<ArrayList<String>> dbFetch(DBObject searchCriteria, DBObject sortCriteria, int postLimit) {
 		
-		ArrayList<DBObject> posts = (ArrayList<DBObject>) collection.find(key).sort(new BasicDBObject("_id", -1)).limit(postLimit).toArray();
+		ArrayList<DBObject> posts = (ArrayList<DBObject>) newsFeed.find(searchCriteria).sort(sortCriteria).limit(postLimit).toArray();
 		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
 		
 		try {
@@ -156,33 +171,11 @@ public class MongoLink {
 	}
 	
 	
-	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
-	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
-		return dbFetch(newsFeed, QueryBuilder.start("target.messageID").is("").get(), postLimit);
-		
-	}
-	
-	/**Default method to return last 20 items from newsFeed collection**/
-	public ArrayList<ArrayList<String>> getNewsFeed(){
-		return getNewsFeed(20);
-	}
-	
-	/**Returns a list of postLimit tasks**/
-	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
-		return dbFetch(newsFeed, QueryBuilder.start("object.objectType").is("TASK").get(), postLimit);
-		
-	}
-	
-	/**Default method to return last 20 tasks**/
-	public ArrayList<ArrayList<String>> getTasks(){
-		return getTasks(20);
-	}
-	
 	/**Inserts obj into newsFeed collection**/
 	public String insertNews(DBObject obj) {
 		
 		newsFeed.insert(obj);
-		return newsFeed.find(obj).toArray().get(0).get("_id").toString();
+		return newsFeed.findOne(obj).get("_id").toString();
 	}
 	
 	/**
@@ -196,7 +189,7 @@ public class MongoLink {
 		
 		int oldCount = (int) users.getCount();
 		
-		if(users.find(QueryBuilder.start("username").is(obj.get("username")).get()).hasNext())
+		if(users.findOne(QueryBuilder.start("username").is(obj.get("username")).get()) != null)
 			return false;
 		
 		users.insert(obj);
@@ -214,28 +207,117 @@ public class MongoLink {
 		return checkLogin( obj.get("username").toString() ,obj.get("password").toString());
 	}
 	
+	/** Checks the validity of the given username and password
+	 * 
+	 * @param username - Username entered by user
+	 * @param password - Password entered by user
+	 * @return True if there is an entry in the database with that exact username and password, False otherwise
+	 */
 	public boolean checkLogin(String username, String password) {
-		return users.find(QueryBuilder.start("username").is(username).and("password").is(password).get()).hasNext();
+		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
 	}
 	
+	public void updateStatusOrPriority(DBObject obj) throws MongoException {
+		if(obj.containsField("status"))
+		{
+			updateStatus(obj.get("id").toString(), obj.get("status").toString());
+		}
+		else if(obj.containsField("priority"))
+		{
+			updatePriority(obj.get("id").toString(), (Integer) obj.get("priority"));
+		}
+		else
+			throw new MongoException("Neither field status or priority exist. Update failed");
+	}
+	
+	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
+	public ArrayList<ArrayList<String>> getNewsFeed(int postLimit) {
+		return dbFetch(QueryBuilder.start("target.messageID").is("").get(), reverseSort, postLimit);
+		
+	}
+
+	/**Default method to return last 20 items from newsFeed collection**/
+	public ArrayList<ArrayList<String>> getNewsFeed(){
+		return getNewsFeed(20);
+	}
+
+	/**Returns a list of postLimit tasks**/
+	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
+		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
+		
+	}
+
+	/**Default method to return last 20 tasks**/
+	public ArrayList<ArrayList<String>> getTasks(){
+		return getTasks(20);
+	}
+
 	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
-		ArrayList<String> tasks = getItemsWithReferences(QueryBuilder.start("object.objectType").is("TASK").get());
+		ArrayList<String> tasks = getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get());
 		Collections.reverse(tasks);
 		return tasks;
 	}
-
-	/**Shortcut to JSON format for testing inserts**/
-	private BasicDBObject dbFormat(String published, String actorType, String dispName, String verb, String objType, String msg, String tar) {
-		BasicDBObject news = new BasicDBObject("published", published);
-		news.append("actor", new BasicDBObject("objectType", actorType).append("displayName", dispName));
-		news.append("verb", verb);
-		news.append("object", new BasicDBObject("objectType", objType).append("message", msg ));
-		news.append("target", tar);
-		return news;
+	
+	/**
+	 * @param postLimit - Number of tasks to fetch from the database
+	 * @return List of tasks (with replies and associated objects) sorted by priority in descending order
+	 */
+	public ArrayList<ArrayList<String>> getTasksByPriority(int postLimit) {
+		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(-1).get(), postLimit);
 	}
 	
+	/**
+	 * @return List of 20 tasks (with replies and associated objects) sorted by priority in descending order
+	 */
+	public ArrayList<ArrayList<String>> getTasksByPriority() {
+		return getTasksByPriority(20);
+	}
+	
+	/**
+	 * @param status - Status of task
+	 * @return List of all the tasks with the given status, sorted from newest to oldest, with replies and associated objects
+	 */
+	public ArrayList<ArrayList<String>> getTasksWithStatus(String status) {
+		return dbFetch(QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit());
+	}
+	
+	/**
+	 * @param postLimit - Maximum number of git commits to fetch
+	 * @return List of git commits (with replies and associated objects) sorted from newest to oldest
+	 */
+	public ArrayList<ArrayList<String>> getGitCommits(int postLimit) {
+		return dbFetch(QueryBuilder.start("object.objectType").is("GIT").get(), reverseSort, postLimit);
+	}
+	
+	/**
+	 * @return List of (at most) 20 git commits (with replies and associated objects) sorted from newest to oldest
+	 */
+	public ArrayList<ArrayList<String>> getGitCommits() {
+		return getGitCommits(20);
+	}
+	
+	public ArrayList<String> getUsers() {
+		List<DBObject> allusers = users.find().toArray();
+		ArrayList<String> retList = new ArrayList<String>();
+		
+		for(DBObject obj : allusers)
+		{
+			retList.add(obj.get("username").toString());
+		}
+		return retList;
+	}
+	
+	public void deletePost(DBObject obj) {
+		deletePost(obj.get("id").toString());
+	}
+	
+	/** 
+	 * @param obj - News Feed object
+	 * @return ArrayList respresenting all the tasks that are referenced by the given object
+	 * @throws ParseException
+	 */
 	private ArrayList<String> getReferences(DBObject obj) throws ParseException {
 		
 		BasicDBList taskIDs = (BasicDBList) ((DBObject)obj.get("target")).get("taskIDs");
@@ -253,7 +335,7 @@ public class MongoLink {
 	
 	/**
 	 * @param id - ID string of the task
-	 * @return ArrayList of all the news feed items that reference the task
+	 * @return ArrayList of all the news feed items that reference the given task
 	 * @throws ParseException
 	 */
 	private ArrayList<String> getReferencedBy(String id) throws ParseException {
@@ -296,6 +378,12 @@ public class MongoLink {
 		return retList;
 	}
 	
+	/** Generic method to find list of objects that satisfy the given query
+	 * 
+	 * @param query - DBObject containing the information about the query
+	 * @return ArrayList of objects
+	 * @throws ParseException
+	 */
 	private ArrayList<String> getItemsWithoutReferences(DBObject query) throws ParseException {
 		
 		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).toArray();
@@ -311,5 +399,45 @@ public class MongoLink {
 		}
 		
 		return retList;
+	}
+	
+	private void deletePost(String id) {
+		deleteReplies(id);
+		newsFeed.remove(new BasicDBObject("_id", new ObjectId(id)));
+	}
+
+	private void deleteReplies(String id) {
+		newsFeed.remove(QueryBuilder.start("target.messageID").is(id).get());
+	}
+	
+	/** Updates the status of the task with ID id
+	 * 
+	 * @param id - ID of task to be updated
+	 * @param status - New status value to be set
+	 */
+	private void updateStatus(String id, String status) {
+		updateObject(id, new BasicDBObject("$set", new BasicDBObject("object.status", status)));
+	}
+
+	/** Updates the priority of the task with ID id
+	 * 
+	 * @param id - ID of task to be updated
+	 * @param priority - New priority value to be set
+	 */
+	private void updatePriority(String id, int priority) {
+		updateObject(id, new BasicDBObject("$set", new BasicDBObject("object.priority", priority)));
+	}
+
+	/** Generic method which updates object with ID 'id' using the parameters in 'updateWith'
+	 * 
+	 * @param id - ID of object to be updated
+	 * @param updateWith - Information on what the update should change
+	 */
+	private void updateObject(String id, DBObject updateWith) {
+		newsFeed.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), updateWith);
+	}
+
+	private int noLimit() {
+		return (int) newsFeed.getCount();
 	}
 }
