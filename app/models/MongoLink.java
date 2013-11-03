@@ -298,6 +298,22 @@ public class MongoLink {
 		return getGitCommits(20);
 	}
 	
+	/**
+	 * 
+	 * @param postLimit - Maximum number of builds to fetch
+	 * @return List of Jenkins builds (with replies and associated objects) sorted from newest to oldest
+	 */
+	public ArrayList<ArrayList<String>> getJenkinsBuilds(int postLimit) {
+		return dbFetch(QueryBuilder.start("object.objectType").is("JENKINS").get(), reverseSort, postLimit);
+	}
+	
+	/**
+	 * @return List of (at most) 20 jenkins builds (with replies and associated objects) sorted from newest to oldest
+	 */
+	public ArrayList<ArrayList<String>> getJenkinsBuilds() {
+		return getJenkinsBuilds(20);
+	}
+	
 	public ArrayList<String> getUsers() {
 		List<DBObject> allusers = users.find().toArray();
 		ArrayList<String> retList = new ArrayList<String>();
