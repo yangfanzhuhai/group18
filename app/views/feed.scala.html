@@ -100,15 +100,15 @@
 	}
   
     if (@toggle == 0) {
-    	document.title = "News Feed";
+      document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("git_nav").setAttribute("class","");
       document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 1) {
     	document.title = "Task List"
-      document.getElementById("tasklist_nav").setAttribute("class","active");
       document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","active");
       document.getElementById("git_nav").setAttribute("class","");
       document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 2) {
@@ -131,7 +131,7 @@
         postToFeed(); 
         return false; 
       }
-
+      limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
     }
 
     function limitText(limitField, limitCount, limitNum) {
@@ -389,17 +389,23 @@
         break;
       case "TASK":
   			var task_name = stream_array[i][0]['object']["name"];
-  			var task_data = document.createElement("div");
+        var task_heading = document.createElement("h4");
+        task_heading.setAttribute("class", "media-heading");
+        task_heading.innerHTML = "Task";
+        
+  			var task_data = document.createElement("p");
+
   			var task_status = stream_array[i][0]['object']["status"];
   			var task_priority = stream_array[i][0]['object']["priority"];
   			post.style.backgroundColor = "#d9edf7";
         //post.setAttribute("class", "alert, alert-warning");
-  			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
-  			var task_details = document.createElement("div");
+  			task_data.innerHTML = task_name + " BY " + publisher.bold();
+  			var task_details = document.createElement("p");
   			task_details.style.cssFloat = "right";
   			task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
 
   			var priority_button = document.createElement("button");
+
   			priority_button.innerHTML= "Change Task Priority";
   			priority_button.type = "text";
   		//	priority_button.style.cssFloat = "right";
@@ -441,19 +447,21 @@
          		}(post_id));
   			}
 
+        post_body.appendChild(task_heading);
         post_body.appendChild(task_details);
-  			post_body.appendChild(date_and_time);
-  			post_body.appendChild(task_data);		
+  			post_body.appendChild(task_data);	
+        post_body.appendChild(date_and_time);	
   			post_body.appendChild(reply_message_div);
   			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			//post.appendChild(post_options);
 			break;
   		case "JENKINS" :
-  			var jenkins = document.createElement("div");
-  			jenkins.innerHTML = publisher  + ":";
+  			var jenkins = document.createElement("h4");
+        jenkins.setAttribute("class", "media-heading");
+  			jenkins.innerHTML = publisher;
   			
-  			var build_data = document.createElement("div");
+  			var build_data = document.createElement("p");
   			var build_name = stream_array[i][0]['object']["name"];
   			var build_number = stream_array[i][0]['object']["number"];
   			var build_status = stream_array[i][0]['object']["status"];
@@ -474,9 +482,9 @@
   			build_data.innerHTML = build_name + " build " + build_number + " finished with status: " + build_status + ". ";
 			  build_data.appendChild(build_link);
   			
-  			post_body.appendChild(date_and_time);
   			post_body.appendChild(jenkins);
   			post_body.appendChild(build_data);
+        post_body.appendChild(date_and_time);
   			post_body.appendChild(reply_message_div);
   			post_body.appendChild(reply_button);
         post.appendChild(post_body);
@@ -488,6 +496,10 @@
   			var branch = stream_array[i][0]['object']['branch'];
   			var branch_name = branch["name"];
   			var branch_url = branch["url"];
+
+        var git_heading = document.createElement("h4");
+        git_heading.setAttribute("class", "media-heading");
+        git_heading.innerHTML = "GIT";
   			
   			var branch_link = document.createElement('a');
   			branch_link.href = branch_url;
@@ -533,14 +545,14 @@
   				
   			}
   			
-  			
   			post.style.backgroundColor = "#fcf8e3";
         //post_body.setAttribute("class", "alert, alert-info");
   			
-  			post_body.appendChild(date_and_time);
+        post_body.appendChild(git_heading);
   			post_body.appendChild(git_data);
   			post_body.appendChild(commit_data);
-  			post_body.appendChild(reply_message);
+        post_body.appendChild(date_and_time);
+  			post_body.appendChild(reply_message_div);
   			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
   			break;
@@ -588,7 +600,7 @@
 
   				var reply_publisher = document.createElement("h4");
           reply_publisher.setAttribute("class", "media-heading");
-  				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
+  				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"];
 
   				var reply_message_text = document.createElement("p");
   				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
@@ -603,7 +615,7 @@
           reply_div.appendChild(reply_div_body);
           reply_div_body.appendChild(reply_publisher);
           reply_div_body.appendChild(reply_published);
-          reply_div_body.appendChild(reply_message_text);
+          reply_div_body.appendChild(reply_message_text);    
   			j++;
 
   		}
