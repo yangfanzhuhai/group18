@@ -418,10 +418,11 @@
   			//post.appendChild(post_options);
 			break;
   		case "JENKINS" :
-  			var jenkins = document.createElement("div");
-  			jenkins.innerHTML = publisher  + ":";
+  			var jenkins = document.createElement("h4");
+        jenkins.setAttribute("class", "media-heading");
+  			jenkins.innerHTML = publisher;
   			
-  			var build_data = document.createElement("div");
+  			var build_data = document.createElement("p");
   			var build_name = stream_array[i][0]['object']["name"];
   			var build_number = stream_array[i][0]['object']["number"];
   			var build_status = stream_array[i][0]['object']["status"];
@@ -442,9 +443,9 @@
   			build_data.innerHTML = build_name + " build " + build_number + " finished with status: " + build_status + ". ";
 			  build_data.appendChild(build_link);
   			
-  			post_body.appendChild(date_and_time);
   			post_body.appendChild(jenkins);
   			post_body.appendChild(build_data);
+        post_body.appendChild(date_and_time);
   			post_body.appendChild(reply_message_div);
   			post_body.appendChild(reply_button);
         post.appendChild(post_body);
@@ -556,7 +557,7 @@
 
   				var reply_publisher = document.createElement("h4");
           reply_publisher.setAttribute("class", "media-heading");
-  				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
+  				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"];
 
   				var reply_message_text = document.createElement("p");
   				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
@@ -571,7 +572,7 @@
           reply_div.appendChild(reply_div_body);
           reply_div_body.appendChild(reply_publisher);
           reply_div_body.appendChild(reply_published);
-          reply_div_body.appendChild(reply_message_text);
+          reply_div_body.appendChild(reply_message_text);    
   			j++;
 
   		}
