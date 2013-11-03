@@ -104,22 +104,22 @@
       document.getElementById("newsfeed_nav").setAttribute("class","active");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("git_nav").setAttribute("class","");
-      document.getElementById("build_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 1) {
     	document.title = "Task List"
       document.getElementById("tasklist_nav").setAttribute("class","active");
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("git_nav").setAttribute("class","");
-      document.getElementById("build_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 2) {
       document.title = "Git Commits"
       document.getElementById("git_nav").setAttribute("class","active");
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("build_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 3) {
       document.title = "Jenkins Builds"
-      document.getElementById("build_nav").setAttribute("class","active");
+      document.getElementById("builds_nav").setAttribute("class","active");
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("git_nav").setAttribute("class","");
@@ -234,6 +234,17 @@
       	
           type: "GET",
           url: "/rest/git",
+          dataType: "json",
+          success: function(data){   
+
+              generateFeed(data);
+          }
+      });
+      } else if (@toggle==3){
+      	$.ajax({
+      	
+          type: "GET",
+          url: "/rest/builds",
           dataType: "json",
           success: function(data){   
 
