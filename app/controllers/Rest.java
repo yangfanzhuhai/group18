@@ -59,6 +59,11 @@ public class Rest extends Controller {
 			ParseException {
 		return ok(MongoLink.MONGO_LINK.getAllTasksWithoutReplies().toString());
 	}
+	
+	public static Result getGits() throws UnknownHostException,
+			ParseException {
+		return ok(MongoLink.MONGO_LINK.getGitCommits().toString());
+}
 
 	public static Result registerUser() {
 		String credentialsJson = getValueFromRequest("credentials");
