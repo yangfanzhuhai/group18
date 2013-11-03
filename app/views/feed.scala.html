@@ -99,14 +99,21 @@
 	}
   
     if (@toggle == 0) {
-    	document.title = "News Feed";
+      document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
       document.getElementById("tasklist_nav").setAttribute("class","");
-    } else {
-    	document.title = "Task List"
-      document.getElementById("tasklist_nav").setAttribute("class","active");
+      //document.getElementById("git_nav").setAttribute("class","");
+    } else if (@toggle == 1) {
+      document.title = "Task List"
       document.getElementById("newsfeed_nav").setAttribute("class","");
-    }
+      document.getElementById("tasklist_nav").setAttribute("class","active");
+      //document.getElementById("git_nav").setAttribute("class","");
+    } /*else if (@toggle == 2) {
+      document.title = "Git Commits"
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("git_nav").setAttribute("class","active");
+    }*/
 
 
     function postFormOnKeyDown (currentElement) {
@@ -114,7 +121,7 @@
         postToFeed(); 
         return false; 
       }
-
+      limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
     }
 
     function limitText(limitField, limitCount, limitNum) {
@@ -501,7 +508,7 @@
   			post_body.appendChild(date_and_time);
   			post_body.appendChild(git_data);
   			post_body.appendChild(commit_data);
-  			post_body.appendChild(reply_message);
+  			post_body.appendChild(reply_message_div);
   			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
   			break;
