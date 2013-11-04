@@ -1,6 +1,5 @@
 package controllers;
 
-import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -47,26 +46,27 @@ public class Rest extends Controller {
 		return ok(session("connected"));
 	}
 
-	public static Result getActivities() throws UnknownHostException {
+	public static Result getActivities() {
 		return ok(MongoLink.MONGO_LINK.getNewsFeed().toString());
 	}
+	
+	public static Result getMoreActivities() {
+		return ok(MongoLink.MONGO_LINK.getNextNews(getValueFromRequest("activity")).toString());
+	}
 
-	public static Result getTasks() throws UnknownHostException {
+	public static Result getTasks() {
 		return ok(MongoLink.MONGO_LINK.getTasks().toString());
 	}
 
-	public static Result getAllTasks() throws UnknownHostException,
-			ParseException {
+	public static Result getAllTasks() throws ParseException {
 		return ok(MongoLink.MONGO_LINK.getAllTasksWithoutReplies().toString());
 	}
 	
-	public static Result getGits() throws UnknownHostException,
-			ParseException {
+	public static Result getGits() {
 		return ok(MongoLink.MONGO_LINK.getGitCommits().toString());
 	}
 	
-	public static Result getBuilds() throws UnknownHostException,
-			ParseException {
+	public static Result getBuilds() {
 		return ok(MongoLink.MONGO_LINK.getJenkinsBuilds().toString());
 	}
 
