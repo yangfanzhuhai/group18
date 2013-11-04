@@ -383,7 +383,7 @@ public class MongoLink {
 	 */
 	private ArrayList<String> getReplies(String id) throws ParseException {
 		
-		return getItemsWithReferences(QueryBuilder.start("target.messageID").is(id).get());
+		return getItemsWithoutReferences(QueryBuilder.start("target.messageID").is(id).get());
 	}
 	
 	/** Generic method to find list of objects that satisfy the given query
