@@ -240,6 +240,14 @@ public class MongoLink {
 	public ArrayList<ArrayList<String>> getNewsFeed(){
 		return getNewsFeed(20);
 	}
+	
+	public ArrayList<ArrayList<String>> getNextNews(String lastID, int postLimit) {
+		return dbFetch(QueryBuilder.start("target.messageID").is("").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+	}
+	
+	public ArrayList<ArrayList<String>> getNextNews(String lastID) {
+		return getNextNews(lastID, 20);
+	}
 
 	/**Returns a list of postLimit tasks**/
 	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
