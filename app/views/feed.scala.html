@@ -32,7 +32,8 @@
             <a href="@routes.Application.feed(0)">News Feed</a>
           </li>
           <li id="tasklist_nav"><a href="@routes.Application.feed(1)">Task List</a></li>
-          <li><a href="@routes.Application.gits">Git Commits</a></li>
+          <li id="git_nav"><a href="@routes.Application.feed(2)">Git Commits</a></li>
+          <li id = "builds_nav"><a href="@routes.Application.feed(3)">Builds</a></li>
           <li><a href="@routes.Application.about">About</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right" role="navigation">
@@ -48,15 +49,16 @@
     	width="200" >
     </a>
 
-    <div id = "post_options" class = "post_options" align = "center">
-      <div id="username"> </div>	
+    <div id = "post_options" align="center">
+      <h1 id="username"> </h1>	
     		
       <form name="myform" role="form">
         <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
-        onKeyDown="postFormOnKeyDown(this)" maxlength="140"> </textarea>
+        onKeyDown="postFormOnKeyDown(this)" maxlength="140" class="form-control" 
+        placeholder="what's on your mind?"> </textarea>
         <br>
-        <font size="1">(Maximum characters: 140)<br>
-        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</font>
+        <small align="right"> <!--(Maximum characters: 140)-->
+        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</small>
 
       </form>
 
@@ -77,8 +79,6 @@
 
 
     <div id = "posts" class = "float">
-    	<p class="posts_title">Posts:</p>
-
     </div>
 
     <ul id = "stream" class = "media-list" ></ul>
@@ -106,13 +106,29 @@
 	});
   
     if (@toggle == 0) {
-    	document.title = "News Feed";
+      document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
       document.getElementById("tasklist_nav").setAttribute("class","");
-    } else {
+      document.getElementById("git_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(@toggle == 1) {
     	document.title = "Task List"
-      document.getElementById("tasklist_nav").setAttribute("class","active");
       document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","active");
+      document.getElementById("git_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(@toggle == 2) {
+      document.title = "Git Commits"
+      document.getElementById("git_nav").setAttribute("class","active");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(@toggle == 3) {
+      document.title = "Jenkins Builds"
+      document.getElementById("builds_nav").setAttribute("class","active");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("git_nav").setAttribute("class","");
     }
 
 
@@ -121,7 +137,7 @@
         postToFeed(); 
         return false; 
       }
-
+      limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
     }
 
     function limitText(limitField, limitCount, limitNum) {
@@ -183,6 +199,362 @@
   	}
 
   }
+  
+  function addToFeed(stream_array) {
+	  document.getElementById("username").innerHTML="@userName";
+
+	  	for (var i=0; i < stream_array.length;i++) {
+
+
+	  		var message_type = stream_array[i][0]['object']["objectType"];
+
+	  		var post_no = 0;
+
+	  		var post_id = stream_array[i][0]['id'];
+	  		
+	  		if (i == (stream_array.length - 1)) {
+	  			final_post_id = post_id;	
+	  		}
+
+	  		var published = stream_array[i][0]['published'];
+
+	  		var publisher = stream_array[i][0]['actor']["displayName"];
+	  		
+	  		var publisherType = stream_array[i][0]['actor']["objectType"];
+	  	
+	  		var verb = stream_array[i][0]['verb'];
+
+	  		var post = document.createElement("li");
+	      post.setAttribute("class", "media");
+	  		post.id = post_id;
+	  		post.className = "post";
+
+	      var post_body = document.createElement("div");
+	      post_body.setAttribute("class", "media-body");
+	  	
+	  		document.getElementById("stream").appendChild(post);
+
+	  		var date_and_time = document.createElement("small");
+	  		date_and_time.innerHTML = published + "<br>";
+
+	      var reply_message_div = document.createElement("div");
+	      reply_message_div.setAttribute("class", "col-xs-8");
+
+	  		var reply_message = document.createElement("input");
+	  		reply_message.placeholder = "Your message"
+	  		reply_message.type = "text";
+	      reply_message.setAttribute("class", "form-control input-sm");
+	  					
+	  		var reply_button = document.createElement("button");
+	      reply_button.setAttribute("class", "btn btn-default btn-sm");
+	  		reply_button.innerHTML = 'Reply';
+	  		//reply_button.align = "right"; 	
+
+	      //reply_form.appendChild(reply_message);
+	      //reply_form.appendChild(reply_button);
+	      //reply_form_div.appendChild(reply_form);
+	      reply_message_div.appendChild(reply_message);
+
+	  		var post_options = document.createElement("div");
+
+	  		if (publisher == "@userName") {
+	  			var delete_button = document.createElement("button");
+	        delete_button.setAttribute("class", "btn btn-danger btn-xs");
+	  			delete_button.innerHTML = "Delete";
+	  			post_options.appendChild(delete_button);
+
+	  		 	delete_button.onclick = (function(post_id) {
+	            	  return function() {
+	            	      delete_post(post_id);
+	              }
+	         	 }(post_id));
+
+	  		}
+
+
+	  		 reply_button.onclick = (function(post_id, reply_message) {
+	              return function() {
+	                  replyToPost(post_id, reply_message);
+	              }
+	          }(post_id, reply_message));
+
+
+	  		post_options.style.padding = "10px";
+	  		
+	  		switch(message_type){
+	  		case "MESSAGE":
+	  			var user = document.createElement("h4");
+	        user.setAttribute("class", "media-heading");
+	  			user.innerHTML = publisher;
+	  		
+	  			var message_text = stream_array[i][0]['object']["message"];
+	  			var message = document.createElement("p");
+	  			message_text = message_text.replace("\n", "<br>");
+	  			message.innerHTML = message_text;
+
+	        /*
+	  			post.appendChild(date_and_time);
+	  			post.appendChild(user);
+	  			post.appendChild(message);
+	  			post.appendChild(reply_message);
+	  			post.appendChild(reply_button);
+	  			//post.appendChild(post_options);
+	        */
+	  			
+	  			post_body.appendChild(user);
+	  			post_body.appendChild(message);
+	        post_body.appendChild(date_and_time);
+	  			post_body.appendChild(reply_message_div);
+	  			post_body.appendChild(reply_button);
+	        //post_body.appendChild(reply_form_div);
+	        post.appendChild(post_body);
+
+	        break;
+	      case "TASK":
+	  			var task_name = stream_array[i][0]['object']["name"];
+	        var task_heading = document.createElement("h4");
+	        task_heading.setAttribute("class", "media-heading");
+	        task_heading.innerHTML = "Task";
+	        
+	  			var task_data = document.createElement("p");
+
+	  			var task_status = stream_array[i][0]['object']["status"];
+	  			var task_priority = stream_array[i][0]['object']["priority"];
+	  			post.style.backgroundColor = "#d9edf7";
+	        //post.setAttribute("class", "alert, alert-warning");
+	  			task_data.innerHTML = task_name + " BY " + publisher.bold();
+	  			var task_details = document.createElement("p");
+	  			task_details.style.cssFloat = "right";
+	  			task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
+
+	  			var priority_button = document.createElement("button");
+
+	  			priority_button.innerHTML= "Change Task Priority";
+	  			priority_button.type = "text";
+	  		//	priority_button.style.cssFloat = "right";
+	  			priority_button.onclick = (function (post_id) {
+	  				return function() {
+	  					var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
+	  					if (new_priority <  4 && new_priority > 0) {
+							post_new_task_details(new_priority, "p", post_id);
+						} else {
+							alert("Value entered is not between 1 and 3");
+						}
+					}
+	  			}(post_id));
+
+	  			var status_button = document.createElement("button");
+	  			status_button.innerHTML= "Change Task Status";
+	  			status_button.type = "text";
+	  			status_button.onclick = (function (post_id) {
+	  				return function() {
+						var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
+						post_new_task_details(new_status, "s", post_id);
+					
+					}
+	  			}(post_id));
+
+
+	  			post_options.appendChild(priority_button);
+	  			post_options.appendChild(status_button);
+
+	  			if (publisher == "@userName") {
+	  				var assign_button = document.createElement("button");
+	  				assign_button.innerHTML = "Assign members";
+	  				post_options.appendChild(assign_button);
+
+	  		 		assign_button.onclick = (function(post_id) {
+	            		  return function() {
+	            	 	    // delete_post(post_id);
+	             	 }
+	         		}(post_id));
+	  			}
+
+	        post_body.appendChild(task_heading);
+	        post_body.appendChild(task_details);
+	  			post_body.appendChild(task_data);	
+	        post_body.appendChild(date_and_time);	
+	  			post_body.appendChild(reply_message_div);
+	  			post_body.appendChild(reply_button);
+	        post.appendChild(post_body);
+	  			//post.appendChild(post_options);
+				break;
+	  		case "JENKINS" :
+	  			var jenkins = document.createElement("h4");
+	        jenkins.setAttribute("class", "media-heading");
+	  			jenkins.innerHTML = publisher;
+	  			
+	  			var build_data = document.createElement("p");
+	  			var build_name = stream_array[i][0]['object']["name"];
+	  			var build_number = stream_array[i][0]['object']["number"];
+	  			var build_status = stream_array[i][0]['object']["status"];
+	  			var build_url = stream_array[i][0]['object']["url"];
+	  			
+	  			var build_link = document.createElement('a');
+	  			build_link.href = build_url;
+	  			build_link.innerHTML = "See build";
+	  			
+	  			if (build_status == "SUCCESS") {
+	  				post.style.backgroundColor = "#AFD772";	
+	          //post_body.setAttribute("class", "alert alert-success");
+	  			} else {
+	  				post.style.backgroundColor = "#FF7A70";	
+	          //post_body.setAttribute("class", "alert alert-danger");
+	  			}
+	  			
+	  			build_data.innerHTML = build_name + " build " + build_number + " finished with status: " + build_status + ". ";
+				  build_data.appendChild(build_link);
+	  			
+	  			post_body.appendChild(jenkins);
+	  			post_body.appendChild(build_data);
+	        post_body.appendChild(date_and_time);
+	  			post_body.appendChild(reply_message_div);
+	  			post_body.appendChild(reply_button);
+	        post.appendChild(post_body);
+	  			break;
+	  		case "GIT":
+	  			var repo = stream_array[i][0]['object']['repository'];
+	  			var repo_name = repo["name"];
+	  			var repo_url = repo["url"];
+	  			var branch = stream_array[i][0]['object']['branch'];
+	  			var branch_name = branch["name"];
+	  			var branch_url = branch["url"];
+
+	        var git_heading = document.createElement("h4");
+	        git_heading.setAttribute("class", "media-heading");
+	        git_heading.innerHTML = "GIT";
+	  			
+	  			var branch_link = document.createElement('a');
+	  			branch_link.href = branch_url;
+	  			branch_link.innerHTML = branch_name.bold()
+	  			
+	  			var repo_link = document.createElement('a');
+	  			repo_link.href = repo_url;
+	  			repo_link.innerHTML = repo_name.bold()
+	  			
+	  			
+	  			var git_data = document.createElement("div");
+	  			git_data.innerHTML = publisher.bold() + " pushed to branch " + $(branch_link).outerHTML() + " at repository " + $(repo_link).outerHTML();
+	  			
+	  			var commits = stream_array[i][0]['object']['commits'];
+	  			var commit_total = stream_array[i][0]['object']['totalCommits'];
+	  			var commit_data = document.createElement("div");
+	  			var commit_list = document.createElement("ul");
+	  			commit_data.appendChild(commit_list);
+	  			for(var k = 0; k < Math.min(2,commit_total); k++) {
+	  				var commit = commits[k];
+	  				var commit_url = commit["url"];
+	  				var commit_author = commit["author"];
+	  				var commit_message = commit["message"];
+	  				var commit_link = document.createElement('a');
+	  				commit_link.href = commit_url;
+	  				commit_link.innerHTML = "See commit"
+	  				
+	  				
+	  				var commit_list_entry = document.createElement("li");
+	  				commit_list_entry.style.display="block";
+	  				commit_list_entry.innerHTML = commit_author.bold() + ": " + commit_message + " " + $(commit_link).outerHTML();
+	  				commit_list.appendChild(commit_list_entry);
+	  				
+	  			}
+	  			if (commit_total > 2){
+	  				var summary_link = document.createElement('a');
+	  				summary_link.href = branch_url;
+	  				summary_link.innerHTML = "... and " + (commit_total - 2) + " more commits";
+	  				var commit_summary = document.createElement("li");
+	  				commit_summary.appendChild(summary_link);
+	  				commit_summary.style.display="block";
+	  				commit_list.appendChild(commit_summary);
+	  				
+	  			}
+	  			
+	  			post.style.backgroundColor = "#fcf8e3";
+	        //post_body.setAttribute("class", "alert, alert-info");
+	  			
+	        post_body.appendChild(git_heading);
+	  			post_body.appendChild(git_data);
+	  			post_body.appendChild(commit_data);
+	        post_body.appendChild(date_and_time);
+	  			post_body.appendChild(reply_message_div);
+	  			post_body.appendChild(reply_button);
+	  			post.appendChild(post_body);
+	  			break;
+	  		}
+
+	  		 reply_button.onclick = (function(post_id, reply_message) {
+	              return function() {
+	                  replyToPost(post_id, reply_message);
+	              }
+	          }(post_id, reply_message));
+
+	  		 reply_message.onkeypress = (function(post_id, reply_message) { 
+	  		 	return function() {
+	  		 			if (event.keyCode == 13) {
+	  		 				replyToPost(post_id, reply_message);
+	  		 			}
+	  		 	}
+	  		 }(post_id, reply_message));
+
+	  		var j = 1;
+	  		while (j < stream_array[i].length) {
+
+	  			if (stream_array[i][j]['object']["objectType"] == "TASK") {
+	  				var task_reference_div = document.createElement("div");
+	  				task_reference_div.innerHTML = "Referencing: " + stream_array[i][j]['object']["name"];
+	  				//task_reference_div.style.backgroundColor = "#FF6699";
+	  				task_reference_div.className = "post";
+	  				task_reference_div.style["cssFloat"] = "right";
+	  				task_reference_div.style["background"] = "#d9edf7";
+
+	  				post.insertBefore(task_reference_div, post.firstChild);
+	  				j++;
+
+	  			} else {
+	  				var reply_div = document.createElement("div");
+	  				//reply_div.className = "reply_post";
+	  				reply_div.setAttribute("class", "media");
+	      	  reply_div.style.paddingLeft = "10%";
+
+	          var reply_div_body = document.createElement("div");
+	          reply_div_body.setAttribute("class", "media-body");
+	  				
+	  				var reply_published = document.createElement("small");
+	  				reply_published.innerHTML = stream_array[i][j]['published'];
+
+	  				var reply_publisher = document.createElement("h4");
+	          reply_publisher.setAttribute("class", "media-heading");
+	  				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"];
+
+	  				var reply_message_text = document.createElement("p");
+	  				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
+	  			
+	  				var reply_publisherType = stream_array[i][j]['actor']["objectType"];
+	  	
+	  				var reply_verb = stream_array[i][j]['verb'];
+	  		
+	  				var reply_message_type = stream_array[i][j]['object']["objectType"];
+
+	          post_body.appendChild(reply_div);
+	          reply_div.appendChild(reply_div_body);
+	          reply_div_body.appendChild(reply_publisher);
+	          reply_div_body.appendChild(reply_published);
+	          reply_div_body.appendChild(reply_message_text);    
+	  			j++;
+
+	  		}
+
+
+	  		}
+	  	  post.appendChild(post_options);
+
+
+
+	  		post_no = post_no + 1;
+	  	}
+
+	  	
+	  
+  }
 
 
   function refreshFeed() {
@@ -219,6 +591,28 @@
               generateFeed(data);
           }
       });
+      } else if (@toggle==2){
+      	$.ajax({
+      	
+          type: "GET",
+          url: "/rest/git",
+          dataType: "json",
+          success: function(data){   
+
+              generateFeed(data);
+          }
+      });
+      } else if (@toggle==3){
+      	$.ajax({
+      	
+          type: "GET",
+          url: "/rest/builds",
+          dataType: "json",
+          success: function(data){   
+
+              generateFeed(data);
+          }
+      });
       }
       
   }
@@ -245,6 +639,18 @@
 
 	var final_post_id;
 
+	$.ajax({
+      	
+        type: "GET",
+        url: "/rest/morefeed",
+        data: {"activity":final_post_id},
+        success: function(data){   
+
+        	addToFeed(data);
+        }
+    });
+	
+	
   function generateFeed(stream_array) {
 
   	document.getElementById("username").innerHTML="@userName";
@@ -363,16 +769,23 @@
         break;
       case "TASK":
   			var task_name = stream_array[i][0]['object']["name"];
-  			var task_data = document.createElement("div");
+        var task_heading = document.createElement("h4");
+        task_heading.setAttribute("class", "media-heading");
+        task_heading.innerHTML = "Task";
+        
+  			var task_data = document.createElement("p");
+
   			var task_status = stream_array[i][0]['object']["status"];
   			var task_priority = stream_array[i][0]['object']["priority"];
-  			post.style.backgroundColor = "#FF8598";
-  			task_data.innerHTML = "TASK: " + task_name.bold() + " BY " + publisher.bold();
-  			var task_details = document.createElement("div");
+  			post.style.backgroundColor = "#d9edf7";
+        //post.setAttribute("class", "alert, alert-warning");
+  			task_data.innerHTML = task_name + " BY " + publisher.bold();
+  			var task_details = document.createElement("p");
   			task_details.style.cssFloat = "right";
   			task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
 
   			var priority_button = document.createElement("button");
+
   			priority_button.innerHTML= "Change Task Priority";
   			priority_button.type = "text";
   		//	priority_button.style.cssFloat = "right";
@@ -414,19 +827,21 @@
          		}(post_id));
   			}
 
+        post_body.appendChild(task_heading);
         post_body.appendChild(task_details);
-  			post_body.appendChild(date_and_time);
-  			post_body.appendChild(task_data);		
+  			post_body.appendChild(task_data);	
+        post_body.appendChild(date_and_time);	
   			post_body.appendChild(reply_message_div);
   			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			//post.appendChild(post_options);
 			break;
   		case "JENKINS" :
-  			var jenkins = document.createElement("div");
-  			jenkins.innerHTML = publisher  + ":";
+  			var jenkins = document.createElement("h4");
+        jenkins.setAttribute("class", "media-heading");
+  			jenkins.innerHTML = publisher;
   			
-  			var build_data = document.createElement("div");
+  			var build_data = document.createElement("p");
   			var build_name = stream_array[i][0]['object']["name"];
   			var build_number = stream_array[i][0]['object']["number"];
   			var build_status = stream_array[i][0]['object']["status"];
@@ -437,17 +852,19 @@
   			build_link.innerHTML = "See build";
   			
   			if (build_status == "SUCCESS") {
-  				post.style.backgroundColor = "#6EFF60";	
+  				post.style.backgroundColor = "#AFD772";	
+          //post_body.setAttribute("class", "alert alert-success");
   			} else {
-  				post.style.backgroundColor = "#FF4137";	
+  				post.style.backgroundColor = "#FF7A70";	
+          //post_body.setAttribute("class", "alert alert-danger");
   			}
   			
   			build_data.innerHTML = build_name + " build " + build_number + " finished with status: " + build_status + ". ";
-			build_data.appendChild(build_link);
+			  build_data.appendChild(build_link);
   			
-  			post_body.appendChild(date_and_time);
   			post_body.appendChild(jenkins);
   			post_body.appendChild(build_data);
+        post_body.appendChild(date_and_time);
   			post_body.appendChild(reply_message_div);
   			post_body.appendChild(reply_button);
         post.appendChild(post_body);
@@ -459,6 +876,10 @@
   			var branch = stream_array[i][0]['object']['branch'];
   			var branch_name = branch["name"];
   			var branch_url = branch["url"];
+
+        var git_heading = document.createElement("h4");
+        git_heading.setAttribute("class", "media-heading");
+        git_heading.innerHTML = "GIT";
   			
   			var branch_link = document.createElement('a');
   			branch_link.href = branch_url;
@@ -504,13 +925,14 @@
   				
   			}
   			
+  			post.style.backgroundColor = "#fcf8e3";
+        //post_body.setAttribute("class", "alert, alert-info");
   			
-  			post.style.backgroundColor = "#FFFDC6";
-  			
-  			post_body.appendChild(date_and_time);
+        post_body.appendChild(git_heading);
   			post_body.appendChild(git_data);
   			post_body.appendChild(commit_data);
-  			post_body.appendChild(reply_message);
+        post_body.appendChild(date_and_time);
+  			post_body.appendChild(reply_message_div);
   			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
   			break;
@@ -539,7 +961,7 @@
   				//task_reference_div.style.backgroundColor = "#FF6699";
   				task_reference_div.className = "post";
   				task_reference_div.style["cssFloat"] = "right";
-  				task_reference_div.style["background"] = "#FF8598";
+  				task_reference_div.style["background"] = "#d9edf7";
 
   				post.insertBefore(task_reference_div, post.firstChild);
   				j++;
@@ -558,7 +980,7 @@
 
   				var reply_publisher = document.createElement("h4");
           reply_publisher.setAttribute("class", "media-heading");
-  				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"] + ":";
+  				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"];
 
   				var reply_message_text = document.createElement("p");
   				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
@@ -573,7 +995,7 @@
           reply_div.appendChild(reply_div_body);
           reply_div_body.appendChild(reply_publisher);
           reply_div_body.appendChild(reply_published);
-          reply_div_body.appendChild(reply_message_text);
+          reply_div_body.appendChild(reply_message_text);    
   			j++;
 
   		}
