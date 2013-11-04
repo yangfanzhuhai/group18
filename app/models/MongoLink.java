@@ -94,12 +94,10 @@ public class MongoLink {
 			}
 		}
 		
-		System.out.println("DELETING A POST");
+		System.out.println("SELECTING NEXT NEWS");
 		
-		ml.deletePost("52743c59c2e69027b2302da2");
+		list = ml.getNextNews("5273d01c646021e813bcd12a");
 		
-		System.out.println("NEW NEWS FEED");
-		list = ml.getNewsFeed();
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
@@ -241,10 +239,21 @@ public class MongoLink {
 		return getNewsFeed(20);
 	}
 	
+	/**
+	 * @param lastID - String ID of the last post currently in news feed
+	 * @param postLimit - Maximum number of posts to fetch
+	 * @return An array of news feed posts (with replies and references) 
+	 * 			that were posted after the post with the given ID
+	 */
 	public ArrayList<ArrayList<String>> getNextNews(String lastID, int postLimit) {
 		return dbFetch(QueryBuilder.start("target.messageID").is("").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
 	}
 	
+	/**
+	 * @param lastID - String ID of the last post currently in news feed
+	 * @return An array of (at most 20) news feed posts (with replies and references) 
+	 * 			that were posted after the post with the given ID
+	 */
 	public ArrayList<ArrayList<String>> getNextNews(String lastID) {
 		return getNextNews(lastID, 20);
 	}
