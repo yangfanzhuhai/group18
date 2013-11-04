@@ -16,11 +16,13 @@ GET     /register                   controllers.Application.register()
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 GET		/rest/feed					controllers.Rest.getActivities()
+GET		/rest/morefeed				controllers.Rest.getMoreActivities()
 GET		/rest/tasks					controllers.Rest.getTasks()
 GET		/rest/alltasks				controllers.Rest.getAllTasks()
 GET		/rest/git					controllers.Rest.getGits()
 GET		/rest/builds				controllers.Rest.getBuilds()
 GET		/rest/user					controllers.Rest.getUser()
+
 
 POST	/rest/message				controllers.Rest.createMessage()
 POST	/rest/register				controllers.Rest.registerUser()
