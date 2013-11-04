@@ -272,9 +272,11 @@ public class MongoLink {
 	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
-		ArrayList<String> tasks = getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get());
-		Collections.reverse(tasks);
-		return tasks;
+		return getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort);
+	}
+	
+	public ArrayList<String> getAllTasksByName() throws ParseException {
+		return getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.name").is("1").get());
 	}
 	
 	/**
@@ -363,7 +365,7 @@ public class MongoLink {
 			taskIDObjs[i] = new ObjectId(taskIDs.get(i).toString());
 		}
 		
-		return getItemsWithoutReferences(QueryBuilder.start("_id").in(taskIDObjs).get());
+		return getItemsWithoutReferences(QueryBuilder.start("_id").in(taskIDObjs).get(), null);
 	}
 	
 	/**
@@ -373,7 +375,7 @@ public class MongoLink {
 	 */
 	private ArrayList<String> getReferencedBy(String id) throws ParseException {
 		
-		return getItemsWithoutReferences(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get());
+		return getItemsWithoutReferences(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), null);
 	}
 	
 	/**
@@ -383,7 +385,7 @@ public class MongoLink {
 	 */
 	private ArrayList<String> getReplies(String id) throws ParseException {
 		
-		return getItemsWithoutReferences(QueryBuilder.start("target.messageID").is(id).get());
+		return getItemsWithoutReferences(QueryBuilder.start("target.messageID").is(id).get(), null);
 	}
 	
 	/** Generic method to find list of objects that satisfy the given query
@@ -417,9 +419,9 @@ public class MongoLink {
 	 * @return ArrayList of objects
 	 * @throws ParseException
 	 */
-	private ArrayList<String> getItemsWithoutReferences(DBObject query) throws ParseException {
+	private ArrayList<String> getItemsWithoutReferences(DBObject query, DBObject sortKey) throws ParseException {
 		
-		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).toArray();
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).sort(sortKey).toArray();
 		ArrayList<String> retList = new ArrayList<String>();		
 		
 		
