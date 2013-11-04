@@ -269,14 +269,23 @@ public class MongoLink {
 		return getTasks(20);
 	}
 
-	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
+	/**
+	 * @return A list of all tasks (only the tasks, no replies or associated objects)
+	 *  in order from newest to oldest 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
 		return getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort);
 	}
 	
+	/**
+	 * 
+	 * @return A list of all tasks (only the tasks, no replies or associated objects)
+	 *  in alphabetical order 
+	 *  !! //TODO this for the moment is case-sensitive and we still have the problem of leading spaces
+	 * @throws ParseException
+	 */
 	public ArrayList<String> getAllTasksByName() throws ParseException {
-		return getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.name").is("1").get());
+		return getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.name").is(1).get());
 	}
 	
 	/**
