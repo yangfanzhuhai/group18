@@ -134,7 +134,7 @@ public class MongoLink {
 	}
 	
 	/**
-	 * @param newsFeed TODO
+	 * @param newsFeed Collection from which to fetch data
 	 * @param searchCriteria - Criteria to use for search
 	 * @param sortCriteria - Criteria by which to sort results
 	 * @param postLimit - Maximum number of items to fetch
@@ -169,7 +169,12 @@ public class MongoLink {
 	}
 	
 	
-	/**Inserts obj into newsFeed collection**/
+	/** Inserts given object into appropriate collection
+	 * 
+	 * @param customID - ID of group collection
+	 * @param obj - Object to be inserted
+	 * @return TODO DO WE NEED A RETURN?
+	 */
 	public String insertNews(String customID, DBObject obj) {
 		
 		DBCollection newsFeed = getGroupColl(customID);
@@ -178,6 +183,11 @@ public class MongoLink {
 		return newsFeed.findOne(obj).get("_id").toString();
 	}
 	
+	/** Creates a new project in the database
+	 * 
+	 * @param obj - Object containing all the necessary information of the new project
+	 * @return True if added correctly, False otherwise
+	 */
 	public boolean addNewProject(DBObject obj) {
 		
 		int oldCount = (int) groups.getCount();
@@ -232,6 +242,7 @@ public class MongoLink {
 	
 	/** Method which changes either the status or priority of a task
 	 * 
+	 * @param customID - ID of collection to be used
 	 * @param obj - Object containing ID of task to be altered plus a status or priority field
 	 * which indicates what should be changed and how
 	 * @throws MongoException
@@ -249,18 +260,26 @@ public class MongoLink {
 			throw new MongoException("Neither field status or priority exist. Update failed");
 	}
 	
-	/**Returns the a list of the last postLimit items from newsFeed collection with replies**/
+	 /** 
+	 * @param customID - ID of collection to be used
+	 * @param postLimit - Maximum number of items to be fetched
+	 * @return List of the last 'postLimit' items from given collection with replies and references
+	 */
 	public ArrayList<ArrayList<String>> getNewsFeed(String customID, int postLimit) {
 		return dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").get(), reverseSort, postLimit);
 		
 	}
 
-	/**Default method to return last 20 items from newsFeed collection**/
+	 /**
+	 * @param customID - ID of collection to be used
+	 * @return List of the last 20 items from given collection with replies and references
+	 */
 	public ArrayList<ArrayList<String>> getNewsFeed(String customID){
 		return getNewsFeed(customID, 20);
 	}
 	
 	/**
+	 * @param customID - ID of collection to be used
 	 * @param lastID - String ID of the last post currently in news feed
 	 * @param postLimit - Maximum number of posts to fetch
 	 * @return An array of news feed posts (with replies and references) 
@@ -271,6 +290,7 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param customID - ID of collection to be used
 	 * @param lastID - String ID of the last post currently in news feed
 	 * @return An array of (at most 20) news feed posts (with replies and references) 
 	 * 			that were posted after the post with the given ID
@@ -291,6 +311,7 @@ public class MongoLink {
 	}
 
 	/**
+	 * @param customID - ID of collection to be used
 	 * @return A list of all tasks (only the tasks, no replies or associated objects)
 	 *  in order from newest to oldest 
 	 * @throws ParseException **/
@@ -299,10 +320,9 @@ public class MongoLink {
 	}
 	
 	/**
-	 * 
+	 * @param customID - ID of collection to be used
 	 * @return A list of all tasks (only the tasks, no replies or associated objects)
-	 *  in alphabetical order 
-	 *  !! //TODO this for the moment is case-sensitive and we still have the problem of leading spaces
+	 *  in alphabetical order (CASE SENSITIVE)
 	 * @throws ParseException
 	 */
 	public ArrayList<String> getAllTasksByName(String customID) throws ParseException {
@@ -310,6 +330,7 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param customID - ID of collection to be used
 	 * @param postLimit - Number of tasks to fetch from the database
 	 * @return List of tasks (with replies and associated objects) sorted by priority in descending order
 	 */
@@ -318,6 +339,7 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param customID - ID of collection to be used
 	 * @return List of 20 tasks (with replies and associated objects) sorted by priority in descending order
 	 */
 	public ArrayList<ArrayList<String>> getTasksByPriority(String customID) {
@@ -325,6 +347,7 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param customID - ID of collection to be used
 	 * @param status - Status of task
 	 * @return List of all the tasks with the given status, sorted from newest to oldest, with replies and associated objects
 	 */
@@ -333,6 +356,7 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param customID - ID of collection to be used
 	 * @param postLimit - Maximum number of git commits to fetch
 	 * @return List of git commits (with replies and associated objects) sorted from newest to oldest
 	 */
@@ -341,6 +365,7 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param customID - ID of collection to be used
 	 * @return List of (at most) 20 git commits (with replies and associated objects) sorted from newest to oldest
 	 */
 	public ArrayList<ArrayList<String>> getGitCommits(String customID) {
@@ -348,7 +373,7 @@ public class MongoLink {
 	}
 	
 	/**
-	 * 
+	 * @param customID - ID of collection to be used
 	 * @param postLimit - Maximum number of builds to fetch
 	 * @return List of Jenkins builds (with replies and associated objects) sorted from newest to oldest
 	 */
@@ -357,6 +382,7 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param customID - ID of collection to be used
 	 * @return List of (at most) 20 jenkins builds (with replies and associated objects) sorted from newest to oldest
 	 */
 	public ArrayList<ArrayList<String>> getJenkinsBuilds(String customID) {
@@ -378,6 +404,7 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param customID - ID of collection to be used
 	 * @param obj - Object representing the news feed post to be deleted.
 	 * All replies corresponding to that object will also be deleted
 	 */
@@ -386,9 +413,9 @@ public class MongoLink {
 	}
 	
 	/** 
-	 * @param coll TODO
+	 * @param coll - Collection to be used
 	 * @param obj - News Feed object
-	 * @return ArrayList respresenting all the tasks that are referenced by the given object
+	 * @return ArrayList representing all the tasks that are referenced by the given object
 	 * @throws ParseException
 	 */
 	private ArrayList<String> getReferences(DBCollection coll, DBObject obj) throws ParseException {
@@ -407,7 +434,7 @@ public class MongoLink {
 	}
 	
 	/**
-	 * @param coll TODO
+	 * @param coll - Collection to be used
 	 * @param id - ID string of the task
 	 * @return ArrayList of all the news feed items that reference the given task
 	 * @throws ParseException
@@ -418,7 +445,7 @@ public class MongoLink {
 	}
 	
 	/**
-	 * @param coll TODO
+	 * @param coll - Collection to be used
 	 * @param id - ID string of the news feed post
 	 * @return ArrayList of all the replies to that post
 	 * @throws ParseException
@@ -430,7 +457,7 @@ public class MongoLink {
 	
 	/** Generic method to find list of objects that satisfy the given query
 	 * and any task they reference
-	 * @param collection TODO
+	 * @param collection - Collection to be used
 	 * @param query - DBObject containing the information about the query
 	 * 
 	 * @return ArrayList of objects
@@ -455,7 +482,7 @@ public class MongoLink {
 	}
 	
 	/** Generic method to find list of objects that satisfy the given query
-	 * @param collection TODO
+	 * @param collection - Collection to be used
 	 * @param query - DBObject containing the information about the query
 	 * 
 	 * @return ArrayList of objects
@@ -479,7 +506,7 @@ public class MongoLink {
 	}
 	
 	/**
-	 * @param coll TODO
+	 * @param coll - Collection be used
 	 * @param id - ID of the object to be deleted, along with all its replies
 	 */
 	private void deletePost(DBCollection coll, String id) {
@@ -488,7 +515,7 @@ public class MongoLink {
 	}
 
 	/**
-	 * @param coll TODO
+	 * @param coll - Collection be used
 	 * @param id - ID of the object which will have its replies deleted
 	 */
 	private void deleteReplies(DBCollection coll, String id) {
@@ -496,7 +523,7 @@ public class MongoLink {
 	}
 	
 	/** Updates the status of the task with ID id
-	 * @param coll TODO
+	 * @param coll - Collection be used
 	 * @param id - ID of task to be updated
 	 * @param status - New status value to be set
 	 */
@@ -505,7 +532,7 @@ public class MongoLink {
 	}
 
 	/** Updates the priority of the task with ID id
-	 * @param coll TODO
+	 * @param coll - Collection be used
 	 * @param id - ID of task to be updated
 	 * @param priority - New priority value to be set
 	 */
@@ -514,7 +541,7 @@ public class MongoLink {
 	}
 
 	/** Generic method which updates object with ID 'id' using the parameters in 'updateWith'
-	 * @param collection TODO
+	 * @param collection - Collection be used
 	 * @param id - ID of object to be updated
 	 * @param updateWith - Information on what the update should change
 	 */
