@@ -6,6 +6,7 @@ import views.html.about;
 import views.html.feed;
 import views.html.login;
 import views.html.register;
+import views.html.profile;
 
 public class Application extends Controller {
 	
@@ -61,6 +62,16 @@ public class Application extends Controller {
 	 */
 	private static boolean loggedIn(){
 		return session("connected") != null;
+	}
+
+	public static Result profile() {
+		if (loggedIn()) {
+			String userName = session("connected");
+			return ok(profile.render(userName));
+		} else {
+			return ok(login.render());
+		}
+		
 	}
 
 }
