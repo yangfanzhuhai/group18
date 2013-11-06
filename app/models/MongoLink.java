@@ -242,7 +242,7 @@ public class MongoLink {
 	
 	public ArrayList<String> getGroups(String username) {
 		ArrayList<String> retList = new ArrayList<String>();
-		List<DBObject> list = groups.find(QueryBuilder.start("members").in(username).get()).toArray();
+		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
 	
 		for(DBObject o : list)
 		{
