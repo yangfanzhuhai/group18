@@ -28,7 +28,7 @@ public class Application extends Controller {
 			}
 			
 		} else {
-			return ok(login.render());
+			return redirect(controllers.routes.Application.login());
 		}
 	}
 
@@ -48,7 +48,7 @@ public class Application extends Controller {
 	 * 		   and render login screen.
 	 */
 	public static Result login() {
-		//session().clear();
+		session().clear();
 		return ok(login.render());
 	}
 
@@ -75,7 +75,7 @@ public class Application extends Controller {
 			String userName = session("connected");
 			return ok(profile.render(userName));
 		} else {
-			return ok(login.render());
+			return redirect(controllers.routes.Application.login());
 		}
 		
 	}

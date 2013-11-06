@@ -243,6 +243,10 @@ public class MongoLink {
 		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
 	}
 	
+	/**
+	 * @param username - Username of the current user
+	 * @return A list of groups which the member is part of
+	 */
 	public ArrayList<String> getGroups(String username) {
 		ArrayList<String> retList = new ArrayList<String>();
 		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
@@ -255,6 +259,11 @@ public class MongoLink {
 		return retList;
 	}
 
+	/**
+	 * @param username - Username of the current user
+	 * @param groupID - GroupID to check against
+	 * @return True if user is a member of 'groupID', False otherwise
+	 */
 	public boolean isMember(String username, String groupID) {
 		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
 		
