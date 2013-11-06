@@ -13,6 +13,7 @@
 
     <!-- jQuery -->
     <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.js" type="text/javascript"></script>
   </head>
 
   <body>
@@ -58,15 +59,11 @@
         placeholder="what's on your mind?"> </textarea>
         <br>
         <small align="right"> <!--(Maximum characters: 140)-->
-        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</small>
+        You have <input readonly type="text" id="charCountdown" name="countdown" size="3" value="140"> characters left.</small>
 
       </form>
 
-    	<div id = "task_referencer" width = "100px" position = "relative">
-    		<select id="tasks" display = "absolute" width = "100px">
-    			<option value="default">-Reference a Task-</option>
-    		</select>
-    	</div>
+   
 
     <select id="post_type" onchange="postTypeChange(this.value)">
       <option value="text_post">Text Post</option>
@@ -132,6 +129,8 @@
     }
 
 
+
+
     function postFormOnKeyDown (currentElement) {
       if (event.keyCode == 13) { 
         postToFeed(); 
@@ -150,6 +149,8 @@
 
   var post_count = 0;
   var task_ids = [];
+  var tasks = [];
+  var task_names = [];
 
   function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
 
@@ -184,15 +185,11 @@
 
   function postTypeChange(option) {
   	if (option == "text_post") {
-  		var task_referencer = document.getElementById("task_referencer");
-  		task_referencer.style.visibility= 'visible';
   		var limitedtextfield = document.getElementById("limitedtextfield");
   		limitedtextfield.rows = 5
   		limitedtextfield.cols = 30;
 
   	} else {
-  		var task_referencer = document.getElementById("task_referencer");
-  		task_referencer.style.visibility= 'hidden';
   		var limitedtextfield = document.getElementById("limitedtextfield");
   		limitedtextfield.rows = 1;
   		limitedtextfield.cols = 30;
@@ -200,362 +197,6 @@
 
   }
   
-  function addToFeed(stream_array) {
-	  document.getElementById("username").innerHTML="@userName";
-
-	  	for (var i=0; i < stream_array.length;i++) {
-
-
-	  		var message_type = stream_array[i][0]['object']["objectType"];
-
-	  		var post_no = 0;
-
-	  		var post_id = stream_array[i][0]['id'];
-	  		
-	  		if (i == (stream_array.length - 1)) {
-	  			final_post_id = post_id;	
-	  		}
-
-	  		var published = stream_array[i][0]['published'];
-
-	  		var publisher = stream_array[i][0]['actor']["displayName"];
-	  		
-	  		var publisherType = stream_array[i][0]['actor']["objectType"];
-	  	
-	  		var verb = stream_array[i][0]['verb'];
-
-	  		var post = document.createElement("li");
-	      post.setAttribute("class", "media");
-	  		post.id = post_id;
-	  		post.className = "post";
-
-	      var post_body = document.createElement("div");
-	      post_body.setAttribute("class", "media-body");
-	  	
-	  		document.getElementById("stream").appendChild(post);
-
-	  		var date_and_time = document.createElement("small");
-	  		date_and_time.innerHTML = published + "<br>";
-
-	      var reply_message_div = document.createElement("div");
-	      reply_message_div.setAttribute("class", "col-xs-8");
-
-	  		var reply_message = document.createElement("input");
-	  		reply_message.placeholder = "Your message"
-	  		reply_message.type = "text";
-	      reply_message.setAttribute("class", "form-control input-sm");
-	  					
-	  		var reply_button = document.createElement("button");
-	      reply_button.setAttribute("class", "btn btn-default btn-sm");
-	  		reply_button.innerHTML = 'Reply';
-	  		//reply_button.align = "right"; 	
-
-	      //reply_form.appendChild(reply_message);
-	      //reply_form.appendChild(reply_button);
-	      //reply_form_div.appendChild(reply_form);
-	      reply_message_div.appendChild(reply_message);
-
-	  		var post_options = document.createElement("div");
-
-	  		if (publisher == "@userName") {
-	  			var delete_button = document.createElement("button");
-	        delete_button.setAttribute("class", "btn btn-danger btn-xs");
-	  			delete_button.innerHTML = "Delete";
-	  			post_options.appendChild(delete_button);
-
-	  		 	delete_button.onclick = (function(post_id) {
-	            	  return function() {
-	            	      delete_post(post_id);
-	              }
-	         	 }(post_id));
-
-	  		}
-
-
-	  		 reply_button.onclick = (function(post_id, reply_message) {
-	              return function() {
-	                  replyToPost(post_id, reply_message);
-	              }
-	          }(post_id, reply_message));
-
-
-	  		post_options.style.padding = "10px";
-	  		
-	  		switch(message_type){
-	  		case "MESSAGE":
-	  			var user = document.createElement("h4");
-	        user.setAttribute("class", "media-heading");
-	  			user.innerHTML = publisher;
-	  		
-	  			var message_text = stream_array[i][0]['object']["message"];
-	  			var message = document.createElement("p");
-	  			message_text = message_text.replace("\n", "<br>");
-	  			message.innerHTML = message_text;
-
-	        /*
-	  			post.appendChild(date_and_time);
-	  			post.appendChild(user);
-	  			post.appendChild(message);
-	  			post.appendChild(reply_message);
-	  			post.appendChild(reply_button);
-	  			//post.appendChild(post_options);
-	        */
-	  			
-	  			post_body.appendChild(user);
-	  			post_body.appendChild(message);
-	        post_body.appendChild(date_and_time);
-	  			post_body.appendChild(reply_message_div);
-	  			post_body.appendChild(reply_button);
-	        //post_body.appendChild(reply_form_div);
-	        post.appendChild(post_body);
-
-	        break;
-	      case "TASK":
-	  			var task_name = stream_array[i][0]['object']["name"];
-	        var task_heading = document.createElement("h4");
-	        task_heading.setAttribute("class", "media-heading");
-	        task_heading.innerHTML = "Task";
-	        
-	  			var task_data = document.createElement("p");
-
-	  			var task_status = stream_array[i][0]['object']["status"];
-	  			var task_priority = stream_array[i][0]['object']["priority"];
-	  			post.style.backgroundColor = "#d9edf7";
-	        //post.setAttribute("class", "alert, alert-warning");
-	  			task_data.innerHTML = task_name + " BY " + publisher.bold();
-	  			var task_details = document.createElement("p");
-	  			task_details.style.cssFloat = "right";
-	  			task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
-
-	  			var priority_button = document.createElement("button");
-
-	  			priority_button.innerHTML= "Change Task Priority";
-	  			priority_button.type = "text";
-	  		//	priority_button.style.cssFloat = "right";
-	  			priority_button.onclick = (function (post_id) {
-	  				return function() {
-	  					var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
-	  					if (new_priority <  4 && new_priority > 0) {
-							post_new_task_details(new_priority, "p", post_id);
-						} else {
-							alert("Value entered is not between 1 and 3");
-						}
-					}
-	  			}(post_id));
-
-	  			var status_button = document.createElement("button");
-	  			status_button.innerHTML= "Change Task Status";
-	  			status_button.type = "text";
-	  			status_button.onclick = (function (post_id) {
-	  				return function() {
-						var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
-						post_new_task_details(new_status, "s", post_id);
-					
-					}
-	  			}(post_id));
-
-
-	  			post_options.appendChild(priority_button);
-	  			post_options.appendChild(status_button);
-
-	  			if (publisher == "@userName") {
-	  				var assign_button = document.createElement("button");
-	  				assign_button.innerHTML = "Assign members";
-	  				post_options.appendChild(assign_button);
-
-	  		 		assign_button.onclick = (function(post_id) {
-	            		  return function() {
-	            	 	    // delete_post(post_id);
-	             	 }
-	         		}(post_id));
-	  			}
-
-	        post_body.appendChild(task_heading);
-	        post_body.appendChild(task_details);
-	  			post_body.appendChild(task_data);	
-	        post_body.appendChild(date_and_time);	
-	  			post_body.appendChild(reply_message_div);
-	  			post_body.appendChild(reply_button);
-	        post.appendChild(post_body);
-	  			//post.appendChild(post_options);
-				break;
-	  		case "JENKINS" :
-	  			var jenkins = document.createElement("h4");
-	        jenkins.setAttribute("class", "media-heading");
-	  			jenkins.innerHTML = publisher;
-	  			
-	  			var build_data = document.createElement("p");
-	  			var build_name = stream_array[i][0]['object']["name"];
-	  			var build_number = stream_array[i][0]['object']["number"];
-	  			var build_status = stream_array[i][0]['object']["status"];
-	  			var build_url = stream_array[i][0]['object']["url"];
-	  			
-	  			var build_link = document.createElement('a');
-	  			build_link.href = build_url;
-	  			build_link.innerHTML = "See build";
-	  			
-	  			if (build_status == "SUCCESS") {
-	  				post.style.backgroundColor = "#AFD772";	
-	          //post_body.setAttribute("class", "alert alert-success");
-	  			} else {
-	  				post.style.backgroundColor = "#FF7A70";	
-	          //post_body.setAttribute("class", "alert alert-danger");
-	  			}
-	  			
-	  			build_data.innerHTML = build_name + " build " + build_number + " finished with status: " + build_status + ". ";
-				  build_data.appendChild(build_link);
-	  			
-	  			post_body.appendChild(jenkins);
-	  			post_body.appendChild(build_data);
-	        post_body.appendChild(date_and_time);
-	  			post_body.appendChild(reply_message_div);
-	  			post_body.appendChild(reply_button);
-	        post.appendChild(post_body);
-	  			break;
-	  		case "GIT":
-	  			var repo = stream_array[i][0]['object']['repository'];
-	  			var repo_name = repo["name"];
-	  			var repo_url = repo["url"];
-	  			var branch = stream_array[i][0]['object']['branch'];
-	  			var branch_name = branch["name"];
-	  			var branch_url = branch["url"];
-
-	        var git_heading = document.createElement("h4");
-	        git_heading.setAttribute("class", "media-heading");
-	        git_heading.innerHTML = "GIT";
-	  			
-	  			var branch_link = document.createElement('a');
-	  			branch_link.href = branch_url;
-	  			branch_link.innerHTML = branch_name.bold()
-	  			
-	  			var repo_link = document.createElement('a');
-	  			repo_link.href = repo_url;
-	  			repo_link.innerHTML = repo_name.bold()
-	  			
-	  			
-	  			var git_data = document.createElement("div");
-	  			git_data.innerHTML = publisher.bold() + " pushed to branch " + $(branch_link).outerHTML() + " at repository " + $(repo_link).outerHTML();
-	  			
-	  			var commits = stream_array[i][0]['object']['commits'];
-	  			var commit_total = stream_array[i][0]['object']['totalCommits'];
-	  			var commit_data = document.createElement("div");
-	  			var commit_list = document.createElement("ul");
-	  			commit_data.appendChild(commit_list);
-	  			for(var k = 0; k < Math.min(2,commit_total); k++) {
-	  				var commit = commits[k];
-	  				var commit_url = commit["url"];
-	  				var commit_author = commit["author"];
-	  				var commit_message = commit["message"];
-	  				var commit_link = document.createElement('a');
-	  				commit_link.href = commit_url;
-	  				commit_link.innerHTML = "See commit"
-	  				
-	  				
-	  				var commit_list_entry = document.createElement("li");
-	  				commit_list_entry.style.display="block";
-	  				commit_list_entry.innerHTML = commit_author.bold() + ": " + commit_message + " " + $(commit_link).outerHTML();
-	  				commit_list.appendChild(commit_list_entry);
-	  				
-	  			}
-	  			if (commit_total > 2){
-	  				var summary_link = document.createElement('a');
-	  				summary_link.href = branch_url;
-	  				summary_link.innerHTML = "... and " + (commit_total - 2) + " more commits";
-	  				var commit_summary = document.createElement("li");
-	  				commit_summary.appendChild(summary_link);
-	  				commit_summary.style.display="block";
-	  				commit_list.appendChild(commit_summary);
-	  				
-	  			}
-	  			
-	  			post.style.backgroundColor = "#fcf8e3";
-	        //post_body.setAttribute("class", "alert, alert-info");
-	  			
-	        post_body.appendChild(git_heading);
-	  			post_body.appendChild(git_data);
-	  			post_body.appendChild(commit_data);
-	        post_body.appendChild(date_and_time);
-	  			post_body.appendChild(reply_message_div);
-	  			post_body.appendChild(reply_button);
-	  			post.appendChild(post_body);
-	  			break;
-	  		}
-
-	  		 reply_button.onclick = (function(post_id, reply_message) {
-	              return function() {
-	                  replyToPost(post_id, reply_message);
-	              }
-	          }(post_id, reply_message));
-
-	  		 reply_message.onkeypress = (function(post_id, reply_message) { 
-	  		 	return function() {
-	  		 			if (event.keyCode == 13) {
-	  		 				replyToPost(post_id, reply_message);
-	  		 			}
-	  		 	}
-	  		 }(post_id, reply_message));
-
-	  		var j = 1;
-	  		while (j < stream_array[i].length) {
-
-	  			if (stream_array[i][j]['object']["objectType"] == "TASK") {
-	  				var task_reference_div = document.createElement("div");
-	  				task_reference_div.innerHTML = "Referencing: " + stream_array[i][j]['object']["name"];
-	  				//task_reference_div.style.backgroundColor = "#FF6699";
-	  				task_reference_div.className = "post";
-	  				task_reference_div.style["cssFloat"] = "right";
-	  				task_reference_div.style["background"] = "#d9edf7";
-
-	  				post.insertBefore(task_reference_div, post.firstChild);
-	  				j++;
-
-	  			} else {
-	  				var reply_div = document.createElement("div");
-	  				//reply_div.className = "reply_post";
-	  				reply_div.setAttribute("class", "media");
-	      	  reply_div.style.paddingLeft = "10%";
-
-	          var reply_div_body = document.createElement("div");
-	          reply_div_body.setAttribute("class", "media-body");
-	  				
-	  				var reply_published = document.createElement("small");
-	  				reply_published.innerHTML = stream_array[i][j]['published'];
-
-	  				var reply_publisher = document.createElement("h4");
-	          reply_publisher.setAttribute("class", "media-heading");
-	  				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"];
-
-	  				var reply_message_text = document.createElement("p");
-	  				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
-	  			
-	  				var reply_publisherType = stream_array[i][j]['actor']["objectType"];
-	  	
-	  				var reply_verb = stream_array[i][j]['verb'];
-	  		
-	  				var reply_message_type = stream_array[i][j]['object']["objectType"];
-
-	          post_body.appendChild(reply_div);
-	          reply_div.appendChild(reply_div_body);
-	          reply_div_body.appendChild(reply_publisher);
-	          reply_div_body.appendChild(reply_published);
-	          reply_div_body.appendChild(reply_message_text);    
-	  			j++;
-
-	  		}
-
-
-	  		}
-	  	  post.appendChild(post_options);
-
-
-
-	  		post_no = post_no + 1;
-	  	}
-
-	  	
-	  
-  }
-
 
   function refreshFeed() {
       document.getElementById("stream").innerHTML = "";
@@ -621,39 +262,101 @@
 
   function addTasks(task_array) {
 
-  	document.getElementById("tasks").options.length = 1;
 
   	for (var i=0; i < task_array.length; i++) {
 
   		var task_id = task_array[i]['id'];
   		task_ids[i] = task_id;
 
+
   		var task_name = task_array[i]['object']["name"];
+      task_names[i] = task_name;
+      tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
+      tasks[i] = jQuery.parseJSON(tasks[i]);
+
   		var option = document.createElement("option");
   		option.text = task_name;
-  		option.style.width = "100px";
-  		var task_referencer = document.getElementById("tasks").add(option, null);
+  		option.style.width = "45%";
   	}
 
   }
 
-	var final_post_id;
+   $(function ()  {
+     var lastHash = -1;
+     var hashes = [-1];
 
-	$.ajax({
-      	
-        type: "GET",
-        url: "/rest/morefeed",
-        data: {"activity":final_post_id},
-        success: function(data){   
+     $("#limitedtextfield").autocomplete({
+         minLength: 0,
+         source: function (request, response) {
+            var limitedtextfield = document.getElementById("limitedtextfield");
+             if (lastHash>=0 && limitedtextfield.rows == 5) {
+                 response($.ui.autocomplete.filter(
+                 tasks, request.term.substring(lastHash+1)));          
+             }
+         },
+         focus: function () {
+             return false;
+         },
+         select: function (event, ui) {
+             var terms = this.value.split();
+             terms.pop();
+             terms.push(ui.item.value);
+            // terms.push("");
+             this.value = this.value.substr(0,lastHash + 1);
+             this.value += terms.join("");
+             this.value += "#";
+             return false;
+         },
+         messages: {
+           noResults: '',
+           results: function() {}
+         },
+         position: {
+            of:"#limitedtextfield",
+            offset: "-2px 0 0 0" },
+         open: function(event, ui){
+            var $input = $(event.target),
+            $results = $input.autocomplete("widget");
+            $results.css("background-color", "#d9edf7");
+            $results.css("list-style", "none");
+            $results.css("border", "2px solid");
+            $results.css("border-radius", "5px");
+            $results.css("width", "50%");
+            $results.css("border-color", "#AF3838");
+            $results.css("z-index", "30 !important");
+            $results.css("position", "absolute");
 
-        	addToFeed(data);
+
         }
-    });
-	
-	
+     }).on("keypress", function (e) {
+         var keys = [];
+         keys.unshift(e.which);
+         if (String.fromCharCode(keys[0]) == "#") {
+             lastHash =  $("#limitedtextfield").val().length;
+             hashes.unshift(lastHash);
+         }
+     }).on("keydown", function (e) {
+        if (e.keyCode == 8) {
+          var selection = $("#limitedtextfield").val();
+          var deleted_char = selection.charAt(selection.length -1);
+          if (deleted_char == "#") {
+            hashes.splice(0, 1);
+            lastHash = hashes[0];
+          $('#limitedtextfield').autocomplete('close');
+          }
+
+        }
+
+     });
+
+
+   });
+
+
   function generateFeed(stream_array) {
 
   	document.getElementById("username").innerHTML="@userName";
+    document.getElementById("limitedtextfield").value = "";
 
   	for (var i=0; i < stream_array.length;i++) {
 
@@ -684,11 +387,12 @@
       var post_body = document.createElement("div");
       post_body.setAttribute("class", "media-body");
   	
+  	
+  		var stream = document.getElementById("stream");
   		if (post_count > 0) {
-  			var stream = document.getElementById("stream");
   			stream.insertBefore(post, stream.childNodes[0]);
   		} else {
-  			document.getElementById("stream").insertBefore(post);
+  			stream.insertBefore(post);
   		}
 
   		var date_and_time = document.createElement("small");
@@ -799,6 +503,7 @@
 					}
 				}
   			}(post_id));
+
 
   			var status_button = document.createElement("button");
   			status_button.innerHTML= "Change Task Status";
@@ -1122,13 +827,40 @@
 
   }
 
+  function extractReferences(message) {
+
+      var result = message.split("#");
+
+      var i = 0;
+      
+      while (i < task_ids.length) {
+          if (task_names[i] == result[1]) {
+            return result[1];
+          }
+          i++;
+      }
+      return "";
+  }
+
+  function getRefId(reference) {
+
+    var i = 0;
+      while (i < task_ids.length) {
+          if (task_names[i] == reference) {
+            return task_ids[i];
+          }
+          i++;
+      }
+      return "";
+
+  }
 
   function postToFeed() {
 
       var currentdate = new Date();
       
       var name_text = "@userName";
-      /*document.getElementById("name").value;*/
+
       var message_text = document.getElementById("limitedtextfield").value;
       
       message_text = message_text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
@@ -1140,18 +872,20 @@
       
       if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
-      	var taskReferencer = document.getElementById("tasks");
+        var reference = extractReferences(message_text);
+        var ref_id = getRefId(reference);
+
   	    var references = [];
 
-      	if (taskReferencer.selectedIndex == 0) {
+        if (ref_id != "") {
 
-      	} else {
+      		references =  ["\"" + ref_id + "\""];
 
+        }
 
-      		var referencedTask = task_ids[taskReferencer.selectedIndex-1];
-      		references =  ["\"" + referencedTask + "\""];
+      //  message_text = message_text.replace("#".concat(reference).concat(, "");
 
-      	}
+      	
 
       var message_object = generateMessageObject(message_text)    
 
@@ -1187,11 +921,12 @@
             complete: refreshFeed
         });      
                     
-        document.getElementById("limitedtextfield").value = "";
+
 
           
       } 
-      
+      document.getElementById("limitedtextfield").value = "";
+      document.getElementById("charCountdown").value = "140";
   }
 
   </script>

@@ -16,6 +16,7 @@ GET     /:groupID/register          	controllers.Application.register()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               	controllers.Assets.at(path="/public", file)
 
+<<<<<<< HEAD
 GET		/:groupID/rest/feed				controllers.Rest.getActivities(groupID)
 GET		/:groupID/rest/morefeed			controllers.Rest.getMoreActivities(groupID)
 GET		/:groupID/rest/tasks			controllers.Rest.getTasks(groupID)
@@ -23,6 +24,16 @@ GET		/:groupID/rest/alltasks			controllers.Rest.getAllTasks(groupID)
 GET		/:groupID/rest/git				controllers.Rest.getGits(groupID)
 GET		/:groupID/rest/builds			controllers.Rest.getBuilds(groupID)
 GET		/:groupID/rest/user				controllers.Rest.getUser(groupID)
+=======
+GET		/rest/feed					controllers.Rest.getActivities()
+GET		/rest/morefeed				controllers.Rest.getMoreActivities()
+GET		/rest/tasks					controllers.Rest.getTasks()
+GET		/rest/alltasks				controllers.Rest.getAllTasks()
+GET		/rest/git					controllers.Rest.getGits()
+GET		/rest/builds				controllers.Rest.getBuilds()
+GET		/rest/user					controllers.Rest.getUser()
+GET		/rest/allUsers				controllers.Rest.getAllUsers()
+>>>>>>> DBBranch
 
 
 POST	/:groupID/rest/message			controllers.Rest.createMessage(groupID)
