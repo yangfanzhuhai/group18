@@ -50,7 +50,9 @@
       <h1 id="group_name">
         Group 18
       </h1>
-      <input
+      <button id="add_group_members" class = "btn btn-info" >
+        Add group members
+      </button>
 
     </div>
 
@@ -75,28 +77,22 @@
 
               addUsers(data);
           }
+      });
     }
 
 
     function addUsers(user_array) {
 
-
       for (var i=0; i < user_array.length; i++) {
 
-        var task_id = task_array[i]['id'];
-        task_ids[i] = task_id;
+        users[i] = user_array[i];
 
-        var task_name = task_array[i]['object']["name"];
-        task_names[i] = task_name;
-        tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
-        tasks[i] = jQuery.parseJSON(tasks[i]);
+        usersJSON[i] = "{ \"value\": \"" + user_array[i] + "\" , \"data\":\"" + user_array[i] + "\" }";
+        usersJSON[i] = jQuery.parseJSON(usersJSON[i]);
 
-        var option = document.createElement("option");
-        option.text = task_name;
-        option.style.width = "45%";
       }
 
-  }
+   }
 
 
 

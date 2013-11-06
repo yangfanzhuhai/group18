@@ -46,28 +46,28 @@ public class Rest extends Controller {
 		return ok(session("connected"));
 	}
 
-	public static Result getActivities() {
-		return ok(MongoLink.MONGO_LINK.getNewsFeed().toString());
+	public static Result getActivities(String groupID) {
+		return ok(MongoLink.MONGO_LINK.getNewsFeed(groupID).toString());
 	}
 	
-	public static Result getMoreActivities() {
-		return ok(MongoLink.MONGO_LINK.getNextNews(getValueFromRequest("activity")).toString());
+	public static Result getMoreActivities(String groupID) {
+		return ok(MongoLink.MONGO_LINK.getNextNews(groupID, getValueFromRequest("activity")).toString());
 	}
 
-	public static Result getTasks() {
-		return ok(MongoLink.MONGO_LINK.getTasks().toString());
+	public static Result getTasks(String groupID) {
+		return ok(MongoLink.MONGO_LINK.getTasks(groupID).toString());
 	}
 
-	public static Result getAllTasks() throws ParseException {
-		return ok(MongoLink.MONGO_LINK.getAllTasksByName().toString());
+	public static Result getAllTasks(String groupID) throws ParseException {
+		return ok(MongoLink.MONGO_LINK.getAllTasksByName(groupID).toString());
 	}
 	
-	public static Result getGits() {
-		return ok(MongoLink.MONGO_LINK.getGitCommits().toString());
+	public static Result getGits(String groupID) {
+		return ok(MongoLink.MONGO_LINK.getGitCommits(groupID).toString());
 	}
 	
-	public static Result getBuilds() {
-		return ok(MongoLink.MONGO_LINK.getJenkinsBuilds().toString());
+	public static Result getBuilds(String groupID) {
+		return ok(MongoLink.MONGO_LINK.getJenkinsBuilds(groupID).toString());
 	}
 
 	public static Result registerUser() {
@@ -105,6 +105,10 @@ public class Rest extends Controller {
 		}
 
 	}
+	
+	public static Result getAllUsers() {
+		return ok(MongoLink.MONGO_LINK.getUsers().toString());
+	}
 
 	public static Result parseGitHook() {
 		JsonNode json = request().body().asJson();
@@ -128,10 +132,10 @@ public class Rest extends Controller {
 	}
 	
 	
-	public static Result updateStatusAndPriority() {
+	public static Result updateStatusAndPriority(String groupID) {
 		try {
 			
-			MongoLink.MONGO_LINK.updateStatusOrPriority((DBObject) JSON.parse(getValueFromRequest("activity")));
+			MongoLink.MONGO_LINK.updateStatusOrPriority(groupID, (DBObject) JSON.parse(getValueFromRequest("activity")));
 			return ok();
 			
 		} catch (MongoException e) {
@@ -139,9 +143,9 @@ public class Rest extends Controller {
 		}
 	}
 	
-	public static Result deletePost() {
+	public static Result deletePost(String groupID) {
 		
-		MongoLink.MONGO_LINK.deletePost((DBObject) JSON.parse(getValueFromRequest("activity")));
+		MongoLink.MONGO_LINK.deletePost(groupID, (DBObject) JSON.parse(getValueFromRequest("activity")));
 		return ok();
 	}
 
