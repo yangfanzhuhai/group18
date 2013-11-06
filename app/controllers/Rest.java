@@ -234,7 +234,7 @@ public class Rest extends Controller {
 	}
 	
 	private static String replaceSpecialChars(String msg) {
-		return msg.replace("\n", "  ").replace("\t", "  ").replace("\r", "  s");
+		return msg.replace("\n", "\\\\n").replace("\t", "\\\\t").replace("\r", "\\\\r");
 	}
 	
 	private static String createDate() {
