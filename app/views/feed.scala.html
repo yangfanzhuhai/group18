@@ -59,10 +59,11 @@
         placeholder="what's on your mind?"> </textarea>
         <br>
         <small align="right"> <!--(Maximum characters: 140)-->
-        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</small>
+        You have <input readonly type="text" id="charCountdown" name="countdown" size="3" value="140"> characters left.</small>
 
       </form>
 
+   
 
     <select id="post_type" onchange="postTypeChange(this.value)">
       <option value="text_post">Text Post</option>
@@ -269,8 +270,7 @@
 
   		var option = document.createElement("option");
   		option.text = task_name;
-  		option.style.width = "100px";
-
+  		option.style.width = "45%";
   	}
 
   }
@@ -355,6 +355,7 @@
 
   	for (var i=0; i < stream_array.length;i++) {
 
+
   		var message_type = stream_array[i][0]['object']["objectType"];
 
   		var post_no = 0;
@@ -377,11 +378,12 @@
       var post_body = document.createElement("div");
       post_body.setAttribute("class", "media-body");
   	
+  	
+  		var stream = document.getElementById("stream");
   		if (post_count > 0) {
-  			var stream = document.getElementById("stream");
   			stream.insertBefore(post, stream.childNodes[0]);
   		} else {
-  			document.getElementById("stream").insertBefore(post);
+  			stream.insertBefore(post);
   		}
 
   		var date_and_time = document.createElement("small");
@@ -492,6 +494,7 @@
 					}
 				}
   			}(post_id));
+
 
   			var status_button = document.createElement("button");
   			status_button.innerHTML= "Change Task Status";
@@ -852,13 +855,12 @@
       var message_text = document.getElementById("limitedtextfield").value;
       
       message_text = message_text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
-
+      
       var dropdown = document.getElementById("post_type");
       var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
       
       var date_and_time_stamp = getTimeStamp();
-
-
+      
       if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
         var reference = extractReferences(message_text);
@@ -874,6 +876,7 @@
 
       //  message_text = message_text.replace("#".concat(reference).concat(, "");
 
+      	
 
       var message_object = generateMessageObject(message_text)    
 
@@ -909,11 +912,12 @@
             complete: refreshFeed
         });      
                     
-        document.getElementById("limitedtextfield").value = "";
+
 
           
       } 
-      
+      document.getElementById("limitedtextfield").value = "";
+      document.getElementById("charCountdown").value = "140";
   }
 
   </script>
