@@ -54,12 +54,11 @@
 
 
       <h1 id="username"> </h1>  
+      <div id = "groups">
       <a id="group_name" class = "h1">
-
       </a>
-      <button id="add_group_members" class = "btn btn-info" >
-        Add group members
-      </button>
+    </div>
+
 
     </div>
 
@@ -93,23 +92,40 @@
 
     }
 
-    function parseUserData(data) {
+    function toggleAddMembersBox() {
 
-        var group_name = data[0]['customID'];
-        alert(group_name);
-        var a = document.getElementById("group_name");
-        var linkText = document.createTextNode(group_name);
-        a.appendChild(linkText);
-
-        var ref = "@routes.Application.feed(\"Progress\",0)";
-
-        a.href = ref;
 
     }
 
+    function parseUserData(data) {
+
+      for (var i = 0; i < data.length; i++) {
+
+        var group_name = data[i]['customID'];
+        var members_array = data[i]['members'];
+
+        var group_members_div = document.createElement("div");
+        group_members_div.innerHTML = "Group Members: ";
+
+        var j = 0;
+        while (j < members_array.length) {
+          users[j] = members_array[j];
+          group_members_div.innerHTML += "<br>" + members_array[j];
+          j++;
+        }
+
+        var a = document.createElement("a");
+        a.href = "/../" + group_name;
+        var groups_div = document.getElementById("groups");
+        var linkText = document.createTextNode(group_name);
 
 
+        a.appendChild(linkText);
+        groups_div.appendChild(a);
+        groups_div.appendChild(group_members_div);
 
+    }
+  }
 
 
     function addUsers(user_array) {
