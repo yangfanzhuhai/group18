@@ -105,6 +105,10 @@ public class Rest extends Controller {
 		}
 
 	}
+	
+	public static Result getAllUsers() {
+		return ok(MongoLink.MONGO_LINK.getUsers().toString());
+	}
 
 	public static Result parseGitHook() {
 		JsonNode json = request().body().asJson();

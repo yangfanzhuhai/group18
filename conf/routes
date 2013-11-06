@@ -22,6 +22,7 @@ GET		/rest/alltasks				controllers.Rest.getAllTasks()
 GET		/rest/git					controllers.Rest.getGits()
 GET		/rest/builds				controllers.Rest.getBuilds()
 GET		/rest/user					controllers.Rest.getUser()
+GET		/rest/allUsers				controllers.Rest.getAllUsers()
 
 
 POST	/rest/message				controllers.Rest.createMessage()
