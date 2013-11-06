@@ -41,7 +41,7 @@ public class Application extends Controller {
 	 * 		   and render login screen.
 	 */
 	public static Result login() {
-		session().clear();
+		//session().clear();
 		return ok(login.render());
 	}
 
