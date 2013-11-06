@@ -3,34 +3,36 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.feed(toggle: Integer = 0)
+GET		/								controllers.Application.login()
+GET     /profile		    			controllers.Application.profile()
+GET     /:groupID                   	controllers.Application.feed(groupID, toggle: Integer = 0)
 
-GET     /about                      controllers.Application.about()
-GET     /builds                     controllers.Application.feed(toggle: Integer = 3)
-GET     /gits                       controllers.Application.feed(toggle: Integer = 2)
-GET     /login                      controllers.Application.login()
-GET     /tasks                      controllers.Application.feed(toggle: Integer = 1)
-GET     /register                   controllers.Application.register()
+GET     /about                      	controllers.Application.about()
+GET     /:groupID/builds            	controllers.Application.feed(groupID, toggle: Integer = 3)
+GET     /:groupID/gits              	controllers.Application.feed(groupID, toggle: Integer = 2)
+GET     /login             				controllers.Application.login()
+GET     /:groupID/tasks             	controllers.Application.feed(groupID, toggle: Integer = 1)
+GET     /register          				controllers.Application.register()
+
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
-
-GET		/rest/feed					controllers.Rest.getActivities()
-GET		/rest/morefeed				controllers.Rest.getMoreActivities()
-GET		/rest/tasks					controllers.Rest.getTasks()
-GET		/rest/alltasks				controllers.Rest.getAllTasks()
-GET		/rest/git					controllers.Rest.getGits()
-GET		/rest/builds				controllers.Rest.getBuilds()
-GET		/rest/user					controllers.Rest.getUser()
+GET     /assets/*file               	controllers.Assets.at(path="/public", file)
 
 
-POST	/rest/message				controllers.Rest.createMessage()
-POST	/rest/register				controllers.Rest.registerUser()
-POST	/rest/login					controllers.Rest.loginUser()
+GET		/:groupID/rest/feed				controllers.Rest.getActivities(groupID)
+GET		/:groupID/rest/morefeed			controllers.Rest.getMoreActivities(groupID)
+GET		/:groupID/rest/tasks			controllers.Rest.getTasks(groupID)
+GET		/:groupID/rest/alltasks			controllers.Rest.getAllTasks(groupID)
+GET		/:groupID/rest/git				controllers.Rest.getGits(groupID)
+GET		/:groupID/rest/builds			controllers.Rest.getBuilds(groupID)
+GET		/rest/user						controllers.Rest.getUser()
 
-POST	/rest/git					controllers.Rest.parseGitHook()
-POST	/rest/jenkins				controllers.Rest.parseJenkinsNotfication()
 
-POST	/rest/update/task			controllers.Rest.updateStatusAndPriority()
 
-POST	/rest/delete/post			controllers.Rest.deletePost()
+POST	/:groupID/rest/message			controllers.Rest.createMessage(groupID)
+POST	/rest/register					controllers.Rest.registerUser()
+POST	/rest/login						controllers.Rest.loginUser()
+POST	/:groupID/rest/git				controllers.Rest.parseGitHook(groupID)
+POST	/:groupID/rest/jenkins			controllers.Rest.parseJenkinsNotfication(groupID)
+POST	/:groupID/rest/update/task		controllers.Rest.updateStatusAndPriority(groupID)
+POST	/:groupID/rest/delete/post		controllers.Rest.deletePost(groupID)

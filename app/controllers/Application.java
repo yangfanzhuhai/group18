@@ -3,11 +3,10 @@ package controllers;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.about;
-import views.html.builds;
-import views.html.gits;
 import views.html.feed;
 import views.html.login;
 import views.html.register;
+import views.html.profile;
 
 public class Application extends Controller {
 	
@@ -18,10 +17,10 @@ public class Application extends Controller {
 	 * 		   Else render login screen.
 	 */
 
-	public static Result feed(Integer toggle) {
+	public static Result feed(String groupID, Integer toggle) {
 		if (loggedIn()) {
 			String userName = session("connected");
-			return ok(feed.render(toggle, userName));
+			return ok(feed.render(groupID, toggle, userName));
 		} else {
 			return ok(login.render());
 		}
@@ -36,32 +35,6 @@ public class Application extends Controller {
 	public static Result about() {
 		return ok(about.render());
 	}
-
-	/**
-	 * 
-	 * @return Render builds page if logged in.
-	 * 		   Else render login screen.
-	 */
-	public static Result builds() {
-		if (loggedIn()) {
-			return ok(builds.render());
-		} else {
-			return ok(login.render());
-		}
-	}
-
-	/**
-	 * 
-	 * @return Render git page if logged in.
-	 * 		   Else render login screen.
-	 */
-	public static Result gits() {
-		if (loggedIn()) {
-			return ok(gits.render());
-		} else {
-			return ok(login.render());
-		}
-	}
 	
 	/**
 	 * 
@@ -69,7 +42,7 @@ public class Application extends Controller {
 	 * 		   and render login screen.
 	 */
 	public static Result login() {
-		session().clear();
+		//session().clear();
 		return ok(login.render());
 	}
 
@@ -89,6 +62,16 @@ public class Application extends Controller {
 	 */
 	private static boolean loggedIn(){
 		return session("connected") != null;
+	}
+
+	public static Result profile() {
+		if (loggedIn()) {
+			String userName = session("connected");
+			return ok(profile.render(userName));
+		} else {
+			return ok(login.render());
+		}
+		
 	}
 
 }
