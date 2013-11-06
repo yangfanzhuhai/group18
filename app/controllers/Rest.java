@@ -59,7 +59,7 @@ public class Rest extends Controller {
 	}
 
 	public static Result getAllTasks() throws ParseException {
-		return ok(MongoLink.MONGO_LINK.getAllTasksWithoutReplies().toString());
+		return ok(MongoLink.MONGO_LINK.getAllTasksByName().toString());
 	}
 	
 	public static Result getGits() {
