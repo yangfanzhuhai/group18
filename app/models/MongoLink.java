@@ -77,6 +77,9 @@ public class MongoLink {
 		}*/
 		
 	//	long totalTime = 0;
+		
+		System.out.println(ml.getGroups("Matt"));
+		System.out.println(ml.isMember("Matt", "Progress"));
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
 	//	list = ml.getNewsFeed();
 	//	for(int i = 0; i < 100; i++) {
@@ -242,7 +245,7 @@ public class MongoLink {
 	
 	public ArrayList<String> getGroups(String username) {
 		ArrayList<String> retList = new ArrayList<String>();
-		List<DBObject> list = groups.find(QueryBuilder.start("members").in(username).get()).toArray();
+		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
 	
 		for(DBObject o : list)
 		{
@@ -253,7 +256,15 @@ public class MongoLink {
 	}
 
 	public boolean isMember(String username, String groupID) {
-		return getGroups(username).contains(groupID);
+		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
+		
+		for(DBObject o : list)
+		{
+			if(o.get("name").equals(groupID))
+				return true;
+		}
+	
+		return false;
 	}
 	
 	/** Method which changes either the status or priority of a task

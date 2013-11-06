@@ -1,5 +1,6 @@
 package controllers;
 
+import models.MongoLink;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.about;
@@ -20,7 +21,12 @@ public class Application extends Controller {
 	public static Result feed(String groupID, Integer toggle) {
 		if (loggedIn()) {
 			String userName = session("connected");
-			return ok(feed.render(groupID, toggle, userName));
+			if(MongoLink.MONGO_LINK.isMember(userName, groupID)) {
+				return ok(feed.render(groupID, toggle, userName));
+			} else {
+				return redirect(controllers.routes.Application.profile());
+			}
+			
 		} else {
 			return ok(login.render());
 		}

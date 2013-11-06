@@ -7,11 +7,11 @@ GET		/								controllers.Application.login()
 GET     /profile		    			controllers.Application.profile()
 GET     /:groupID                   	controllers.Application.feed(groupID, toggle: Integer = 0)
 
-GET     /about                      	controllers.Application.about()
-GET     /:groupID/builds            	controllers.Application.feed(groupID, toggle: Integer = 3)
-GET     /:groupID/gits              	controllers.Application.feed(groupID, toggle: Integer = 2)
 GET     /login             				controllers.Application.login()
+GET     /about                      	controllers.Application.about()
 GET     /:groupID/tasks             	controllers.Application.feed(groupID, toggle: Integer = 1)
+GET     /:groupID/gits              	controllers.Application.feed(groupID, toggle: Integer = 2)
+GET     /:groupID/builds            	controllers.Application.feed(groupID, toggle: Integer = 3)
 GET     /register          				controllers.Application.register()
 
 
