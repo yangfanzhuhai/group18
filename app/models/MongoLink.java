@@ -178,6 +178,18 @@ public class MongoLink {
 		return newsFeed.findOne(obj).get("_id").toString();
 	}
 	
+	public boolean addNewProject(DBObject obj) {
+		
+		int oldCount = (int) groups.getCount();
+		
+		if(groups.findOne(QueryBuilder.start("customID").is(obj.get("customID")).get()) != null)
+			return false;
+		
+		groups.insert(obj);
+		
+		return (int) groups.getCount() == oldCount + 1;
+	}
+	
 	/**
 	 * Adds new user to the database, only if their username is not already
 	 * in the database
