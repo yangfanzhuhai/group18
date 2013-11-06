@@ -306,6 +306,9 @@
            noResults: '',
            results: function() {}
          },
+         position: {
+            of:"#limitedtextfield",
+            offset: "-2px 0 0 0" },
          open: function(event, ui){
             var $input = $(event.target),
             $results = $input.autocomplete("widget");
@@ -315,7 +318,9 @@
             $results.css("border-radius", "5px");
             $results.css("width", "50%");
             $results.css("border-color", "#AF3838");
-            $results.css("border-color", "#AF3838");
+            $results.css("z-index", "30 !important");
+            $results.css("position", "absolute");
+
 
         }
      }).on("keypress", function (e) {
@@ -829,7 +834,6 @@
 
     var i = 0;
       while (i < task_ids.length) {
-          alert("comparing" + task_names[i] + " and " + reference);
           if (task_names[i] == reference) {
             return task_ids[i];
           }
@@ -858,7 +862,6 @@
       if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
         var reference = extractReferences(message_text);
-        alert(reference);
         var ref_id = getRefId(reference);
 
   	    var references = [];
