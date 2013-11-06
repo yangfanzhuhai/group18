@@ -13,6 +13,7 @@
 
     <!-- jQuery -->
     <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.js" type="text/javascript"></script>
   </head>
 
   <body>
@@ -62,11 +63,7 @@
 
       </form>
 
-    	<div id = "task_referencer" width = "45%" position = "relative">
-    		<select id="tasks" display = "absolute" width = "45%">
-    			<option value="default">-Reference a Task-</option>
-    		</select>
-    	</div>
+   
 
     <select id="post_type" onchange="postTypeChange(this.value)">
       <option value="text_post">Text Post</option>
@@ -126,9 +123,11 @@
     }
 
 
+
+
     function postFormOnKeyDown (currentElement) {
       if (event.keyCode == 13) { 
-        postToFeed();
+        postToFeed(); 
         return false; 
       }
       limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
@@ -144,6 +143,8 @@
 
   var post_count = 0;
   var task_ids = [];
+  var tasks = [];
+  var task_names = [];
 
   function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
 
@@ -178,15 +179,11 @@
 
   function postTypeChange(option) {
   	if (option == "text_post") {
-  		var task_referencer = document.getElementById("task_referencer");
-  		task_referencer.style.visibility= 'visible';
   		var limitedtextfield = document.getElementById("limitedtextfield");
   		limitedtextfield.rows = 5
   		limitedtextfield.cols = 30;
 
   	} else {
-  		var task_referencer = document.getElementById("task_referencer");
-  		task_referencer.style.visibility= 'hidden';
   		var limitedtextfield = document.getElementById("limitedtextfield");
   		limitedtextfield.rows = 1;
   		limitedtextfield.cols = 30;
@@ -259,27 +256,105 @@
 
   function addTasks(task_array) {
 
-  	document.getElementById("tasks").options.length = 1;
 
   	for (var i=0; i < task_array.length; i++) {
 
   		var task_id = task_array[i]['id'];
   		task_ids[i] = task_id;
 
+
   		var task_name = task_array[i]['object']["name"];
+      task_names[i] = task_name;
+      tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
+      tasks[i] = jQuery.parseJSON(tasks[i]);
+
   		var option = document.createElement("option");
   		option.text = task_name;
   		option.style.width = "45%";
-  		var task_referencer = document.getElementById("tasks").add(option, null);
   	}
 
   }
 
+
+   $(function ()  {
+     var lastHash = -1;
+     var hashes = [-1];
+
+     $("#limitedtextfield").autocomplete({
+         minLength: 0,
+         source: function (request, response) {
+            var limitedtextfield = document.getElementById("limitedtextfield");
+             if (lastHash>=0 && limitedtextfield.rows == 5) {
+                 response($.ui.autocomplete.filter(
+                 tasks, request.term.substring(lastHash+1)));          
+             }
+         },
+         focus: function () {
+             return false;
+         },
+         select: function (event, ui) {
+             var terms = this.value.split();
+             terms.pop();
+             terms.push(ui.item.value);
+            // terms.push("");
+             this.value = this.value.substr(0,lastHash + 1);
+             this.value += terms.join("");
+             this.value += "#";
+             return false;
+         },
+         messages: {
+           noResults: '',
+           results: function() {}
+         },
+         position: {
+            of:"#limitedtextfield",
+            offset: "-2px 0 0 0" },
+         open: function(event, ui){
+            var $input = $(event.target),
+            $results = $input.autocomplete("widget");
+            $results.css("background-color", "#d9edf7");
+            $results.css("list-style", "none");
+            $results.css("border", "2px solid");
+            $results.css("border-radius", "5px");
+            $results.css("width", "50%");
+            $results.css("border-color", "#AF3838");
+            $results.css("z-index", "30 !important");
+            $results.css("position", "absolute");
+
+
+        }
+     }).on("keypress", function (e) {
+         var keys = [];
+         keys.unshift(e.which);
+         if (String.fromCharCode(keys[0]) == "#") {
+             lastHash =  $("#limitedtextfield").val().length;
+             hashes.unshift(lastHash);
+         }
+     }).on("keydown", function (e) {
+        if (e.keyCode == 8) {
+          var selection = $("#limitedtextfield").val();
+          var deleted_char = selection.charAt(selection.length -1);
+          if (deleted_char == "#") {
+            hashes.splice(0, 1);
+            lastHash = hashes[0];
+          $('#limitedtextfield').autocomplete('close');
+          }
+
+        }
+
+     });
+
+
+   });
+
+
   function generateFeed(stream_array) {
 
   	document.getElementById("username").innerHTML="@userName";
+    document.getElementById("limitedtextfield").value = "";
 
   	for (var i=0; i < stream_array.length;i++) {
+
 
   		var message_type = stream_array[i][0]['object']["objectType"];
 
@@ -296,7 +371,7 @@
   		var verb = stream_array[i][0]['verb'];
 
   		var post = document.createElement("li");
-     	post.setAttribute("class", "media");
+      post.setAttribute("class", "media");
   		post.id = post_id;
   		post.className = "post";
 
@@ -333,6 +408,21 @@
       reply_message_div.appendChild(reply_message);
 
   		var post_options = document.createElement("div");
+
+  		if (publisher == "@userName") {
+  			var delete_button = document.createElement("button");
+        delete_button.setAttribute("class", "btn btn-danger btn-xs");
+  			delete_button.innerHTML = "Delete";
+  			post_options.appendChild(delete_button);
+
+  		 	delete_button.onclick = (function(post_id) {
+            	  return function() {
+            	      delete_post(post_id);
+              }
+         	 }(post_id));
+
+  		}
+
 
   		 reply_button.onclick = (function(post_id, reply_message) {
               return function() {
@@ -388,9 +478,7 @@
   			var task_details = document.createElement("p");
   			task_details.style.cssFloat = "right";
   			task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
-  			
-  			
-			
+
   			var priority_button = document.createElement("button");
 
   			priority_button.innerHTML= "Change Task Priority";
@@ -409,17 +497,17 @@
 
 
   			var status_button = document.createElement("button");
-  			status_button.id = "status_buton";
   			status_button.innerHTML= "Change Task Status";
   			status_button.type = "text";
-  			/*status_button.onclick = (function (post_id) {
+  			status_button.onclick = (function (post_id) {
   				return function() {
 					var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
 					post_new_task_details(new_status, "s", post_id);
 				
 				}
-  			}(post_id));*/
-			
+  			}(post_id));
+
+
   			post_options.appendChild(priority_button);
   			post_options.appendChild(status_button);
 
@@ -610,21 +698,6 @@
 
 
   		}
-  		
-  		if (publisher == "@userName") {
-  			var delete_button = document.createElement("button");
-        delete_button.setAttribute("class", "btn btn-danger btn-xs");
-  			delete_button.innerHTML = "Delete";
-  			post_options.appendChild(delete_button);
-
-  		 	delete_button.onclick = (function(post_id) {
-            	  return function() {
-            	      delete_post(post_id);
-              }
-         	 }(post_id));
-
-  		}
-  		
   	  post.appendChild(post_options);
 
 
@@ -634,9 +707,8 @@
 
   	
   }
-  
-  
-  
+
+
   function post_new_task_details(value, id, post_id) {
 
   	var json = "{\"id\" : \"" + post_id + "\", "
@@ -746,13 +818,40 @@
 
   }
 
+  function extractReferences(message) {
+
+      var result = message.split("#");
+
+      var i = 0;
+      
+      while (i < task_ids.length) {
+          if (task_names[i] == result[1]) {
+            return result[1];
+          }
+          i++;
+      }
+      return "";
+  }
+
+  function getRefId(reference) {
+
+    var i = 0;
+      while (i < task_ids.length) {
+          if (task_names[i] == reference) {
+            return task_ids[i];
+          }
+          i++;
+      }
+      return "";
+
+  }
 
   function postToFeed() {
 
       var currentdate = new Date();
       
       var name_text = "@userName";
-      /*document.getElementById("name").value;*/
+
       var message_text = document.getElementById("limitedtextfield").value;
       
       message_text = message_text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
@@ -764,18 +863,20 @@
       
       if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
-      	var taskReferencer = document.getElementById("tasks");
+        var reference = extractReferences(message_text);
+        var ref_id = getRefId(reference);
+
   	    var references = [];
 
-      	if (taskReferencer.selectedIndex == 0) {
+        if (ref_id != "") {
 
-      	} else {
+      		references =  ["\"" + ref_id + "\""];
 
+        }
 
-      		var referencedTask = task_ids[taskReferencer.selectedIndex-1];
-      		references =  ["\"" + referencedTask + "\""];
+      //  message_text = message_text.replace("#".concat(reference).concat(, "");
 
-      	}
+      	
 
       var message_object = generateMessageObject(message_text)    
 
@@ -790,8 +891,14 @@
   	        complete: refreshFeed                
         });
                     
+        //document.getElementById("name").value = "";
+        document.getElementById("limitedtextfield").value = ""; 
+
+
+          
       } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
           
+
           var references = [];
 
           var task_object = generateTaskObject(message_text, "TO_DO", "1")
@@ -805,10 +912,12 @@
             complete: refreshFeed
         });      
                     
+
+
+          
       } 
       document.getElementById("limitedtextfield").value = "";
       document.getElementById("charCountdown").value = "140";
-      //limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
   }
 
   </script>
