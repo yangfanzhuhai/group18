@@ -226,7 +226,7 @@ public class MongoLink {
 	 * @param obj - Object containing username and password
 	 * @return true if parameters match some entry in the database, false if not
 	 */
-	public ArrayList<String> checkLogin(DBObject obj) {
+	public boolean checkLogin(DBObject obj) {
 		return checkLogin( obj.get("username").toString() ,obj.get("password").toString());
 	}
 	
@@ -236,19 +236,8 @@ public class MongoLink {
 	 * @param password - Password entered by user
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
-	public ArrayList<String> checkLogin(String username, String password) {
-		if(users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) == null)
-			return null;
-		
-		ArrayList<String> retList = new ArrayList<String>();
-		List<DBObject> list = groups.find(QueryBuilder.start("members").in(username).get()).toArray();
-		
-		for(DBObject o : list)
-		{
-			retList.add(o.toString());
-		}
-		
-		return retList;
+	public boolean checkLogin(String username, String password) {
+		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
 	}
 	
 	/** Method which changes either the status or priority of a task
