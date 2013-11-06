@@ -45,6 +45,11 @@ public class Rest extends Controller {
 	public static Result getUser() {
 		return ok(session("connected"));
 	}
+	
+	public static Result getGroups(){
+		String userName = session("connected");
+		return ok(MongoLink.MONGO_LINK.getGroups(userName).toString());
+	}
 
 	public static Result getActivities(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getNewsFeed(groupID).toString());
