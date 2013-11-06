@@ -78,7 +78,7 @@ public class MongoLink {
 		
 	//	long totalTime = 0;
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
-		list = ml.getNewsFeed();
+	//	list = ml.getNewsFeed();
 	//	for(int i = 0; i < 100; i++) {
 	//		long startTime = System.currentTimeMillis();
 	//		list = ml.getNewsFeed(20);
@@ -95,7 +95,7 @@ public class MongoLink {
 		
 		System.out.println("SELECTING NEXT NEWS");
 		
-		list = ml.getNextNews("5273d01c646021e813bcd12a");
+	//	list = ml.getNextNews("5273d01c646021e813bcd12a");
 		
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
@@ -105,7 +105,7 @@ public class MongoLink {
 		
 		System.out.println("GETTING TASKS WITH STATUS TO_DO");
 		
-		list = ml.getTasksWithStatus("TO_DO");
+	//	list = ml.getTasksWithStatus("TO_DO");
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
