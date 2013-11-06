@@ -24,7 +24,7 @@ public class Application extends Controller {
 			if(MongoLink.MONGO_LINK.isMember(userName, groupID)) {
 				return ok(feed.render(groupID, toggle, userName));
 			} else {
-				return badRequest();
+				return status(400);
 			}
 			
 		} else {
