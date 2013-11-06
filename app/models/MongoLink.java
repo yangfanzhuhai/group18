@@ -240,6 +240,22 @@ public class MongoLink {
 		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
 	}
 	
+	public ArrayList<String> getGroups(String username) {
+		ArrayList<String> retList = new ArrayList<String>();
+		List<DBObject> list = groups.find(QueryBuilder.start("members").in(username).get()).toArray();
+	
+		for(DBObject o : list)
+		{
+			retList.add(o.toString());
+		}
+	
+		return retList;
+	}
+
+	public boolean isMember(String username, String groupID) {
+		return getGroups(username).contains(groupID);
+	}
+	
 	/** Method which changes either the status or priority of a task
 	 * 
 	 * @param customID - ID of collection to be used
