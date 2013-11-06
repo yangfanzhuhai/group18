@@ -13,6 +13,7 @@
 
     <!-- jQuery -->
     <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.js" type="text/javascript"></script>
   </head>
 
   <body>
@@ -62,11 +63,6 @@
 
       </form>
 
-    	<div id = "task_referencer" width = "100px" position = "relative">
-    		<select id="tasks" display = "absolute" width = "100px">
-    			<option value="default">-Reference a Task-</option>
-    		</select>
-    	</div>
 
     <select id="post_type" onchange="postTypeChange(this.value)">
       <option value="text_post">Text Post</option>
@@ -126,6 +122,8 @@
     }
 
 
+
+
     function postFormOnKeyDown (currentElement) {
       if (event.keyCode == 13) { 
         postToFeed(); 
@@ -144,6 +142,7 @@
 
   var post_count = 0;
   var task_ids = [];
+  var tasks = [];
 
   function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
 
@@ -178,15 +177,11 @@
 
   function postTypeChange(option) {
   	if (option == "text_post") {
-  		var task_referencer = document.getElementById("task_referencer");
-  		task_referencer.style.visibility= 'visible';
   		var limitedtextfield = document.getElementById("limitedtextfield");
   		limitedtextfield.rows = 5
   		limitedtextfield.cols = 30;
 
   	} else {
-  		var task_referencer = document.getElementById("task_referencer");
-  		task_referencer.style.visibility= 'hidden';
   		var limitedtextfield = document.getElementById("limitedtextfield");
   		limitedtextfield.rows = 1;
   		limitedtextfield.cols = 30;
@@ -259,7 +254,6 @@
 
   function addTasks(task_array) {
 
-  	document.getElementById("tasks").options.length = 1;
 
   	for (var i=0; i < task_array.length; i++) {
 
@@ -267,20 +261,89 @@
   		task_ids[i] = task_id;
 
   		var task_name = task_array[i]['object']["name"];
+      tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
+      tasks[i] = jQuery.parseJSON(tasks[i]);
+
   		var option = document.createElement("option");
   		option.text = task_name;
   		option.style.width = "100px";
-  		var task_referencer = document.getElementById("tasks").add(option, null);
+
   	}
 
   }
 
+
+   $(function ()  {
+     var lastHash = -1;
+     var hashes = [-1];
+
+     $("#limitedtextfield").autocomplete({
+         minLength: 0,
+         source: function (request, response) {
+            var limitedtextfield = document.getElementById("limitedtextfield");
+             if (lastHash>=0 && limitedtextfield.rows == 5) {
+                 response($.ui.autocomplete.filter(
+                 tasks, request.term.substring(lastHash+1)));          
+             }
+         },
+         focus: function () {
+             return false;
+         },
+         select: function (event, ui) {
+             var terms = this.value.split();
+             terms.pop();
+             terms.push(ui.item.data);
+            // terms.push("");
+             this.value = this.value.substr(0,lastHash + 1);
+             this.value += terms.join("");
+             return false;
+         },
+         messages: {
+           noResults: '',
+           results: function() {}
+         },
+         open: function(event, ui){
+            var $input = $(event.target),
+            $results = $input.autocomplete("widget");
+            $results.css("background-color", "#d9edf7");
+            $results.css("list-style", "none");
+            $results.css("border", "2px solid");
+            $results.css("border-radius", "5px");
+            $results.css("width", "50%");
+            $results.css("border-color", "#AF3838");
+
+        }
+     }).on("keypress", function (e) {
+         var keys = [];
+         keys.unshift(e.which);
+         if (String.fromCharCode(keys[0]) == "#") {
+             lastHash =  $("#limitedtextfield").val().length;
+             hashes.unshift(lastHash);
+         }
+     }).on("keydown", function (e) {
+        if (e.keyCode == 8) {
+          var selection = $("#limitedtextfield").val();
+          var deleted_char = selection.charAt(selection.length -1);
+          if (deleted_char == "#") {
+            hashes.splice(0, 1);
+            lastHash = hashes[0];
+          $('#limitedtextfield').autocomplete('close');
+          }
+
+        }
+
+     });
+
+
+   });
+
+
   function generateFeed(stream_array) {
 
   	document.getElementById("username").innerHTML="@userName";
+    document.getElementById("limitedtextfield").value = "";
 
   	for (var i=0; i < stream_array.length;i++) {
-
 
   		var message_type = stream_array[i][0]['object']["objectType"];
 
@@ -742,6 +805,22 @@
 
   }
 
+  function extractReferences(message) {
+
+      var result = message.split("#");
+
+      var i = 0;
+      
+      while (i < task_ids.length) {
+          if (task_ids[i] == result[1]) {
+            return result[1];
+          }
+          i++;
+      }
+      return "";
+
+
+  }
 
   function postToFeed() {
 
@@ -752,26 +831,31 @@
       var message_text = document.getElementById("limitedtextfield").value;
       
       message_text = message_text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
+
       
       var dropdown = document.getElementById("post_type");
       var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
       
       var date_and_time_stamp = getTimeStamp();
-      
+
+
       if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
+
+        var ref_id = extractReferences(message_text);
+
 
       	var taskReferencer = document.getElementById("tasks");
   	    var references = [];
 
-      	if (taskReferencer.selectedIndex == 0) {
 
-      	} else {
+        if (ref_id != "") {
 
+      		references =  ["\"" + ref_id + "\""];
 
-      		var referencedTask = task_ids[taskReferencer.selectedIndex-1];
-      		references =  ["\"" + referencedTask + "\""];
+        }
 
-      	}
+        message_text = message_text.replace("#".concat(ref_id), "");
+
 
       var message_object = generateMessageObject(message_text)    
 
