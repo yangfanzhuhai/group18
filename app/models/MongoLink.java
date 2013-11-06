@@ -342,6 +342,9 @@ public class MongoLink {
 		return getJenkinsBuilds(20);
 	}
 	
+	/**
+	 * @return List of all the usernames in the Database
+	 */
 	public ArrayList<String> getUsers() {
 		List<DBObject> allusers = users.find().toArray();
 		ArrayList<String> retList = new ArrayList<String>();
@@ -353,6 +356,10 @@ public class MongoLink {
 		return retList;
 	}
 	
+	/**
+	 * @param obj - Object representing the news feed post to be deleted.
+	 * All replies corresponding to that object will also be deleted
+	 */
 	public void deletePost(DBObject obj) {
 		deletePost(obj.get("id").toString());
 	}
@@ -384,7 +391,7 @@ public class MongoLink {
 	 */
 	private ArrayList<String> getReferencedBy(String id) throws ParseException {
 		
-		return getItemsWithoutReferences(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), null);
+		return getItemsWithoutReferences(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), reverseSort);
 	}
 	
 	/**
@@ -445,11 +452,17 @@ public class MongoLink {
 		return retList;
 	}
 	
+	/**
+	 * @param id - ID of the object to be deleted, along with all its replies
+	 */
 	private void deletePost(String id) {
 		deleteReplies(id);
 		newsFeed.remove(new BasicDBObject("_id", new ObjectId(id)));
 	}
 
+	/**
+	 * @param id - ID of the object which will have its replies deleted
+	 */
 	private void deleteReplies(String id) {
 		newsFeed.remove(QueryBuilder.start("target.messageID").is(id).get());
 	}
