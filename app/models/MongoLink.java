@@ -3,7 +3,6 @@ package models;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -32,6 +31,7 @@ public class MongoLink {
 	private static DBCollection newsFeed;
 	private static DBCollection users;
 	private static DBCollection gitRepos;
+	private static DBCollection groups;
 	
 	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 	
@@ -46,12 +46,14 @@ public class MongoLink {
 			gitRepos = db.getCollection("DEVgitRepositories");
 			newsFeed = db.getCollection("DEVnewsFeed");
 			users = db.getCollection("DEVuserAccounts");
+			groups = db.getCollection("DEVgroups");
 		}
 		else
 		{
 			gitRepos = db.getCollection("gitRepositories");
 			newsFeed = db.getCollection("newsFeed");
 			users = db.getCollection("userAccounts");
+			groups = db.getCollection("groups");
 		}
 
 	}
@@ -215,6 +217,12 @@ public class MongoLink {
 		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
 	}
 	
+	/** Method which changes either the status or priority of a task
+	 * 
+	 * @param obj - Object containing ID of task to be altered plus a status or priority field
+	 * which indicates what should be changed and how
+	 * @throws MongoException
+	 */
 	public void updateStatusOrPriority(DBObject obj) throws MongoException {
 		if(obj.containsField("status"))
 		{
