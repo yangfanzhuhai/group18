@@ -143,6 +143,7 @@
   var post_count = 0;
   var task_ids = [];
   var tasks = [];
+  var task_names = [];
 
   function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
 
@@ -260,7 +261,9 @@
   		var task_id = task_array[i]['id'];
   		task_ids[i] = task_id;
 
+
   		var task_name = task_array[i]['object']["name"];
+      task_names[i] = task_name;
       tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
       tasks[i] = jQuery.parseJSON(tasks[i]);
 
@@ -292,10 +295,11 @@
          select: function (event, ui) {
              var terms = this.value.split();
              terms.pop();
-             terms.push(ui.item.data);
+             terms.push(ui.item.value);
             // terms.push("");
              this.value = this.value.substr(0,lastHash + 1);
              this.value += terms.join("");
+             this.value += "#";
              return false;
          },
          messages: {
@@ -310,6 +314,7 @@
             $results.css("border", "2px solid");
             $results.css("border-radius", "5px");
             $results.css("width", "50%");
+            $results.css("border-color", "#AF3838");
             $results.css("border-color", "#AF3838");
 
         }
@@ -812,13 +817,25 @@
       var i = 0;
       
       while (i < task_ids.length) {
-          if (task_ids[i] == result[1]) {
+          if (task_names[i] == result[1]) {
             return result[1];
           }
           i++;
       }
       return "";
+  }
 
+  function getRefId(reference) {
+
+    var i = 0;
+      while (i < task_ids.length) {
+          alert("comparing" + task_names[i] + " and " + reference);
+          if (task_names[i] == reference) {
+            return task_ids[i];
+          }
+          i++;
+      }
+      return "";
 
   }
 
@@ -827,12 +844,11 @@
       var currentdate = new Date();
       
       var name_text = "@userName";
-      /*document.getElementById("name").value;*/
+
       var message_text = document.getElementById("limitedtextfield").value;
       
       message_text = message_text.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
 
-      
       var dropdown = document.getElementById("post_type");
       var dropdown_value = dropdown.options[dropdown.selectedIndex].value;
       
@@ -841,12 +857,11 @@
 
       if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
-        var ref_id = extractReferences(message_text);
+        var reference = extractReferences(message_text);
+        alert(reference);
+        var ref_id = getRefId(reference);
 
-
-      	var taskReferencer = document.getElementById("tasks");
   	    var references = [];
-
 
         if (ref_id != "") {
 
@@ -854,7 +869,7 @@
 
         }
 
-        message_text = message_text.replace("#".concat(ref_id), "");
+      //  message_text = message_text.replace("#".concat(reference).concat(, "");
 
 
       var message_object = generateMessageObject(message_text)    
