@@ -225,12 +225,16 @@ public class Rest extends Controller {
 	}
 
 	private static Commit createCommit(JsonNode commitNode) {
-		String message = getStringValueFromJson(commitNode, "message");
+		String message = replaceSpecialChars(getStringValueFromJson(commitNode, "message"));
 		String url = getStringValueFromJson(commitNode, "url");
 		JsonNode authorNode = commitNode.findValue("author");
 		String author = getStringValueFromJson(authorNode, "name");
 		Commit commit = new Commit(url, author, message);
 		return commit;
+	}
+	
+	private static String replaceSpecialChars(String msg) {
+		return msg.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r");
 	}
 	
 	private static String createDate() {
