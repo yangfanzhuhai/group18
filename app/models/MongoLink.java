@@ -3,7 +3,6 @@ package models;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -32,6 +31,7 @@ public class MongoLink {
 	private static DBCollection newsFeed;
 	private static DBCollection users;
 	private static DBCollection gitRepos;
+	private static DBCollection groups;
 	
 	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 	
@@ -46,12 +46,14 @@ public class MongoLink {
 			gitRepos = db.getCollection("DEVgitRepositories");
 			newsFeed = db.getCollection("DEVnewsFeed");
 			users = db.getCollection("DEVuserAccounts");
+			groups = db.getCollection("DEVgroups");
 		}
 		else
 		{
 			gitRepos = db.getCollection("gitRepositories");
 			newsFeed = db.getCollection("newsFeed");
 			users = db.getCollection("userAccounts");
+			groups = db.getCollection("groups");
 		}
 
 	}
@@ -94,12 +96,10 @@ public class MongoLink {
 			}
 		}
 		
-		System.out.println("DELETING A POST");
+		System.out.println("SELECTING NEXT NEWS");
 		
-		ml.deletePost("52743c59c2e69027b2302da2");
+		list = ml.getNextNews("5273d01c646021e813bcd12a");
 		
-		System.out.println("NEW NEWS FEED");
-		list = ml.getNewsFeed();
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
@@ -178,6 +178,18 @@ public class MongoLink {
 		return newsFeed.findOne(obj).get("_id").toString();
 	}
 	
+	public boolean addNewProject(DBObject obj) {
+		
+		int oldCount = (int) groups.getCount();
+		
+		if(groups.findOne(QueryBuilder.start("customID").is(obj.get("customID")).get()) != null)
+			return false;
+		
+		groups.insert(obj);
+		
+		return (int) groups.getCount() == oldCount + 1;
+	}
+	
 	/**
 	 * Adds new user to the database, only if their username is not already
 	 * in the database
@@ -217,6 +229,12 @@ public class MongoLink {
 		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
 	}
 	
+	/** Method which changes either the status or priority of a task
+	 * 
+	 * @param obj - Object containing ID of task to be altered plus a status or priority field
+	 * which indicates what should be changed and how
+	 * @throws MongoException
+	 */
 	public void updateStatusOrPriority(DBObject obj) throws MongoException {
 		if(obj.containsField("status"))
 		{
@@ -240,6 +258,25 @@ public class MongoLink {
 	public ArrayList<ArrayList<String>> getNewsFeed(){
 		return getNewsFeed(20);
 	}
+	
+	/**
+	 * @param lastID - String ID of the last post currently in news feed
+	 * @param postLimit - Maximum number of posts to fetch
+	 * @return An array of news feed posts (with replies and references) 
+	 * 			that were posted after the post with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextNews(String lastID, int postLimit) {
+		return dbFetch(QueryBuilder.start("target.messageID").is("").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+	}
+	
+	/**
+	 * @param lastID - String ID of the last post currently in news feed
+	 * @return An array of (at most 20) news feed posts (with replies and references) 
+	 * 			that were posted after the post with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextNews(String lastID) {
+		return getNextNews(lastID, 20);
+	}
 
 	/**Returns a list of postLimit tasks**/
 	public ArrayList<ArrayList<String>> getTasks(int postLimit) {
@@ -252,12 +289,23 @@ public class MongoLink {
 		return getTasks(20);
 	}
 
-	/**Returns a list of all tasks (only the tasks, no replies or associated objects) 
+	/**
+	 * @return A list of all tasks (only the tasks, no replies or associated objects)
+	 *  in order from newest to oldest 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies() throws ParseException{
-		ArrayList<String> tasks = getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get());
-		Collections.reverse(tasks);
-		return tasks;
+		return getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort);
+	}
+	
+	/**
+	 * 
+	 * @return A list of all tasks (only the tasks, no replies or associated objects)
+	 *  in alphabetical order 
+	 *  !! //TODO this for the moment is case-sensitive and we still have the problem of leading spaces
+	 * @throws ParseException
+	 */
+	public ArrayList<String> getAllTasksByName() throws ParseException {
+		return getItemsWithoutReferences(QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.name").is(1).get());
 	}
 	
 	/**
@@ -314,6 +362,9 @@ public class MongoLink {
 		return getJenkinsBuilds(20);
 	}
 	
+	/**
+	 * @return List of all the usernames in the Database
+	 */
 	public ArrayList<String> getUsers() {
 		List<DBObject> allusers = users.find().toArray();
 		ArrayList<String> retList = new ArrayList<String>();
@@ -325,6 +376,10 @@ public class MongoLink {
 		return retList;
 	}
 	
+	/**
+	 * @param obj - Object representing the news feed post to be deleted.
+	 * All replies corresponding to that object will also be deleted
+	 */
 	public void deletePost(DBObject obj) {
 		deletePost(obj.get("id").toString());
 	}
@@ -346,7 +401,7 @@ public class MongoLink {
 			taskIDObjs[i] = new ObjectId(taskIDs.get(i).toString());
 		}
 		
-		return getItemsWithoutReferences(QueryBuilder.start("_id").in(taskIDObjs).get());
+		return getItemsWithoutReferences(QueryBuilder.start("_id").in(taskIDObjs).get(), null);
 	}
 	
 	/**
@@ -356,7 +411,7 @@ public class MongoLink {
 	 */
 	private ArrayList<String> getReferencedBy(String id) throws ParseException {
 		
-		return getItemsWithoutReferences(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get());
+		return getItemsWithoutReferences(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), reverseSort);
 	}
 	
 	/**
@@ -366,7 +421,7 @@ public class MongoLink {
 	 */
 	private ArrayList<String> getReplies(String id) throws ParseException {
 		
-		return getItemsWithReferences(QueryBuilder.start("target.messageID").is(id).get());
+		return getItemsWithoutReferences(QueryBuilder.start("target.messageID").is(id).get(), null);
 	}
 	
 	/** Generic method to find list of objects that satisfy the given query
@@ -400,9 +455,9 @@ public class MongoLink {
 	 * @return ArrayList of objects
 	 * @throws ParseException
 	 */
-	private ArrayList<String> getItemsWithoutReferences(DBObject query) throws ParseException {
+	private ArrayList<String> getItemsWithoutReferences(DBObject query, DBObject sortKey) throws ParseException {
 		
-		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).toArray();
+		ArrayList<DBObject> list = (ArrayList<DBObject>) newsFeed.find(query).sort(sortKey).toArray();
 		ArrayList<String> retList = new ArrayList<String>();		
 		
 		
@@ -417,11 +472,17 @@ public class MongoLink {
 		return retList;
 	}
 	
+	/**
+	 * @param id - ID of the object to be deleted, along with all its replies
+	 */
 	private void deletePost(String id) {
 		deleteReplies(id);
 		newsFeed.remove(new BasicDBObject("_id", new ObjectId(id)));
 	}
 
+	/**
+	 * @param id - ID of the object which will have its replies deleted
+	 */
 	private void deleteReplies(String id) {
 		newsFeed.remove(QueryBuilder.start("target.messageID").is(id).get());
 	}
