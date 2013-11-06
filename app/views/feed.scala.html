@@ -58,12 +58,12 @@
         placeholder="what's on your mind?"> </textarea>
         <br>
         <small align="right"> <!--(Maximum characters: 140)-->
-        You have <input readonly type="text" name="countdown" size="3" value="140"> characters left.</small>
+        You have <input readonly type="text" id="charCountdown" name="countdown" size="3" value="140"> characters left.</small>
 
       </form>
 
-    	<div id = "task_referencer" width = "100px" position = "relative">
-    		<select id="tasks" display = "absolute" width = "100px">
+    	<div id = "task_referencer" width = "45%" position = "relative">
+    		<select id="tasks" display = "absolute" width = "45%">
     			<option value="default">-Reference a Task-</option>
     		</select>
     	</div>
@@ -128,7 +128,7 @@
 
     function postFormOnKeyDown (currentElement) {
       if (event.keyCode == 13) { 
-        postToFeed(); 
+        postToFeed();
         return false; 
       }
       limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
@@ -269,7 +269,7 @@
   		var task_name = task_array[i]['object']["name"];
   		var option = document.createElement("option");
   		option.text = task_name;
-  		option.style.width = "100px";
+  		option.style.width = "45%";
   		var task_referencer = document.getElementById("tasks").add(option, null);
   	}
 
@@ -280,7 +280,6 @@
   	document.getElementById("username").innerHTML="@userName";
 
   	for (var i=0; i < stream_array.length;i++) {
-
 
   		var message_type = stream_array[i][0]['object']["objectType"];
 
@@ -297,18 +296,19 @@
   		var verb = stream_array[i][0]['verb'];
 
   		var post = document.createElement("li");
-      post.setAttribute("class", "media");
+     	post.setAttribute("class", "media");
   		post.id = post_id;
   		post.className = "post";
 
       var post_body = document.createElement("div");
       post_body.setAttribute("class", "media-body");
   	
+  	
+  		var stream = document.getElementById("stream");
   		if (post_count > 0) {
-  			var stream = document.getElementById("stream");
   			stream.insertBefore(post, stream.childNodes[0]);
   		} else {
-  			document.getElementById("stream").insertBefore(post);
+  			stream.insertBefore(post);
   		}
 
   		var date_and_time = document.createElement("small");
@@ -333,21 +333,6 @@
       reply_message_div.appendChild(reply_message);
 
   		var post_options = document.createElement("div");
-
-  		if (publisher == "@userName") {
-  			var delete_button = document.createElement("button");
-        delete_button.setAttribute("class", "btn btn-danger btn-xs");
-  			delete_button.innerHTML = "Delete";
-  			post_options.appendChild(delete_button);
-
-  		 	delete_button.onclick = (function(post_id) {
-            	  return function() {
-            	      delete_post(post_id);
-              }
-         	 }(post_id));
-
-  		}
-
 
   		 reply_button.onclick = (function(post_id, reply_message) {
               return function() {
@@ -403,7 +388,9 @@
   			var task_details = document.createElement("p");
   			task_details.style.cssFloat = "right";
   			task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
-
+  			
+  			
+			
   			var priority_button = document.createElement("button");
 
   			priority_button.innerHTML= "Change Task Priority";
@@ -420,18 +407,19 @@
 				}
   			}(post_id));
 
+
   			var status_button = document.createElement("button");
+  			status_button.id = "status_buton";
   			status_button.innerHTML= "Change Task Status";
   			status_button.type = "text";
-  			status_button.onclick = (function (post_id) {
+  			/*status_button.onclick = (function (post_id) {
   				return function() {
 					var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
 					post_new_task_details(new_status, "s", post_id);
 				
 				}
-  			}(post_id));
-
-
+  			}(post_id));*/
+			
   			post_options.appendChild(priority_button);
   			post_options.appendChild(status_button);
 
@@ -622,6 +610,21 @@
 
 
   		}
+  		
+  		if (publisher == "@userName") {
+  			var delete_button = document.createElement("button");
+        delete_button.setAttribute("class", "btn btn-danger btn-xs");
+  			delete_button.innerHTML = "Delete";
+  			post_options.appendChild(delete_button);
+
+  		 	delete_button.onclick = (function(post_id) {
+            	  return function() {
+            	      delete_post(post_id);
+              }
+         	 }(post_id));
+
+  		}
+  		
   	  post.appendChild(post_options);
 
 
@@ -631,8 +634,9 @@
 
   	
   }
-
-
+  
+  
+  
   function post_new_task_details(value, id, post_id) {
 
   	var json = "{\"id\" : \"" + post_id + "\", "
@@ -786,14 +790,8 @@
   	        complete: refreshFeed                
         });
                     
-        //document.getElementById("name").value = "";
-        document.getElementById("limitedtextfield").value = ""; 
-
-
-          
       } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
           
-
           var references = [];
 
           var task_object = generateTaskObject(message_text, "TO_DO", "1")
@@ -807,11 +805,10 @@
             complete: refreshFeed
         });      
                     
-        document.getElementById("limitedtextfield").value = "";
-
-          
       } 
-      
+      document.getElementById("limitedtextfield").value = "";
+      document.getElementById("charCountdown").value = "140";
+      //limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
   }
 
   </script>
