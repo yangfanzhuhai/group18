@@ -473,7 +473,6 @@
   			var task_status = stream_array[i][0]['object']["status"];
   			var task_priority = stream_array[i][0]['object']["priority"];
   			post.style.backgroundColor = "#d9edf7";
-        //post.setAttribute("class", "alert, alert-warning");
   			task_data.innerHTML = task_name + " BY " + publisher.bold();
   			var task_details = document.createElement("p");
   			task_details.style.cssFloat = "right";
@@ -502,7 +501,11 @@
   			status_button.onclick = (function (post_id) {
   				return function() {
 					var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
-					post_new_task_details(new_status, "s", post_id);
+					if((new_status == "TO_DO") || (new_status == "DOING") || (new_status == "DONE")) {
+						post_new_task_details(new_status, "s", post_id);
+					} else {
+						alert("Not a valid status");
+					}
 				
 				}
   			}(post_id));
