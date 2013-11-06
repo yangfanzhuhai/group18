@@ -108,7 +108,7 @@
               url: "/rest/register",
               data: {"credentials":credentials},
               success: function(data){        
-  	            window.location.href = '@routes.Application.feed(0)'
+  	            window.location.href = '@routes.Application.login())'
               },
               error: function (xhr, ajaxOptions, thrownError) {
               	if (xhr.status == 400) {
