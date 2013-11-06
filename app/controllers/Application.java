@@ -18,7 +18,7 @@ public class Application extends Controller {
 	 * 		   Else render login screen.
 	 */
 
-	public static Result feed(Integer toggle) {
+	public static Result feed(String groupID, Integer toggle) {
 		if (loggedIn()) {
 			String userName = session("connected");
 			return ok(feed.render(toggle, userName));
