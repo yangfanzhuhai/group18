@@ -158,8 +158,8 @@ public class ActivityModel {
 				+ ", \"target\" : " + getTarget().toJSON() + " }";
 	}
 	
-	public void save(){
-		MongoLink.MONGO_LINK.insertNews((DBObject) JSON.parse(this
+	public void save(String groupID){
+		MongoLink.MONGO_LINK.insertNews(groupID, (DBObject) JSON.parse(this
 				.toJSON()));
 	}
 	

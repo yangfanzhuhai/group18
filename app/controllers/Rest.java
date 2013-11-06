@@ -30,12 +30,12 @@ import com.mongodb.util.JSON;
 
 public class Rest extends Controller {
 
-	public static Result createMessage() {
+	public static Result createMessage(String groupID) {
 		String activityJson = getValueFromRequest("activity");
 
 		try {
 			ActivityModel activity = new ActivityModel(activityJson);
-			activity.save();
+			activity.save(groupID);
 			return ok();
 		} catch (Exception e) {
 			return status(400);
@@ -110,23 +110,23 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getUsers().toString());
 	}
 
-	public static Result parseGitHook() {
+	public static Result parseGitHook(String groupID) {
 		JsonNode json = request().body().asJson();
 		ActivityModel activity = createActivityModelFromGitHook(json);
-		activity.save();
+		activity.save(groupID);
 		return ok();
 
 	}
 
 
-	public static Result parseJenkinsNotfication() {
+	public static Result parseJenkinsNotfication(String groupID) {
 		JsonNode json = request().body().asJson();
 		JsonNode build = json.findValue("build");
 		String phase = getStringValueFromJson(build, "phase");
 		if(phase.equals("FINISHED")){
 		ActivityModel activity = createActivityModelFromJenkinsNotification(
 				json, build);
-		activity.save();
+		activity.save(groupID);
 		}
 		return ok();
 	}
