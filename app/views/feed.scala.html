@@ -32,7 +32,20 @@
           <li id="newsfeed_nav" class = "active">
             <a href="@routes.Application.feed(groupID,0)">News Feed</a>
           </li>
-          <li id="tasklist_nav"><a href="@routes.Application.feed(groupID,1)">Task List</a></li>
+          <!--<li id="tasklist_nav"><a href="@routes.Application.feed(groupID,1)">Task List</a></li>-->
+          
+          <li id="tasklist_nav" class="dropdown">
+            <a href="@routes.Application.feed(groupID,1)" class="dropdown-toggle" data-toggle="dropdown">
+              Task List 
+              <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="@routes.Application.feed(groupID,1)">All Tasks</a></li>
+          	  <li><a href="#">TO DO</a></li>
+          	  <li><a href="#">DOING</a></li>
+          	  <li><a href="#">DONE</a></li>
+        	</ul>
+      	  </li>
+          
           <li id="git_nav"><a href="@routes.Application.feed(groupID,2)">Git Commits</a></li>
           <li id = "builds_nav"><a href="@routes.Application.feed(groupID,3)">Builds</a></li>
           <li><a href="@routes.Application.about">About</a></li>
@@ -52,7 +65,7 @@
     </a>
 
     <div id = "post_options" align="center">
-      <h1 id="username"> </h1>	
+      <!--h1 id="username"> </h1-->	
     		
       <form name="myform" role="form">
         <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
@@ -356,7 +369,7 @@
 
   function generateFeed(stream_array) {
 
-  	document.getElementById("username").innerHTML="@userName";
+  	//document.getElementById("username").innerHTML="@userName";
     document.getElementById("limitedtextfield").value = "";
 
   	for (var i=0; i < stream_array.length;i++) {
@@ -463,77 +476,76 @@
   			//post.appendChild(post_options);
         */
   			
-  			post_body.appendChild(user);
-  			post_body.appendChild(message);
+  	    post_body.appendChild(user);
+  		post_body.appendChild(message);
         post_body.appendChild(date_and_time);
-  			post_body.appendChild(reply_message_div);
-  			post_body.appendChild(reply_button);
+  		post_body.appendChild(reply_message_div);
+  		post_body.appendChild(reply_button);
         //post_body.appendChild(reply_form_div);
         post.appendChild(post_body);
 
         break;
       case "TASK":
-  			var task_name = stream_array[i][0]['object']["name"];
+  		var task_name = stream_array[i][0]['object']["name"];
         var task_heading = document.createElement("h4");
         task_heading.setAttribute("class", "media-heading");
         task_heading.innerHTML = "Task";
         
-  			var task_data = document.createElement("p");
+  		var task_data = document.createElement("p");
 
-  			var task_status = stream_array[i][0]['object']["status"];
-  			var task_priority = stream_array[i][0]['object']["priority"];
-  			post.style.backgroundColor = "#d9edf7";
-  			task_data.innerHTML = task_name + " BY " + publisher.bold();
-  			var task_details = document.createElement("p");
-  			task_details.style.cssFloat = "right";
-  			task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
+  		var task_status = stream_array[i][0]['object']["status"];
+  		var task_priority = stream_array[i][0]['object']["priority"];
+  		post.style.backgroundColor = "#d9edf7";
+  		task_data.innerHTML = task_name + " BY " + publisher.bold();
+  		var task_details = document.createElement("p");
+  		task_details.style.cssFloat = "right";
+		task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
 
-  			var priority_button = document.createElement("button");
-
-  			priority_button.innerHTML= "Change Task Priority";
-  			priority_button.type = "text";
-  			priority_button.onclick = (function (post_id) {
-  				return function() {
-  					var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
-  					if (new_priority <  4 && new_priority > 0) {
-						post_new_task_details(new_priority, "p", post_id);
-					} else {
-						alert("Value entered is not between 1 and 3");
-					}
+  		var priority_button = document.createElement("button");
+		priority_button.innerHTML= "Change Task Priority";
+		priority_button.type = "text";
+		priority_button.onclick = (function (post_id) {
+			return function() {
+				var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
+				if (new_priority <  4 && new_priority > 0) {
+					post_new_task_details(new_priority, "p", post_id);
+				} else {
+					alert("Value entered is not between 1 and 3");
 				}
-  			}(post_id));
+			}
+		}(post_id));
 
 
-  			var status_button = document.createElement("button");
-  			status_button.innerHTML= "Change Task Status";
-  			status_button.type = "text";
-  			status_button.onclick = (function (post_id) {
-  				return function() {
-					var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
-					if((new_status == "TO_DO") || (new_status == "DOING") || (new_status == "DONE")) {
-						post_new_task_details(new_status, "s", post_id);
-					} else {
-						alert("Not a valid status");
-					}
-				
+  		var status_button = document.createElement("button");
+		status_button.innerHTML= "Change Task Status";
+		status_button.type = "text";
+		status_button.onclick = (function (post_id) {
+			return function() {
+				var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
+				if((new_status == "TO_DO") || (new_status == "DOING") || (new_status == "DONE")) {
+					post_new_task_details(new_status, "s", post_id);
+				} else {
+					alert("Not a valid status");
 				}
-  			}(post_id));
+			
+			}
+		}(post_id));
 
 
-  			post_options.appendChild(priority_button);
-  			post_options.appendChild(status_button);
+		post_options.appendChild(priority_button);
+		post_options.appendChild(status_button);
 
-  			if (publisher == "@userName") {
-  				var assign_button = document.createElement("button");
-  				assign_button.innerHTML = "Assign members";
-  				post_options.appendChild(assign_button);
+		if (publisher == "@userName") {
+			var assign_button = document.createElement("button");
+			assign_button.innerHTML = "Assign members";
+			post_options.appendChild(assign_button);
 
-  		 		assign_button.onclick = (function(post_id) {
-            		  return function() {
-            	 	    // delete_post(post_id);
-             	 }
-         		}(post_id));
-  			}
+			assign_button.onclick = (function(post_id) {
+				  return function() {
+					// delete_post(post_id);
+			 }
+			}(post_id));
+		}
 
         post_body.appendChild(task_heading);
         post_body.appendChild(task_details);
@@ -666,10 +678,10 @@
   			if (stream_array[i][j]['object']["objectType"] == "TASK") {
   				var task_reference_div = document.createElement("div");
   				task_reference_div.innerHTML = "Referencing: " + stream_array[i][j]['object']["name"];
-  				//task_reference_div.style.backgroundColor = "#FF6699";
   				task_reference_div.className = "post";
   				task_reference_div.style["cssFloat"] = "right";
   				task_reference_div.style["background"] = "#d9edf7";
+  				task_reference_div.style["width"] = "30%";
 
   				post.insertBefore(task_reference_div, post.firstChild);
   				j++;
