@@ -195,7 +195,7 @@ public class MongoLink {
 		
 		int oldCount = (int) groups.getCount();
 		
-		if(groups.findOne(QueryBuilder.start("customID").is(obj.get("customID")).get()) != null)
+		if(groups.findOne(queryForProject((String) obj.get("customID"))) != null)
 			return false;
 		
 		groups.insert(obj);
@@ -206,7 +206,15 @@ public class MongoLink {
 	
 	public void addToProject(String customID, String username) {
 		
-		groups.update(QueryBuilder.start("customID").is(customID).get(), new BasicDBObject("$push", new BasicDBObject("members", username)));
+		groups.update(queryForProject(customID), new BasicDBObject("$addToSet", new BasicDBObject("members", username)));
+	}
+	
+	public void removeFromProject(String customID, String username) {
+		groups.update(queryForProject(customID), new BasicDBObject("$pull", new BasicDBObject("members", username)));
+	}
+	
+	public void changeProjectName(String customID, String name) {
+		groups.update(queryForProject(customID), new BasicDBObject("name", name));
 	}
 	
 	/**
@@ -596,5 +604,9 @@ public class MongoLink {
 	
 	private DBCollection getGroupColl(String customID) {
 		return db.getCollection(customID);
+	}
+	
+	private DBObject queryForProject(String customID) {
+		return QueryBuilder.start("customID").is(customID).get();
 	}
 }
