@@ -66,6 +66,10 @@ public class Rest extends Controller {
 	public static Result getAllTasks(String groupID) throws ParseException {
 		return ok(MongoLink.MONGO_LINK.getAllTasksByName(groupID).toString());
 	}
+
+	public static Result getTasksWithStatus(String groupID, String status) {
+		return ok(MongoLink.MONGO_LINK.getTasksWithStatus(groupID, status).toString());
+	}
 	
 	public static Result getGits(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getGitCommits(groupID).toString());
