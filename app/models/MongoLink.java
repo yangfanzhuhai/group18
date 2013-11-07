@@ -204,6 +204,11 @@ public class MongoLink {
 		return (int) groups.getCount() == oldCount + 1;
 	}
 	
+	public void addToProject(String customID, String username) {
+		
+		groups.update(QueryBuilder.start("customID").is(customID).get(), new BasicDBObject("$push", new BasicDBObject("members", username)));
+	}
+	
 	/**
 	 * Adds new user to the database, only if their username is not already
 	 * in the database
