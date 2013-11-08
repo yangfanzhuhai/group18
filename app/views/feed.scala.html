@@ -304,18 +304,19 @@
 
   }
 
-   $(function ()  {
+  function autocomplete_setup() {
+  $(function ()  {
      var lastHash = -1;
      var hashes = [-1];
 
-     $("#limitedtextfield").autocomplete({
+     $(":input").autocomplete({
          minLength: 0,
          source: function (request, response) {
-            var limitedtextfield = document.getElementById("limitedtextfield");
-             if (lastHash>=0 && limitedtextfield.rows == 5) {
+            var limitedtextfield = this.element;
+           //  if (lastHash>=0 && limitedtextfield.rows == 5) {
                  response($.ui.autocomplete.filter(
                  tasks, request.term.substring(lastHash+1)));          
-             }
+           //  }
          },
          focus: function () {
              return false;
@@ -334,9 +335,9 @@
            noResults: '',
            results: function() {}
          },
-         position: {
-            of:"#limitedtextfield",
-            offset: "-2px 0 0 0" },
+        // position: {
+          //  of:"#limitedtextfield",
+            //offset: "-2px 0 0 0" },
          open: function(event, ui){
             var $input = $(event.target),
             $results = $input.autocomplete("widget");
@@ -355,17 +356,17 @@
          var keys = [];
          keys.unshift(e.which);
          if (String.fromCharCode(keys[0]) == "#") {
-             lastHash =  $("#limitedtextfield").val().length;
+             lastHash =  $(":focus").val().length;
              hashes.unshift(lastHash);
          }
      }).on("keydown", function (e) {
         if (e.keyCode == 8) {
-          var selection = $("#limitedtextfield").val();
+          var selection = $(":focus").val();
           var deleted_char = selection.charAt(selection.length -1);
           if (deleted_char == "#") {
             hashes.splice(0, 1);
             lastHash = hashes[0];
-          $('#limitedtextfield').autocomplete('close');
+          $(":focus").autocomplete('close');
           }
 
         }
@@ -374,6 +375,8 @@
 
 
    });
+}
+
 
 
   function generateFeed(stream_array) {
@@ -722,6 +725,8 @@
 
   		post_no = post_no + 1;
   	}
+
+    autocomplete_setup();
 
   	
   }
