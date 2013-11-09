@@ -127,13 +127,12 @@
           return function() {
             if (checkValidUser(add_users_box)) {
 
-              var add_user_json = "{\"id\" : \"" + group_name + "\", \"name\" : \""
-                                 + add_users_box.value + "\"}";
+              var add_user_json = "{\"id\" : \"" + group_name + "\", \"users\" : [\""
+                                 + add_users_box.value + "\"]}";
 
               $.ajax({
                  type: "POST",
-                 dataType: "json",
-                 url: "/" + group_name + "/rest/addtoproject",
+                 url: "/rest/addtoproject",
                  data: {"activity":add_user_json},
                  success: function(data){   
                     location.reload(true);

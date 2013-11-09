@@ -31,8 +31,8 @@ GET		/rest/groups					controllers.Rest.getGroups()
 GET		/rest/allusers					controllers.Rest.getAllUsers()
 
 
-
 POST	/:groupID/rest/message			controllers.Rest.createMessage(groupID)
+POST	/rest/addtoproject				controllers.Rest.addUsersToProject()
 POST	/rest/register					controllers.Rest.registerUser()
 POST	/rest/login						controllers.Rest.loginUser()
 POST	/:groupID/rest/git				controllers.Rest.parseGitHook(groupID)
