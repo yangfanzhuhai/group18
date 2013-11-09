@@ -283,15 +283,10 @@ public class MongoLink {
 	 * @return True if user is a member of 'groupID', False otherwise
 	 */
 	public boolean isMember(String username, String groupID) {
-		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
+		@SuppressWarnings("unchecked")
+		List<String> members = (List<String>) groups.findOne(QueryBuilder.start("customID").is(groupID).get()).get("members");
 		
-		for(DBObject o : list)
-		{
-			if(o.get("name").equals(groupID))
-				return true;
-		}
-	
-		return false;
+		return members.contains(username);
 	}
 	
 	/** Method which changes either the status or priority of a task

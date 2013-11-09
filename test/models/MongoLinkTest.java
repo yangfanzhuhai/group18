@@ -372,6 +372,7 @@ public class MongoLinkTest {
 	}
 	
 	private boolean isMember(DBCollection coll, String username, String groupID) {
+		@SuppressWarnings("unchecked")
 		List<String> members = (List<String>) coll.findOne(QueryBuilder.start("customID").is(groupID).get()).get("members");
 		
 		return members.contains(username);
