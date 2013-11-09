@@ -213,6 +213,11 @@ public class MongoLink {
 		groups.update(queryForProject(customID), new BasicDBObject("$pull", new BasicDBObject("members", username)));
 	}
 	
+	/** Changes the project's display name
+	 * 
+	 * @param customID - ID of the project
+	 * @param name - The new display name
+	 */
 	public void changeProjectName(String customID, String name) {
 		groups.update(queryForProject(customID), new BasicDBObject("name", name));
 	}
