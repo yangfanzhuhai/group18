@@ -322,6 +322,32 @@ public class MongoLinkTest {
 		}
 	}
 	
+	@Test
+	public void testAddManyToProject()
+	{
+		DBCollection coll = null;
+		
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			coll = db.getCollection("testCollection");
+			
+			coll.insert(createNewProject());
+			
+			addToProject(coll, "testProject", new String[]{"Tom", "Sam", "Dude"});
+			
+			if(!(isMember(coll, "Tom", "testProject") && isMember(coll, "Sam", "testProject") && isMember(coll, "Dude", "testProject")))
+				fail("User was not added correctly");
+			
+			
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
+		}
+	}
+	
 	private boolean registerNewUser(DBCollection coll, DBObject obj) {
 		
 		int oldCount = (int) coll.getCount();
@@ -366,9 +392,9 @@ public class MongoLinkTest {
 		return new BasicDBObject("customID", "testProject").append("name", "Test Project").append("members", new String[]{"Bob", "Fred"});
 	}
 	
-	private void addToProject(DBCollection coll, String customID, String username) {
+	private void addToProject(DBCollection coll, String customID, String ... users) {
 		
-		coll.update(QueryBuilder.start("customID").is(customID).get(), new BasicDBObject("$addToSet", new BasicDBObject("members", username)));
+		coll.update(QueryBuilder.start("customID").is(customID).get(), new BasicDBObject("$addToSet", new BasicDBObject("members", new BasicDBObject("$each", users))));
 	}
 	
 	private boolean isMember(DBCollection coll, String username, String groupID) {
