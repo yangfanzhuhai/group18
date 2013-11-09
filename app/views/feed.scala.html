@@ -808,6 +808,18 @@
   		var date_and_time_stamp = getTimeStamp();
   		var references = [];
 
+      var reference = extractReferences(reply_message_text);
+        var ref_id = getRefId(reference);
+
+        var references = [];
+
+        if (ref_id != "") {
+
+          references =  ["\"" + ref_id + "\""];
+
+        }
+
+
   /*	var reply = generateJSON(date_and_time_stamp, reply_name_text, "MESSAGE",
   							 reply_message_text, post_id, references); */
 
