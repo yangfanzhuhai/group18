@@ -195,13 +195,32 @@ public class MongoLink {
 		
 		int oldCount = (int) groups.getCount();
 		
-		if(groups.findOne(QueryBuilder.start("customID").is(obj.get("customID")).get()) != null)
+		if(groups.findOne(queryForProject((String) obj.get("customID"))) != null)
 			return false;
 		
 		groups.insert(obj);
 		db.createCollection(obj.get("customID").toString(), null);
 		
 		return (int) groups.getCount() == oldCount + 1;
+	}
+	
+	public void addUsersToProject(String customID, String ... users) {
+		
+		groups.update(QueryBuilder.start("customID").is(customID).get(),
+					new BasicDBObject("$addToSet", new BasicDBObject("members", new BasicDBObject("$each", users))));
+	}
+	
+	public void removeFromProject(String customID, String username) {
+		groups.update(queryForProject(customID), new BasicDBObject("$pull", new BasicDBObject("members", username)));
+	}
+	
+	/** Changes the project's display name
+	 * 
+	 * @param customID - ID of the project
+	 * @param name - The new display name
+	 */
+	public void changeProjectName(String customID, String name) {
+		groups.update(queryForProject(customID), new BasicDBObject("name", name));
 	}
 	
 	/**
@@ -265,15 +284,10 @@ public class MongoLink {
 	 * @return True if user is a member of 'groupID', False otherwise
 	 */
 	public boolean isMember(String username, String groupID) {
-		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
+		@SuppressWarnings("unchecked")
+		List<String> members = (List<String>) groups.findOne(QueryBuilder.start("customID").is(groupID).get()).get("members");
 		
-		for(DBObject o : list)
-		{
-			if(o.get("name").equals(groupID))
-				return true;
-		}
-	
-		return false;
+		return members.contains(username);
 	}
 	
 	/** Method which changes either the status or priority of a task
@@ -591,5 +605,9 @@ public class MongoLink {
 	
 	private DBCollection getGroupColl(String customID) {
 		return db.getCollection(customID);
+	}
+	
+	private DBObject queryForProject(String customID) {
+		return QueryBuilder.start("customID").is(customID).get();
 	}
 }

@@ -54,12 +54,6 @@
       <h1 id="username"> </h1> 
       <div id="groups"> 
       <a id="group_name" class = "h1"></a>
-      </div>
-      <button id="add_group_members" class = "btn btn-info" >
-        Add group members
-      </button>
-
-    </div>
 
 
     </div>  <!-- /container --> 
@@ -76,6 +70,7 @@
         fetchUserData()
 
       ); 
+
     function fetchUserData() {
 
       $.ajax({
@@ -87,13 +82,7 @@
 
               parseUserData(data);
           }
-      });
-
-    }
-
-    function toggleAddMembersBox() {
-
-
+      }); 
     }
 
     function parseUserData(data) {
@@ -111,7 +100,6 @@
 
         var j = 0;
         while (j < members_array.length) {
-          users[j] = members_array[j];
           group_members_div.innerHTML += "<br>" + members_array[j];
           j++;
         }
@@ -122,23 +110,99 @@
         var all_groups_div = document.getElementById("groups");
         var linkText = document.createTextNode(group_name);
 
-		newsLink.href = ref;
+		    newsLink.href = ref;
         taskLink.href = ref + "/tasks";
-		gitLink.href = ref + "/gits";
-		buildLink.href = ref + "/builds";
+		    gitLink.href = ref + "/gits";
+		    buildLink.href = ref + "/builds";
+
+        var add_users_box = document.createElement("input");
+        add_users_box.type = "text";
+        add_users_box.placeholder = "Start typing a name";
+
+        var add_group_members_button = document.createElement("button");
+        add_group_members_button.className = "btn btn-info";
+        add_group_members_button.style.marginLeft="10px";
+        add_group_members_button.innerHTML = "Add user to group";
+        add_group_members_button.onclick = (function (group_name, group_div, add_users_box) {
+          return function() {
+            if (checkValidUser(add_users_box)) {
+
+              var add_user_json = "{\"id\" : \"" + group_name + "\", \"users\" : [\""
+                                 + add_users_box.value + "\"]}";
+
+              $.ajax({
+                 type: "POST",
+                 url: "/rest/addtoproject",
+		 dataType: "json",
+                 data: {"activity":add_user_json},
+                 success: function(data){   
+                    location.reload(true);
+                }
+               });
+            }
+          }
+        }(group_name, group_div, add_users_box)); 
+
+
 
         a.appendChild(linkText);
         group_div.appendChild(a);
         group_div.appendChild(group_members_div);
+        group_div.appendChild(add_users_box);
+        group_div.appendChild(add_group_members_button);
+
         all_groups_div.appendChild(group_div);
 
     }
+
+    var create_group_button = document.createElement("button");
+    create_group_button.className = "btn btn-success";
+    create_group_button.innerHTML = "Create new group";
+    create_group_button.style.marginTop = "10px";
+    create_group_button.onclick = function () {
+
+      prompt("What is the name of your group?");
+
+    }
+
+    all_groups_div.appendChild(create_group_button);
+
+      $.ajax({
+
+          type: "GET",
+          url: "/rest/allusers",
+          success: function(data){   
+              var name_array = data.split(",");
+
+              parseAllUserData(name_array);
+          }
+      });
   }
 
 
-    function addUsers(user_array) {
+  function checkValidUser(add_users_box) {
+
+    var username = add_users_box.value;
+
+    for (var i = 0; i < users.length; i++) {
+      if (username == users[i]) {
+        return true;
+      }
+    }
+    return false;
+
+  }
+
+
+    function parseAllUserData(user_array) {
 
       for (var i=0; i < user_array.length; i++) {
+
+        if (i == 0) {
+          user_array[i] = user_array[i].substring(1, user_array[i].length);
+        } else if (i == user_array.length - 1) {
+          user_array[i] = user_array[i].substring(0, user_array[i].length - 1)
+        }
 
         users[i] = user_array[i];
 
@@ -147,19 +211,52 @@
 
       }
 
+      autocomplete_setup();
+
    }
 
 
+  function autocomplete_setup() {
+  $(function ()  {
+
+     $(":input").autocomplete({
+         source: usersJSON,
+         focus: function () {
+             return false;
+         },
+
+         messages: {
+           noResults:'',
+           results: function() {}
+         },
+        // position: {
+          //  of:"#limitedtextfield",
+            //offset: "-2px 0 0 0" },
+         open: function(event, ui){
+            var $input = $(event.target),
+            $results = $input.autocomplete("widget");
+            $results.css("background-color", "#d9edf7");
+            $results.css("list-style", "none");
+            $results.css("border", "2px solid");
+            $results.css("border-radius", "5px");
+            $results.css("width", "50%");
+            $results.css("border-color", "#AF3838");
+            $results.css("z-index", "30 !important");
+            $results.css("position", "absolute");
+
+
+        }
+      });
+
+   });}
 
 
 
-
-//
     </script>
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+
     <script src="@routes.Assets.at("javascripts/bootstrap.min.js")"></script>
   </body>
 </html>

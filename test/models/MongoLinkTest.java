@@ -273,6 +273,81 @@ public class MongoLinkTest {
 		}
 	}
 	
+	@Test
+	public void testIsMember() {
+		DBCollection coll = null;
+		
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			coll = db.getCollection("testCollection");
+			
+			coll.insert(createNewProject());
+			
+			if(!isMember(coll, "Fred", "testProject"))
+				fail("User should be in project");
+			
+			
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
+		}
+	}
+	
+	@Test
+	public void testAddOneUserToProject()
+	{
+		DBCollection coll = null;
+		
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			coll = db.getCollection("testCollection");
+			
+			coll.insert(createNewProject());
+			
+			addToProject(coll, "testProject", "Tom");
+			
+			if(!isMember(coll, "Tom", "testProject"))
+				fail("User was not added correctly");
+			
+			
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
+		}
+	}
+	
+	@Test
+	public void testAddManyToProject()
+	{
+		DBCollection coll = null;
+		
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			coll = db.getCollection("testCollection");
+			
+			coll.insert(createNewProject());
+			
+			addToProject(coll, "testProject", new String[]{"Tom", "Sam", "Dude"});
+			
+			if(!(isMember(coll, "Tom", "testProject") && isMember(coll, "Sam", "testProject") && isMember(coll, "Dude", "testProject")))
+				fail("User was not added correctly");
+			
+			
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
+		}
+	}
+	
 	private boolean registerNewUser(DBCollection coll, DBObject obj) {
 		
 		int oldCount = (int) coll.getCount();
@@ -311,5 +386,21 @@ public class MongoLinkTest {
 	
 	private DBCursor getTasksByStatus(DBCollection coll, String status) {
 		return coll.find(QueryBuilder.start("object.status").is(status).get());
+	}
+	
+	private DBObject createNewProject() {
+		return new BasicDBObject("customID", "testProject").append("name", "Test Project").append("members", new String[]{"Bob", "Fred"});
+	}
+	
+	private void addToProject(DBCollection coll, String customID, String ... users) {
+		
+		coll.update(QueryBuilder.start("customID").is(customID).get(), new BasicDBObject("$addToSet", new BasicDBObject("members", new BasicDBObject("$each", users))));
+	}
+	
+	private boolean isMember(DBCollection coll, String username, String groupID) {
+		@SuppressWarnings("unchecked")
+		List<String> members = (List<String>) coll.findOne(QueryBuilder.start("customID").is(groupID).get()).get("members");
+		
+		return members.contains(username);
 	}
 }

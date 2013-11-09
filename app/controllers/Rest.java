@@ -16,6 +16,7 @@ import models.ObjectModel;
 import models.PersonActor;
 import models.TargetModel;
 import models.User;
+import models.UsersWithGroup;
 import models.git.Branch;
 import models.git.Commit;
 import models.git.Repository;
@@ -24,6 +25,7 @@ import play.mvc.Result;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
@@ -39,6 +41,21 @@ public class Rest extends Controller {
 			return ok();
 		} catch (Exception e) {
 			return status(400);
+		}
+	}
+	
+	public static Result addUsersToProject() {
+		
+		try {
+			String Json = getValueFromRequest("activity");
+			
+			Gson gson = new Gson();
+			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
+
+			MongoLink.MONGO_LINK.addUsersToProject(users.id, users.users);
+			return ok();
+		} catch (JsonSyntaxException e) {
+			return status(422);
 		}
 	}
 
