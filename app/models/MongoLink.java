@@ -204,9 +204,10 @@ public class MongoLink {
 		return (int) groups.getCount() == oldCount + 1;
 	}
 	
-	public void addToProject(String customID, String username) {
+	public void addUsersToProject(String customID, String ... username) {
 		
-		groups.update(queryForProject(customID), new BasicDBObject("$addToSet", new BasicDBObject("members", username)));
+		groups.update(QueryBuilder.start("customID").is(customID).get(),
+					new BasicDBObject("$addToSet", new BasicDBObject("members", new BasicDBObject("$each", users))));
 	}
 	
 	public void removeFromProject(String customID, String username) {
