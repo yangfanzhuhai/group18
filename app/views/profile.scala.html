@@ -133,6 +133,7 @@
               $.ajax({
                  type: "POST",
                  url: "/rest/addtoproject",
+		 dataType: "json",
                  data: {"activity":add_user_json},
                  success: function(data){   
                     location.reload(true);

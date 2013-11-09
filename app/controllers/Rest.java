@@ -51,7 +51,7 @@ public class Rest extends Controller {
 			
 			Gson gson = new Gson();
 			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
-			
+
 			MongoLink.MONGO_LINK.addUsersToProject(users.id, users.users);
 			return ok();
 		} catch (JsonSyntaxException e) {
