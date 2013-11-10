@@ -130,7 +130,12 @@
         add_group_members_button.innerHTML = "Add user to group";
         add_group_members_button.onclick = (function (group_name, group_div, add_users_box) {
           return function() {
-            if (checkValidUser(add_users_box)) {
+
+            var username = add_users_box.value;
+
+            if (checkValidUser(username)) {
+
+              alert("valid");
 
               var add_user_json = "{\"id\" : \"" + group_name + "\", \"users\" : [\""
                                  + add_users_box.value + "\"]}";
@@ -141,7 +146,7 @@
 		              dataType: "json",
                   data: {"activity":add_user_json},
                   complete: reload
-               });
+               }); 
             }
         }
         }(group_name, group_div, add_users_box)); 
@@ -168,12 +173,12 @@
 
       if (group_name != "") {
 
-        var create_group_json = "{\"id\" : \"" + group_name + "\"]}";
+        var create_group_json = "{\"id\" : \"" + group_name + "\", \"creator\" : @userName }";
 
         $.ajax({
             type: "POST",
             url: "/rest/addProject",
-            ataType: "json",
+            dataType: "json",
             data: {"activity":create_group_json},
             complete: reload
         });
@@ -195,11 +200,10 @@
   }
 
 
-  function checkValidUser(add_users_box) {
-
-    var username = add_users_box.value;
+  function checkValidUser(username) {
 
     for (var i = 0; i < users.length; i++) {
+      alert("comparing " + username + " with " + users[i]);
       if (username == users[i]) {
         return true;
       }
@@ -216,13 +220,18 @@
         if (i == 0) {
           user_array[i] = user_array[i].substring(1, user_array[i].length);
         } else if (i == user_array.length - 1) {
-          user_array[i] = user_array[i].substring(0, user_array[i].length - 1)
+          var a = user_array[i].substring(1, user_array[i].length - 1);
+          user_array[i] = a;
+        } else {
+          var a = user_array[i].substring(1);
+          user_array[i] = a;
         }
 
+        alert(user_array[i]);
         users[i] = user_array[i];
-
         usersJSON[i] = "{ \"value\": \"" + user_array[i] + "\" , \"data\":\"" + user_array[i] + "\" }";
         usersJSON[i] = jQuery.parseJSON(usersJSON[i]);
+
 
       }
 
@@ -239,7 +248,6 @@
          focus: function () {
              return false;
          },
-
          messages: {
            noResults:'',
            results: function() {}
