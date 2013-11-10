@@ -118,6 +118,10 @@ public class MongoLink {
 		if(ml.checkLogin(new BasicDBObject("username", "Piotr").append("password","pass")))
 			System.out.println("Success");
 		
+		System.out.println("Adding new project");
+		
+		if(ml.addNewProject("testP", "Piotr"))
+			System.out.println("added correctly");
 	//	ml.registerNewUser(new BasicDBObject("username", "Rob").append("password", "pass2"));
 		
 	//	if(ml.checkLogin("Rob", "pass2"))
@@ -194,11 +198,12 @@ public class MongoLink {
 	public boolean addNewProject(DBObject obj) {
 		
 		int oldCount = (int) groups.getCount();
+		String customID = obj.get("customID").toString();
 		
 		groups.insert(obj);
-		db.createCollection(obj.get("customID").toString(), null);
+		db.createCollection(customID, null);
 		
-		return (int) groups.getCount() == oldCount + 1;
+		return (int) groups.getCount() == oldCount + 1 && db.getCollection(customID) != null;
 	}
 	
 	/** Takes the parameters, generates a customID, creates a new project,
@@ -305,7 +310,7 @@ public class MongoLink {
 	 */
 	public boolean isMember(String username, String groupID) {
 		@SuppressWarnings("unchecked")
-		List<String> members = (List<String>) groups.findOne(QueryBuilder.start("customID").is(groupID).get()).get("members");
+		List<String> members = (List<String>) groups.findOne(queryForProject(groupID)).get("members");
 		
 		return members.contains(username);
 	}
@@ -660,11 +665,11 @@ public class MongoLink {
 	private String generateCustomID(String name) {
 		
 		int i = 1;
-		String temp = name + i;
+		String temp = name;
 		
 		while(groups.findOne(queryForProject(temp)) != null)
 		{
-			temp = name + ++i;
+			temp = name + i++;
 		}
 		return temp;
 	}

@@ -135,8 +135,6 @@
 
             if (checkValidUser(username)) {
 
-              alert("valid");
-
               var add_user_json = "{\"id\" : \"" + group_name + "\", \"users\" : [\""
                                  + add_users_box.value + "\"]}";
 
@@ -203,7 +201,6 @@
   function checkValidUser(username) {
 
     for (var i = 0; i < users.length; i++) {
-      alert("comparing " + username + " with " + users[i]);
       if (username == users[i]) {
         return true;
       }
@@ -227,7 +224,6 @@
           user_array[i] = a;
         }
 
-        alert(user_array[i]);
         users[i] = user_array[i];
         usersJSON[i] = "{ \"value\": \"" + user_array[i] + "\" , \"data\":\"" + user_array[i] + "\" }";
         usersJSON[i] = jQuery.parseJSON(usersJSON[i]);
