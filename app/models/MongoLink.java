@@ -201,17 +201,35 @@ public class MongoLink {
 		return (int) groups.getCount() == oldCount + 1;
 	}
 	
+	/** Takes the parameters, generates a customID, creates a new project,
+	 * adds it to the database, and creates a collection for the project
+	 * 
+	 * @param name - Name of the project
+	 * @param creator - Username of the person who created the project
+	 * @return True if added correctly, False otherwise
+	 */
 	public boolean addNewProject(String name, String creator) {
 		
 		return addNewProject(createNewEmptyProject(generateCustomID(name), name, creator));
 	}
 	
+	/** Adds any amount of users to a given project. Any user who is already a
+	 * member of the project will not be added again.
+	 * 
+	 * @param customID - ID of the project
+	 * @param users - String or String array of users to be added to the project
+	 */
 	public void addUsersToProject(String customID, String ... users) {
 		
 		groups.update(QueryBuilder.start("customID").is(customID).get(),
 					new BasicDBObject("$addToSet", new BasicDBObject("members", new BasicDBObject("$each", users))));
 	}
 	
+	/** Removes a user from the given project
+	 * 
+	 * @param customID - ID of the project
+	 * @param username - User to be removed
+	 */
 	public void removeFromProject(String customID, String username) {
 		groups.update(queryForProject(customID), new BasicDBObject("$pull", new BasicDBObject("members", username)));
 	}
@@ -605,18 +623,40 @@ public class MongoLink {
 		return (int) collection.getCount();
 	}
 	
+	/**
+	 * @param customID - ID of the current project/group
+	 * @return Database collection belonging to that project/group
+	 */
 	private DBCollection getGroupColl(String customID) {
 		return db.getCollection(customID);
 	}
 	
+	/**
+	 * 
+	 * @param customID - ID of the current project/group
+	 * @return DBObject to be used for querying this project/groups
+	 */
 	private DBObject queryForProject(String customID) {
 		return QueryBuilder.start("customID").is(customID).get();
 	}
 	
+	/** Generates a DBObject representing a project with the given parameters
+	 * 
+	 * @param customID - ID of the project
+	 * @param name - name of the project
+	 * @param creator - creator/owner of the project
+	 * @return DBObject containing the given parameters
+	 */
 	private DBObject createNewEmptyProject(String customID, String name, String creator) {
 		return new BasicDBObject("customID", customID).append("name", name).append("members", new String[]{creator});
 	}
 	
+	/** Generates a unique customID for the project with the given name,
+	 * using the name as a basis for the customID
+	 * 
+	 * @param name - Display name of the project
+	 * @return A unique customID for the project
+	 */
 	private String generateCustomID(String name) {
 		
 		int i = 1;
