@@ -313,10 +313,11 @@
          minLength: 0,
          source: function (request, response) {
             var limitedtextfield = this.element;
-           //  if (lastHash>=0 && limitedtextfield.rows == 5) {
+	    var dropdown = document.getElementById("post_type");
+             if (lastHash>=0 && dropdown.options[dropdown.selectedIndex].value == "text_post") {
                  response($.ui.autocomplete.filter(
                  tasks, request.term.substring(lastHash+1)));          
-           //  }
+             }
          },
          focus: function () {
              return false;
