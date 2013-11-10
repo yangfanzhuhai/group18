@@ -16,6 +16,7 @@ import models.ObjectModel;
 import models.PersonActor;
 import models.TargetModel;
 import models.User;
+import models.UserWithGroup;
 import models.UsersWithGroup;
 import models.git.Branch;
 import models.git.Commit;
@@ -41,6 +42,21 @@ public class Rest extends Controller {
 			return ok();
 		} catch (Exception e) {
 			return status(400);
+		}
+	}
+	
+	public static Result addProject() {
+		
+		try {
+			String Json = getValueFromRequest("activity");
+			
+			Gson gson = new Gson();
+			UserWithGroup project = gson.fromJson(Json, UserWithGroup.class);
+
+			MongoLink.MONGO_LINK.addNewProject(project.name, project.creator);
+			return ok();
+		} catch (JsonSyntaxException e) {
+			return status(422);
 		}
 	}
 	
