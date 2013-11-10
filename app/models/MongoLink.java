@@ -203,12 +203,7 @@ public class MongoLink {
 	
 	public boolean addNewProject(String name, String creator) {
 		
-		if(groups.findOne(queryForProject(name)) == null) {
-			return addNewProject(createNewEmptyProject(name, creator));
-		}
-		else {
-			return false;
-		}
+		return addNewProject(createNewEmptyProject(generateCustomID(name), name, creator));
 	}
 	
 	public void addUsersToProject(String customID, String ... users) {
@@ -618,7 +613,19 @@ public class MongoLink {
 		return QueryBuilder.start("customID").is(customID).get();
 	}
 	
-	private DBObject createNewEmptyProject(String name, String creator) {
-		return new BasicDBObject("customID", name).append("name", name).append("members", new String[]{creator});
+	private DBObject createNewEmptyProject(String customID, String name, String creator) {
+		return new BasicDBObject("customID", customID).append("name", name).append("members", new String[]{creator});
+	}
+	
+	private String generateCustomID(String name) {
+		
+		int i = 1;
+		String temp = name + i;
+		
+		while(groups.findOne(queryForProject(temp)) != null)
+		{
+			temp = name + ++i;
+		}
+		return temp;
 	}
 }
