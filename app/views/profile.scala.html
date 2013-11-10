@@ -85,6 +85,11 @@
       }); 
     }
 
+    function reload() {
+      location.reload(true);
+
+    }
+
     function parseUserData(data) {
 
       for (var i = 0; i < data.length; i++) {
@@ -131,16 +136,14 @@
                                  + add_users_box.value + "\"]}";
 
               $.ajax({
-                 type: "POST",
-                 url: "/rest/addtoproject",
-		 dataType: "json",
-                 data: {"activity":add_user_json},
-                 success: function(data){   
-                    location.reload(true);
-                }
+                  type: "POST",
+                  url: "/rest/addtoproject",
+		              dataType: "json",
+                  data: {"activity":add_user_json},
+                  complete: reload
                });
             }
-          }
+        }
         }(group_name, group_div, add_users_box)); 
 
 
@@ -161,8 +164,20 @@
     create_group_button.style.marginTop = "10px";
     create_group_button.onclick = function () {
 
-      prompt("What is the name of your group?");
+      var group_name = prompt("What is the name of your group?");
 
+      if (group_name != "") {
+
+        var create_group_json = "{\"id\" : \"" + group_name + "\"]}";
+
+        $.ajax({
+            type: "POST",
+            url: "/rest/addProject",
+            ataType: "json",
+            data: {"activity":create_group_json},
+            complete: reload
+        });
+      }
     }
 
     all_groups_div.appendChild(create_group_button);
