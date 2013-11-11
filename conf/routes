@@ -31,6 +31,7 @@ GET		/rest/allusers					controllers.Rest.getAllUsers()
 
 
 POST	/rest/addproject				controllers.Rest.addProject()
+POST	/rest/leaveproject				controllers.Rest.leaveProject()
 POST	/:groupID/rest/message			controllers.Rest.createMessage(groupID)
 POST	/rest/addtoproject				controllers.Rest.addUsersToProject()
 POST	/rest/register					controllers.Rest.registerUser()
