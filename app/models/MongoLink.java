@@ -233,10 +233,10 @@ public class MongoLink {
 	/** Removes a user from the given project
 	 * 
 	 * @param customID - ID of the project
-	 * @param username - User to be removed
+	 * @param users - User to be removed
 	 */
-	public void removeFromProject(String customID, String username) {
-		groups.update(queryForProject(customID), new BasicDBObject("$pull", new BasicDBObject("members", username)));
+	public void removeFromProject(String customID, String ... users) {
+		groups.update(queryForProject(customID), new BasicDBObject("$pullAll", new BasicDBObject("members", users)));
 	}
 	
 	/** Changes the project's display name
