@@ -151,32 +151,76 @@
         }
         }(group_name, group_div, add_users_box)); 
 
-        var leave_group_button = document.createElement("button");
-        leave_group_button.className = "btn btn-danger btn-xs";
-        leave_group_button.innerHTML = "Leave group";
-        leave_group_button.style.float = "right";
-        leave_group_button.onclick = (function (group_name) {
-          return function() {
+        var leave_group_button;
+        var close_group_button;
 
-              var leave_group_json = "{\"id\" : \"" + group_name + "\"}";
+        if (j > 1) {
 
-              $.ajax({
-                  type: "POST",
-                  url: "/rest/leaveproject",
-                  dataType: "json",
-                  data: {"activity":leave_group_json},
-                  complete: reload
-               }); 
+          var leave_group_button = document.createElement("button");
+          leave_group_button.className = "btn btn-danger btn-xs";
+          leave_group_button.innerHTML = "Leave group";
+          leave_group_button.style.float = "right";
+          leave_group_button.onclick = (function (group_name) {
+            return function() {
+
+                var choice = confirm("Are you sure you want to leave group " + group_name + "?");
+
+                if (choice == true) {
+
+                  var leave_group_json = "{\"id\" : \"" + group_name + "\"}";
+
+                  $.ajax({
+                    type: "POST",
+                    url: "/rest/leaveproject",
+                    dataType: "json",
+                    data: {"activity":leave_group_json},
+                    complete: reload
+                  }); 
+
+                }
         
+              }
+            }(group_name, group_div, add_users_box)); 
+
+
+          } else {
+            close_group_button = document.createElement("button");
+            close_group_button.className = "btn btn-danger btn-xs";
+            close_group_button.innerHTML = "Close group";
+            close_group_button.style.float = "right";
+            close_group_button.onclick = (function (group_name) {
+            return function() {
+
+              var choice = confirm("Are you sure you want to close group " + group_name + "?");
+
+              if (choice == true) {
+
+                var close_group_json = "{\"id\" : \"" + group_name + "\"}";
+
+                $.ajax({
+                    type: "POST",
+                    url: "/rest/deleteproject",
+                    dataType: "json",
+                    data: {"activity":leave_group_json},
+                    complete: reload
+                }); 
+
+              }
+        
+            }
+            }(group_name, group_div, add_users_box)); 
         }
-        }(group_name, group_div, add_users_box)); 
 
         a.appendChild(linkText);
         group_div.appendChild(a);
         group_div.appendChild(group_members_div);
         group_div.appendChild(add_users_box);
         group_div.appendChild(add_group_members_button);
-        group_div.appendChild(leave_group_button);
+        if (j > 1) {
+          group_div.appendChild(leave_group_button);
+        } else {
+          group_div.appendChild(close_group_button);
+        }
 
         all_groups_div.appendChild(group_div);
 
