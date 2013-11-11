@@ -30,7 +30,6 @@ public class MongoLink {
 	private MongoClient mongoClient;
 	private static DB db;
 	private static DBCollection users;
-	private static DBCollection gitRepos;
 	private static DBCollection groups;
 	
 	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
@@ -41,18 +40,8 @@ public class MongoLink {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		
-		if(devMode)
-		{
-			gitRepos = db.getCollection("DEVgitRepositories");
-			users = db.getCollection("DEVuserAccounts");
-			groups = db.getCollection("DEVgroups");
-		}
-		else
-		{
-			gitRepos = db.getCollection("gitRepositories");
-			users = db.getCollection("userAccounts");
-			groups = db.getCollection("groups");
-		}
+		users = db.getCollection("userAccounts");
+		groups = db.getCollection("groups");
 
 	}
 
