@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.bson.types.ObjectId;
 
@@ -29,7 +30,6 @@ public class MongoLink {
 	private MongoClient mongoClient;
 	private static DB db;
 	private static DBCollection users;
-	private static DBCollection gitRepos;
 	private static DBCollection groups;
 	
 	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
@@ -40,18 +40,8 @@ public class MongoLink {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		
-		if(devMode)
-		{
-			gitRepos = db.getCollection("DEVgitRepositories");
-			users = db.getCollection("DEVuserAccounts");
-			groups = db.getCollection("DEVgroups");
-		}
-		else
-		{
-			gitRepos = db.getCollection("gitRepositories");
-			users = db.getCollection("userAccounts");
-			groups = db.getCollection("groups");
-		}
+		users = db.getCollection("userAccounts");
+		groups = db.getCollection("groups");
 
 	}
 
@@ -120,8 +110,15 @@ public class MongoLink {
 		
 		System.out.println("Adding new project");
 		*/
-		if(ml.addNewProject("test Hello spaces", "Piotr"))
-			System.out.println("added correctly");
+		groups = db.createCollection("temp", null);
+		long startTime = System.currentTimeMillis();
+		for(int i = 0; i < 200; i++)
+		{
+			ml.addNewProject("test Hello spaces", "Piotr");
+		}
+		float totalTime = System.currentTimeMillis() - startTime;
+		System.out.println("Total time taken : " + totalTime/1000 + " (average: " + totalTime/200000 + ")");
+		groups.drop();
 	//	ml.registerNewUser(new BasicDBObject("username", "Rob").append("password", "pass2"));
 		
 	//	if(ml.checkLogin("Rob", "pass2"))
@@ -673,12 +670,13 @@ public class MongoLink {
 	 */
 	private String generateCustomID(String name) {
 		
-		int i = 1;
-		String temp = removeBlanks(name);
+		name = removeBlanks(name);
+		String temp = name;
+		Random random = new Random();
 		
 		while(groups.findOne(queryForProject(temp)) != null)
 		{
-			temp = name + i++;
+			temp = name + Math.round(random.nextFloat() * 1000);
 		}
 		return temp;
 	}
