@@ -89,6 +89,20 @@ public class Rest extends Controller {
 			return status(422);
 		}
 	}
+	
+	public static Result deleteProject() {
+		try {
+			String Json = getValueFromRequest("activity");
+			
+			Gson gson = new Gson();
+			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
+
+			MongoLink.MONGO_LINK.deleteProject(users.id);
+			return ok();
+		} catch (JsonSyntaxException e) {
+			return status(422);
+		}
+	}
 
 	public static Result getUser() {
 		return ok(session("connected"));

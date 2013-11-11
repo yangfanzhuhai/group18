@@ -248,6 +248,15 @@ public class MongoLink {
 		groups.update(queryForProject(customID), new BasicDBObject("name", name));
 	}
 	
+	/** Deletes the entire project from the database.
+	 * 
+	 * @param customID - ID of the project to be removed
+	 */
+	public void deleteProject(String customID) {
+		groups.remove(queryForProject(customID));
+		getGroupColl(customID).drop();
+	}
+	
 	/**
 	 * Adds new user to the database, only if their username is not already
 	 * in the database
