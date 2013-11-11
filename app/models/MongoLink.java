@@ -78,7 +78,7 @@ public class MongoLink {
 		
 	//	long totalTime = 0;
 		
-		System.out.println(ml.getGroups("Matt"));
+	/*	System.out.println(ml.getGroups("Matt"));
 		System.out.println(ml.isMember("Matt", "Progress"));
 		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
 	//	list = ml.getNewsFeed();
@@ -119,8 +119,8 @@ public class MongoLink {
 			System.out.println("Success");
 		
 		System.out.println("Adding new project");
-		
-		if(ml.addNewProject("testP", "Piotr"))
+		*/
+		if(ml.addNewProject("test Hello spaces", "Piotr"))
 			System.out.println("added correctly");
 	//	ml.registerNewUser(new BasicDBObject("username", "Rob").append("password", "pass2"));
 		
@@ -233,10 +233,10 @@ public class MongoLink {
 	/** Removes a user from the given project
 	 * 
 	 * @param customID - ID of the project
-	 * @param username - User to be removed
+	 * @param users - User to be removed
 	 */
-	public void removeFromProject(String customID, String username) {
-		groups.update(queryForProject(customID), new BasicDBObject("$pull", new BasicDBObject("members", username)));
+	public void removeFromProject(String customID, String ... users) {
+		groups.update(queryForProject(customID), new BasicDBObject("$pullAll", new BasicDBObject("members", users)));
 	}
 	
 	/** Changes the project's display name
@@ -246,6 +246,15 @@ public class MongoLink {
 	 */
 	public void changeProjectName(String customID, String name) {
 		groups.update(queryForProject(customID), new BasicDBObject("name", name));
+	}
+	
+	/** Deletes the entire project from the database.
+	 * 
+	 * @param customID - ID of the project to be removed
+	 */
+	public void deleteProject(String customID) {
+		groups.remove(queryForProject(customID));
+		getGroupColl(customID).drop();
 	}
 	
 	/**
@@ -665,12 +674,17 @@ public class MongoLink {
 	private String generateCustomID(String name) {
 		
 		int i = 1;
-		String temp = name;
+		String temp = removeBlanks(name);
 		
 		while(groups.findOne(queryForProject(temp)) != null)
 		{
 			temp = name + i++;
 		}
 		return temp;
+	}
+	
+	private String removeBlanks(String input) {
+		
+		return input.replaceAll("\\s+","");
 	}
 }

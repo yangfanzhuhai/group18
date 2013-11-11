@@ -448,7 +448,10 @@
 
   		 	delete_button.onclick = (function(post_id) {
             	  return function() {
-            	      delete_post(post_id);
+                    var choice = confirm("Are you sure you want to delete this post?");
+                    if (choice == true) {
+            	         delete_post(post_id);
+                   }
               }
          	 }(post_id));
 
@@ -802,7 +805,7 @@
   	var reply_name_text = "@userName";
   	var reply_message_text = reply_message.value;
 
-  	if (reply_message_text == "") {
+  	if (reply_message_text == "" && reply_message_text != null) {
   		alert("Reply cannot be empty.");
   	} else {
 

@@ -348,6 +348,63 @@ public class MongoLinkTest {
 		}
 	}
 	
+	@Test
+	public void testRemoveFromProject() 
+	{
+		DBCollection coll = null;
+		
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			coll = db.getCollection("testCollection");
+			
+			coll.insert(createNewProject());
+			
+			removeFromProject(coll, "testProject", "Bob");
+			
+			if(isMember(coll, "Bob", "testProject") || !isMember(coll, "Fred", "testProject"))
+				fail("User was not removed correctly");
+			
+			
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
+		}
+	}
+	
+	@Test
+	public void testRemoveManyFromProject()
+	{
+		DBCollection coll = null;
+		
+		try {
+			DB db = new MongoClient( DBURL ).getDB(DBURL.getDatabase());
+			db.createCollection("testCollection", null);
+			coll = db.getCollection("testCollection");
+			
+			coll.insert(createNewProject());
+			
+			addToProject(coll, "testProject", new String[]{"Sam", "Dude"});
+			
+			if(!(isMember(coll, "Sam", "testProject") && isMember(coll, "Dude", "testProject")))
+				fail("User was not added correctly");
+			
+			removeFromProject(coll, "testProject", new String[]{"Bob","Sam", "Dude"});
+			
+			if(isMember(coll, "Bob", "testProject") || isMember(coll, "Sam", "testProject") || isMember(coll, "Dude", "testProject") || !isMember(coll, "Fred", "testProject"))
+				fail("User was not removed correctly");
+			
+			
+		} catch (UnknownHostException e) {
+			fail("Connection to database failed");
+		} finally {
+			if(coll != null)
+				coll.drop();
+		}
+	}
+	
 	private boolean registerNewUser(DBCollection coll, DBObject obj) {
 		
 		int oldCount = (int) coll.getCount();
@@ -402,5 +459,9 @@ public class MongoLinkTest {
 		List<String> members = (List<String>) coll.findOne(QueryBuilder.start("customID").is(groupID).get()).get("members");
 		
 		return members.contains(username);
+	}
+	
+	public void removeFromProject(DBCollection coll, String customID, String ... users) {
+		coll.update(QueryBuilder.start("customID").is(customID).get(), new BasicDBObject("$pullAll", new BasicDBObject("members", users)));
 	}
 }
