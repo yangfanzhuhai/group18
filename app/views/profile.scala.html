@@ -151,6 +151,13 @@
         }
         }(group_name, group_div, add_users_box)); 
 
+        var leave_group_button = document.createElement("button");
+        leave_group_button.className = "btn btn-danger btn-xs";
+        leave_group_button.innerHTML = "Leave group";
+        leave_group_button.style.float = "right";
+
+
+
 
 
         a.appendChild(linkText);
@@ -158,6 +165,7 @@
         group_div.appendChild(group_members_div);
         group_div.appendChild(add_users_box);
         group_div.appendChild(add_group_members_button);
+        group_div.appendChild(leave_group_button);
 
         all_groups_div.appendChild(group_div);
 
@@ -171,7 +179,7 @@
 
       var group_name = prompt("What is the name of your group?");
 
-      if (group_name != "") {
+      if (group_name != "" && group_name != null) {
 
         var create_group_json = "{\"name\" : \"" + group_name + "\", \"creator\" : @userName }";
 

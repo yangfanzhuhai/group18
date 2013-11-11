@@ -802,7 +802,7 @@
   	var reply_name_text = "@userName";
   	var reply_message_text = reply_message.value;
 
-  	if (reply_message_text == "") {
+  	if (reply_message_text == "" && reply_message_text != null) {
   		alert("Reply cannot be empty.");
   	} else {
 
