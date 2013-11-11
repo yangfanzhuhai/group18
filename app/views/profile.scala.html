@@ -155,10 +155,21 @@
         leave_group_button.className = "btn btn-danger btn-xs";
         leave_group_button.innerHTML = "Leave group";
         leave_group_button.style.float = "right";
+        leave_group_button.onclick = (function (group_name) {
+          return function() {
 
+              var leave_group_json = "{\"id\" : \"" + group_name + "\"}";
 
-
-
+              $.ajax({
+                  type: "POST",
+                  url: "/rest/leaveproject",
+                  dataType: "json",
+                  data: {"activity":leave_group_json},
+                  complete: reload
+               }); 
+        
+        }
+        }(group_name, group_div, add_users_box)); 
 
         a.appendChild(linkText);
         group_div.appendChild(a);
