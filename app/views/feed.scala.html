@@ -72,7 +72,7 @@
       <form name="myform" role="form">
         <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
         onKeyDown="postFormOnKeyDown(this)" maxlength="140" class="form-control" 
-        placeholder="what's on your mind?"> </textarea>
+        placeholder="what's on your mind?" style = "resize: none"> </textarea>
         <br>
         <small align="right"> <!--(Maximum characters: 140)-->
         You have <input readonly type="text" id="charCountdown" name="countdown" size="3" value="140"> characters left.</small>
@@ -442,7 +442,6 @@
       var post_body = document.createElement("div");
       post_body.setAttribute("class", "media-body");
   	
-  	
   		var stream = document.getElementById("stream");
   		if (post_count > 0) {
   			stream.insertBefore(post, stream.childNodes[0]);
@@ -513,9 +512,11 @@
   			user.innerHTML = publisher;
   		
   			var message_text = stream_array[i][0]['object']["message"];
+        changeReferencesToLinks(message_text);
+
   			var message = document.createElement("p");
   			message_text = message_text.replace("\n", "<br>");
-  			message.innerHTML = message_text;
+        message.innerHTML = changeReferencesToLinks(message_text);
   			
   	    post_body.appendChild(user);
   		  post_body.appendChild(message);
@@ -917,6 +918,20 @@
       });
 
   	}
+
+  }
+
+  function changeReferencesToLinks(message) {
+
+
+    var hashtagRegex = new RegExp("#[^#]*#");
+    var tag = hashtagRegex.exec(message);
+
+    var linked_tag = document.createElement('a');
+    linked_tag.href = "http://www.google.com";
+    linked_tag.innerHTML = tag;
+
+    return message.replace(tag, $(linked_tag).outerHTML());
 
   }
 
