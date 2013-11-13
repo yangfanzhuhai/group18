@@ -81,7 +81,7 @@
 
    
     <div class="container col-md-offset-2 col-md-4">
-    <select id="post_type" onchange="postTypeChange(this.value)" style = "width: 25%" class="form-inline form-control">
+    <select id="post_type" onchange="postTypeChange(this.value)" align = "center" style = "width: 50%" class="form-inline form-control">
       <option value="text_post">Text Post</option>
       <option value="task">Task</option>
     </select>
@@ -93,13 +93,14 @@
 
     <div id = "posts" class = "float">
     </div>
+
+              <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
+"AJAX loader" title="AJAX loader" align="center" /></div>
     
 
     <ul id = "stream" class = "media-list" ></ul>
   </div> <!-- /container -->  
 
-          <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
-"AJAX loader" title="AJAX loader" /></div>
 
   <script>
   $.fn.outerHTML = function(){
