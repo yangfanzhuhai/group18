@@ -28,6 +28,12 @@ body {
 
 }
 
+.profile_picture {
+	border-radius: 15px;
+	width: 10%;
+
+}
+
 .taskRef {
   background: #FE4365;
   margin: 10px;
