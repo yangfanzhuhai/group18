@@ -147,7 +147,12 @@
         postToFeed(); 
         return false; 
       }
-      limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
+      var dropdown = document.getElementById("post_type");
+      if (dropdown.options[dropdown.selectedIndex].value == "task") {
+        limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,20);
+      } else {
+        limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
+      }
     }
 
     function limitText(limitField, limitCount, limitNum) {
@@ -199,12 +204,16 @@
   		var limitedtextfield = document.getElementById("limitedtextfield");
   		limitedtextfield.rows = 5
   		limitedtextfield.cols = 30;
+      limitedtextfield.value = "";
+      document.getElementById("charCountdown").value = "140";
 
   	} else {
   		var limitedtextfield = document.getElementById("limitedtextfield");
   		limitedtextfield.rows = 1;
   		limitedtextfield.cols = 30;
-  	}
+      limitedtextfield.value = "";
+      document.getElementById("charCountdown").value = "20";
+    }
 
   }
 
@@ -454,7 +463,6 @@
                    }
               }
          	 }(post_id));
-
   		}
 
 
