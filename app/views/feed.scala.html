@@ -60,8 +60,11 @@
 
   <div class="container col-md-offset-2 col-md-8">
     <a href="@routes.Application.feed(groupID,0)">
-      <img src="@routes.Assets.at("images/progress_all.jpg")" alt="some_text"
+      <img src="@routes.Assets.at("images/title.jpg")" id ="title" alt="some_text"
     	width="200" >
+      <img src="@routes.Assets.at("images/logo.jpg")" id = "logo"  alt="some_text"
+      width="200" >
+
     </a>
 
     <div id = "post_options" align="center">
@@ -78,7 +81,7 @@
 
    
     <div class="container col-md-offset-2 col-md-4">
-    <select id="post_type" onchange="postTypeChange(this.value)" class="form-inline form-control">
+    <select id="post_type" onchange="postTypeChange(this.value)" style = "width: 25%" class="form-inline form-control">
       <option value="text_post">Text Post</option>
       <option value="task">Task</option>
     </select>
@@ -94,6 +97,9 @@
 
     <ul id = "stream" class = "media-list" ></ul>
   </div> <!-- /container -->  
+
+          <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
+"AJAX loader" title="AJAX loader" /></div>
 
   <script>
   $.fn.outerHTML = function(){
@@ -168,7 +174,20 @@
   var tasks = [];
   var task_names = [];
 
+  document.getElementById("title").style.marginTop = "20px";
+  document.getElementById("title").style.marginBottom = "10px";
+  document.getElementById("logo").style.float = "right";
+  document.getElementById("logo").style.marginTop = "25px";
+  document.getElementById("charCountdown").style.marginBottom = "10px";
+  document.getElementById("post_type").style.marginBottom = "10px";
+  document.getElementById("preloader").style.textAlign = "center";
+  document.getElementById("preloader").style.marginTop = "100px";
+
+
+
   function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
+
+      $('#preloader').show();
 
       return "{\"published\" : \""
                 + date_and_time_stamp
@@ -478,6 +497,7 @@
       user_image.style.float = "right";
       user_image.style.margin = "5px";
       user_image.style.marginLeft = "10px";
+      user_image.style.border = "3px solid white";
 
       var email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
 
@@ -718,6 +738,7 @@
           user_image.style.float = "left";
           user_image.style.marginRight = "10px";
           user_image.style.marginTop = "10px";
+          user_image.style.border = "2px solid white";
 
           var email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
 
@@ -762,6 +783,7 @@
   	}
 
     autocomplete_setup();
+    $('#preloader').hide();
 
   	
   }

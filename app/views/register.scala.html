@@ -71,6 +71,7 @@
     	  var username = document.getElementById("username").value;
     	  var password = document.getElementById("password").value;
     	  var password_reenter = document.getElementById("password_reenter").value;
+        var email = document.getElementById("email").value;
     	
     	  /*if (first_name == "") {
 
@@ -96,13 +97,18 @@
 
     		  alert("Passwords do not match");
 
+        } else if (email == "") {
+
+          alert("Please enter your email address");
+
     	  } else {
           var credentials = "{\"username\" : "
               + "\"" + username + "\", "
               + "\"password\" : "
               + "\"" + password + "\""
+              + "\"email\" : "
+              + "\"" + email + "\""
               + "}";
-          
           
           $.ajax({
               type: "POST",
