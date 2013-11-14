@@ -119,11 +119,17 @@
           var user_image = document.createElement("image");
           user_image.style.height = "40px";
           user_image.style.width = "40px";
-          user_image.style.borderRadius = "20px";
+          user_image.style.borderRadius = "50px";
 
-          var email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
+          var email = "user" + String.fromCharCode(64) + "gmail.com";
 
-          user_image.src= get_gravatar(email, 250);
+          if (members_array[j] == "Rob") {
+                email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
+          }
+
+          var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
+
+          user_image.src= get_gravatar(email, 250) + "&d=" + default_img;
           group_images_div.appendChild(user_image);
 
           j++;
@@ -137,10 +143,10 @@
         
         var git_webhook_div = document.createElement("div");
         var git_webhook = window.location.origin + "/" +  group_name + "/rest/git";
-		git_webhook_div.innerHTML = "Git Web Hook: ".bold() +  git_webhook;
-		var jenkins_webhook_div = document.createElement("div");
+		    git_webhook_div.innerHTML = "Git Web Hook: ".bold() +  git_webhook;
+		    var jenkins_webhook_div = document.createElement("div");
         var jenkins_webhook = window.location.origin + "/" +  group_name + "/rest/jenkins";
-		jenkins_webhook_div.innerHTML = "Jenkins Web Hook: ".bold() +  git_webhook;
+		    jenkins_webhook_div.innerHTML = "Jenkins Web Hook: ".bold() +  git_webhook;
         
 		    newsLink.href = ref;
         taskLink.href = ref + "/tasks";
@@ -375,12 +381,20 @@
 
   function show_gravatar() {
 
-  var string = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
-  var profileImage = document.getElementById("profileImage");
+    var email = "user" + String.fromCharCode(64) + "gmail.com";
 
-    profileImage.src= get_gravatar(string, 250);
-    profileImage.style.borderRadius = "20px";
+    if ("@userName" == "Rob") {
+      email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
+    }
+
+    var profileImage = document.getElementById("profileImage");
+
+    profileImage.style.borderRadius = "50px";
     profileImage.float = "right";
+
+    var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
+
+    profileImage.src= get_gravatar(email, 250) + "&d=" + default_img;
   }
 
   function md5 (str) {
