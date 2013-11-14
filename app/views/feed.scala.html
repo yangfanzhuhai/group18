@@ -492,16 +492,24 @@
           }(post_id, reply_message));
 
       var user_image = document.createElement("image");
-      user_image.style.width = "10%";
-      user_image.style.borderRadius = "20px";
+      user_image.style.width = "8%";
+      user_image.style.borderRadius = "50px";
       user_image.style.float = "right";
       user_image.style.margin = "5px";
       user_image.style.marginLeft = "10px";
       user_image.style.border = "3px solid white";
 
-      var email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
+      var email = "user" + String.fromCharCode(64) + "gmail.com";
 
-      user_image.src= get_gravatar(email, 250);
+      if (publisher == "Rob") {
+
+        email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
+
+      }
+
+      var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
+
+      user_image.src= get_gravatar(email, 250) + "&d=" + default_img;
       post.appendChild(user_image);
 
   		post_options.style.padding = "10px";
@@ -513,7 +521,6 @@
   			user.innerHTML = publisher;
   		
   			var message_text = stream_array[i][0]['object']["message"];
-        changeReferencesToLinks(message_text);
 
   			var message = document.createElement("p");
   			message_text = message_text.replace("\n", "<br>");
@@ -602,6 +609,10 @@
   			var jenkins = document.createElement("h4");
         jenkins.setAttribute("class", "media-heading");
   			jenkins.innerHTML = publisher;
+
+        user_image.src = "@routes.Assets.at("images/jenkins.png")";
+        user_image.style.width = "7%";
+        user_image.style.border = "";
   			
   			var build_data = document.createElement("p");
   			var build_name = stream_array[i][0]['object']["name"];
@@ -638,6 +649,10 @@
   			var branch = stream_array[i][0]['object']['branch'];
   			var branch_name = branch["name"];
   			var branch_url = branch["url"];
+
+        user_image.src = "@routes.Assets.at("images/git.png")";
+        user_image.style.width = "7%";
+        user_image.style.border = "";
 
         var git_heading = document.createElement("h4");
         git_heading.setAttribute("class", "media-heading");
@@ -735,16 +750,13 @@
       	  reply_div.style.paddingLeft = "10%";
 
           var user_image = document.createElement("image");
-          user_image.style.width = "8%";
-          user_image.style.borderRadius = "16px";
+          user_image.style.width = "6%";
+          user_image.style.borderRadius = "50px";
           user_image.style.float = "left";
           user_image.style.marginRight = "10px";
           user_image.style.marginTop = "10px";
           user_image.style.border = "2px solid white";
 
-          var email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
-
-          user_image.src= get_gravatar(email, 250);
           reply_div.appendChild(user_image);
 
           var reply_div_body = document.createElement("div");
@@ -757,8 +769,20 @@
           reply_publisher.setAttribute("class", "media-heading");
   				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"];
 
+          var email = "user" + String.fromCharCode(64) + "gmail.com";
+
+          if (reply_publisher.innerHTML == "Rob") {
+
+            email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
+
+          }
+
+          var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
+
+          user_image.src= get_gravatar(email, 250) + "&d=" + default_img;
+
   				var reply_message_text = document.createElement("p");
-  				reply_message_text.innerHTML = stream_array[i][j]['object']["message"];
+  				reply_message_text.innerHTML = changeReferencesToLinks(stream_array[i][j]['object']["message"]);
   			
   				var reply_publisherType = stream_array[i][j]['actor']["objectType"];
   	
