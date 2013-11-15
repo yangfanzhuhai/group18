@@ -117,8 +117,8 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getNewsFeed(groupID).toString());
 	}
 	
-	public static Result getMoreActivities(String groupID) {
-		return ok(MongoLink.MONGO_LINK.getNextNews(groupID, getValueFromRequest("activity")).toString());
+	public static Result getMoreActivities(String groupID, String last_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNextNews(groupID, last_post_id).toString());
 	}
 
 	public static Result getTasks(String groupID) {

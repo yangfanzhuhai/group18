@@ -19,7 +19,7 @@ GET     /:groupID/builds            	controllers.Application.feed(groupID, toggl
 
 
 GET		/:groupID/rest/feed				controllers.Rest.getActivities(groupID)
-GET		/:groupID/rest/morefeed			controllers.Rest.getMoreActivities(groupID)
+GET		/:groupID/rest/morefeed/:fid	controllers.Rest.getMoreActivities(groupID, fid)
 GET		/:groupID/rest/tasks			controllers.Rest.getTasks(groupID)
 GET		/:groupID/rest/alltasks			controllers.Rest.getAllTasks(groupID)
 GET     /:groupID/rest/tasks/:status    controllers.Rest.getTasksWithStatus(groupID, status)
