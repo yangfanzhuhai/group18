@@ -1011,13 +1011,25 @@
     var hashtagRegex = new RegExp("#[^#]*#");
     var tag = hashtagRegex.exec(message);
 
-    var linked_tag = document.createElement('a');
-    linked_tag.href = "http://www.google.com";
-    linked_tag.innerHTML = tag;
+    if (tag != null) {
 
-    return message.replace(tag, $(linked_tag).outerHTML());
+      var linked_tag = document.createElement('a');
+      var tag_without_hashes = tag[0].substring(1, tag[0].length -1).trim();
+
+       alert(tag_without_hashes);
+
+     linked_tag.href = "@routes.Application.feed(groupID,1)";
+    
+      linked_tag.innerHTML = tag;
+
+      return message.replace(tag, $(linked_tag).outerHTML());
+
+    }
+
+    return message;
 
   }
+
 
   function extractReferences(message) {
 

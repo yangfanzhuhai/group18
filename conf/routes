@@ -16,6 +16,7 @@ GET     /:groupID                   	controllers.Application.feed(groupID, toggl
 GET     /:groupID/tasks             	controllers.Application.feed(groupID, toggle: Integer = 1)
 GET     /:groupID/gits              	controllers.Application.feed(groupID, toggle: Integer = 2)
 GET     /:groupID/builds            	controllers.Application.feed(groupID, toggle: Integer = 3)
+GET	/:groupID/taskref		controllers.Application.feed(groupID, toggle: Integer = 4)
 
 
 GET		/:groupID/rest/feed				controllers.Rest.getActivities(groupID)
