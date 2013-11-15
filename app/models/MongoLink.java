@@ -350,7 +350,7 @@ public class MongoLink {
 	}
 	
 	public void addFBImage(String username, String url) {
-		users.update(QueryBuilder.start("username").is(username).get(), new BasicDBObject("fb_image", url));
+		users.update(QueryBuilder.start("username").is(username).get(), new BasicDBObject("$set", new BasicDBObject("fb_image", url)));
 	}
 	
 	/** Method which changes either the status or priority of a task

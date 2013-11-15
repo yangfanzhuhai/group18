@@ -80,9 +80,6 @@
     FB.api('/me', function(response) {
       console.log('Good to see you, ' + response.name + '.');
     });
-    document.getElementById("logoutButton").style.visibility = "visible";
-    document.getElementById("logoutButton").disabled = "false";
-
     FB.api("/me/picture?width=180&height=180",  function(response) {
 
       if (response != null && response != "") {
@@ -149,11 +146,6 @@
       <h1 id="username"> </h1> 
       <fb:login-button show-faces="true" width="200" max-rows="1" style = "float: right"></fb:login-button>
 
-      <button id = "logoutButton" onclick=logout() style = "visibility: hidden" disabled = "true"  >
-
-        Log out of Facebook
-      </button>
-
       <div id = "picture" class = "profile_picture" float = "right">
       <img id="profileImage" width="107" height="98" class = "profile_picture">
     </div>
@@ -205,7 +197,6 @@
 
     function parseUserData(data) {
 
-
       for (var i = 0; i < data.length; i++) {
 
         var group_div = document.createElement("div");
@@ -237,7 +228,6 @@
 
           if (members[j]["fb_image"] != "") {
 
-
               image_src = members[j]["fb_image"];
 
           } else if (members[j]["email"] != "") {
@@ -257,6 +247,11 @@
 
           j++;
         } 
+
+        var profileImage = document.getElementById("profileImage");
+        profileImage.src = user_images["@userName"];
+        profileImage.style.borderRadius = "50px";
+
 
         var a = document.createElement("a");
         var ref = "/../" + group_name;
