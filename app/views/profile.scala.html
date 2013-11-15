@@ -85,11 +85,11 @@
 
     FB.api("/me/picture?width=180&height=180",  function(response) {
 
-      if (reponse != null && response != "") {
+      if (response != null && response != "") {
 
         document.getElementById("profileImage").src = response.data.url;
 
-        var fb_image_json = "{\"fb_image\" : \"" + reponse.data.url + "\"}";
+        var fb_image_json = "{\"fb_image\" : \"" + response.data.url + "\"}";
 
               $.ajax({
                   type: "POST",
@@ -236,6 +236,7 @@
           var image_src;
 
           if (members[j]["fb_image"] != "") {
+
 
               image_src = members[j]["fb_image"];
 
@@ -416,7 +417,6 @@
               parseAllUserData(name_array);
           }
       });
-       show_gravatar();
   }
 
 
@@ -492,24 +492,6 @@
    });}
 
 
-  function show_gravatar() {
-
-    var email = "user" + String.fromCharCode(64) + "gmail.com";
-
-    if ("@userName" == "Rob") {
-      email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
-    }
-
-    var profileImage = document.getElementById("profileImage");
-
-    profileImage.style.borderRadius = "50px";
-    profileImage.float = "right";
-
-    var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
-
-   // profileImage.src= get_gravatar(email, 250) + "&d=" + default_img;
-
-  }
 
 
 

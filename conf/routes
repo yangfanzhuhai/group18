@@ -30,6 +30,7 @@ GET		/rest/groups					controllers.Rest.getGroups()
 GET		/rest/allusers					controllers.Rest.getAllUsers()
 
 
+POST	/rest/addfbimage				controllers.Rest.addFBImage()
 POST	/rest/addproject				controllers.Rest.addProject()
 POST	/rest/leaveproject				controllers.Rest.leaveProject()
 POST	/rest/deleteproject				controllers.Rest.deleteProject()
