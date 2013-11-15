@@ -432,7 +432,6 @@
     $('#loadMoreButton').hide();
     $('#loader').show();
     if(@toggle==0) {
-          //alert("feed page");
           $.ajax({
             type: "GET",
             url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
@@ -440,9 +439,17 @@
             success: function(data){   
                 addToFeed(data);
             }});
-        } else {
+    } else if (@toggle==1) {
+          $.ajax({
+            type: "GET",
+            url: "/" + "@groupID" + "/rest/moretask/" + final_post_id,
+            dataType: "json",
+            success: function(data){   
+                addToFeed(data);
+            }});
+    } else{
           alert("end of page");
-        }
+    }
 
   }
 

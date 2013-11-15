@@ -129,6 +129,10 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getAllTasksByName(groupID).toString());
 	}
 
+	public static Result getMoreTasks(String groupID, String last_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNextTasks(groupID, last_post_id).toString());
+	}
+
 	public static Result getTasksWithStatus(String groupID, String status) {
 		return ok(MongoLink.MONGO_LINK.getTasksWithStatus(groupID, status).toString());
 	}
