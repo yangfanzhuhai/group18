@@ -94,13 +94,15 @@
     <div id = "posts" class = "float">
     </div>
 
-    <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
-        "AJAX loader" title="AJAX loader" align="center" /></div>
+    <div id="preloader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
+        "AJAX loader" title="AJAX loader"  /></div>
 
     <ul id = "stream" class = "media-list" ></ul>
     <div align="center">
-      <button class = "btn btn-info" onclick = "loadMoreFeed()">Load More feed</button>
+      <button id = "loadMoreButton"class = "btn btn-info" onclick = "loadMoreFeed()">See more...</button>
     </div>
+    <div id="loader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
+        "AJAX loader" title="AJAX loader"  /></div>
   </div> <!-- /container -->  
 
 
@@ -250,6 +252,8 @@
   
   function refreshFeed() {
       document.getElementById("stream").innerHTML = "";
+      $('#loader').hide();
+      $('#loadMoreButton').hide();
       if(@toggle==0) {
       	$.ajax({
       	
@@ -425,6 +429,8 @@
 
 
   function loadMoreFeed() {
+    $('#loadMoreButton').hide();
+    $('#loader').show();
     if(@toggle==0) {
           //alert("feed page");
           $.ajax({
@@ -837,6 +843,8 @@
 
     autocomplete_setup();
     $('#preloader').hide();
+    $('#loader').hide();
+    $('#loadMoreButton').show();
   	
   }
 
