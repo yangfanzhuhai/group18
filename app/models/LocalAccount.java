@@ -1,22 +1,13 @@
 package models;
 
-public class LocalAccount {
+import models.utils.MD5Util;
+
+public class LocalAccount extends Account {
 	
-	private String username;
 	private String password;
 	private String email;
-	private String emailHash;
 	
 	
-	public String getEmailHash() {
-		return emailHash;
-	}
-	public String getUsername() {
-		return username;
-	}
-	public void setUsername(String username) {
-		this.username = username;
-	}
 	public String getPassword() {
 		return password;
 	}
@@ -28,12 +19,11 @@ public class LocalAccount {
 	}
 	public void setEmail(String email) {
 		this.email = email;
-		emailHash = hashEmail();
+		updatePhotoUrl();
 	}
-	private String hashEmail() {
-		// TODO Auto-generated method stub
-		return null;
+	@Override
+	protected void updatePhotoUrl() {
+		setPhoto_url("http://www.gravatar.com/avatar/" + MD5Util.md5Hex(email) + ".jpg?s=250" + default_img);
 	}
-	
 
 }

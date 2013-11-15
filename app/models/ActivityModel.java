@@ -140,10 +140,8 @@ public class ActivityModel extends Model {
 	 * @return String JSON
 	 */
 	@Override
-	public String toJSON() {
-		String prefix = getID() == null ? "" : "\"id\" : \"" + getID() + "\", ";
-		
-		return "{" + prefix + "\"published\" : \"" + getPublished().toString()
+	public String toJSON() {		
+		return "{" + super.toJSON() + "\"published\" : \"" + getPublished().toString()
 				+ "\", \"actor\" : " + getActor().toJSON() + ", \"verb\" : \""
 				+ getVerb() + "\", \"object\" : " + getObject().toJSON()
 				+ ", \"target\" : " + getTarget().toJSON() + " }";

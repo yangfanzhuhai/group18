@@ -16,6 +16,8 @@ public abstract class Model {
 		ID = id;
 	}
 	
-	public abstract String toJSON();
+	public String toJSON() {
+		return getID() == null ? "" : "\"id\" : \"" + getID() + "\", ";
+	}
 
 }
