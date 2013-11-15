@@ -16,6 +16,7 @@ import models.MongoLink;
 import models.ObjectModel;
 import models.PersonActor;
 import models.TargetModel;
+import models.TaskID;
 import models.User;
 import models.UserWithGroup;
 import models.UsersWithGroup;
@@ -131,6 +132,18 @@ public class Rest extends Controller {
 
 	public static Result getTasks(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getTasks(groupID).toString());
+	}
+	
+	public static Result getTaskDetails(String groupID) {
+		try {
+			Gson gson = new Gson();
+			TaskID task = gson.fromJson(getValueFromRequest("activity"), TaskID.class);
+			return ok(MongoLink.MONGO_LINK.getReferencedBy(groupID, task.id).toString());
+		} catch (JsonSyntaxException e) {
+			return status(422);
+		} catch (ParseException e) {
+			return status(422);
+		}
 	}
 
 	public static Result getAllTasks(String groupID) throws ParseException {

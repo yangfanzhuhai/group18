@@ -546,6 +546,11 @@ public class MongoLink {
 		return getItemsWithoutReferences(coll, QueryBuilder.start("_id").in(taskIDObjs).get(), null);
 	}
 	
+	public ArrayList<String> getReferencedBy(String groupID, String id) throws ParseException {
+		
+		return getReferencedBy(getGroupColl(groupID), id);
+	}
+	
 	/**
 	 * @param coll - Collection to be used
 	 * @param id - ID string of the task
