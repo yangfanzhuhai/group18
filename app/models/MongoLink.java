@@ -49,7 +49,11 @@ public class MongoLink {
 	//for testing
 	public static void main(String[] args) throws UnknownHostException {
 		
-		String json = "{ \"localAccount\": { \"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
+		//String json = "{ \"localAccount\": { \"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
+			//	"\"fbAccount\": {\"name\": \"Luke\", \"photo_url\" : \"\", \"profile_id\" : \"f123\" }, " +
+				//"\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
+		
+		String json = "{ \"localAccount\": { \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
 				"\"fbAccount\": {}, " +
 				"\"ghAccount\" : {}}";
 		
@@ -60,7 +64,7 @@ public class MongoLink {
 		}
 		MongoLink ml = new MongoLink(true);
 	
-		for(ArrayList<String> o: ml.getGroups("Piotr"))
+	/*	for(ArrayList<String> o: ml.getGroups("Piotr"))
 		{
 			System.out.println(o);
 		}
