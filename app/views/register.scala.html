@@ -105,18 +105,19 @@
 
           var emailHash = get_gravatar(email, 250);
 
-          alert(emailHash);
 
           var credentials = "{\"username\" : "
               + "\"" + username + "\", "
               + "\"password\" : "
-              + "\"" + password + "\""
+              + "\"" + password + "\", "
               + "\"email\" : "
-              + "\"" + email + "\""
+              + "\"" + email + "\", "
               + "\"emailHash\" : "
-              + "\"" + emailHash + "\""
+              + "\"" + emailHash + "\", "
               + "\"fb_image\" : \"\" "
               + "}";
+
+              alert(credentials);
           
           $.ajax({
               type: "POST",
