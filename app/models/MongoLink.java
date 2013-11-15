@@ -3,10 +3,8 @@ package models;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import org.bson.types.ObjectId;
 
@@ -55,6 +53,14 @@ public class MongoLink {
 		{
 			System.out.println(o);
 		}
+		
+		long startTime = System.currentTimeMillis();
+		for(int i = 0; i < 100; i++)
+		{
+			ml.getGroups("Piotr");
+		}
+		float totalTime = System.currentTimeMillis() - startTime;
+		System.out.println("Total time taken : " + totalTime/1000 + " (average: " + totalTime/100000 + ")");
 		
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
@@ -118,7 +124,7 @@ public class MongoLink {
 		
 		System.out.println("Adding new project");
 		*/
-		groups = db.createCollection("temp", null);
+	/*	groups = db.createCollection("temp", null);
 		long startTime = System.currentTimeMillis();
 		for(int i = 0; i < 200; i++)
 		{
