@@ -9,9 +9,8 @@ import com.google.gson.Gson;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
-public class ActivityModel {
-
-	private String ID;
+public class ActivityModel extends Model {
+	
 	private String published;
 	private ActorModel actor;
 	private String verb;
@@ -20,7 +19,7 @@ public class ActivityModel {
 
 	public ActivityModel(String published, ActorModel actor, String verb,
 			ObjectModel object, TargetModel target) {
-		this.ID = null;
+		super();
 		this.setPublished(published);
 		this.setActor(actor);
 		this.setVerb(verb);
@@ -33,13 +32,12 @@ public class ActivityModel {
 	}
 
 	public ActivityModel(String jsonString) throws ParseException {
+		super();
 		JsValue obj = Json.parse(jsonString);
 		Gson gson = new Gson();
 		// Date published = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
 		// Locale.ENGLISH).parse(ActivityModel.cleanJsonStringValue(
 		// obj.$bslash("published").toString()));
-
-		ID = null;
 		 
 		String published = ActivityModel.cleanJsonStringValue(obj.$bslash(
 				"published").toString());
@@ -137,20 +135,13 @@ public class ActivityModel {
 		this.target = target;
 	}
 
-	public String getID() {
-		return ID;
-	}
-
-	public void setID(String iD) {
-		this.ID = iD;
-	}
-
 	/** Converts the ActivityModel to a JSON object.
 	 * Optionally has an ID field (if the ActivityModel has an ID set)
 	 * @return String JSON
 	 */
+	@Override
 	public String toJSON() {
-		String prefix = ID == null ? "" : "\"id\" : \"" + getID() + "\", ";
+		String prefix = getID() == null ? "" : "\"id\" : \"" + getID() + "\", ";
 		
 		return "{" + prefix + "\"published\" : \"" + getPublished().toString()
 				+ "\", \"actor\" : " + getActor().toJSON() + ", \"verb\" : \""
