@@ -19,11 +19,11 @@ public class LocalAccount extends Account {
 	}
 	public void setEmail(String email) {
 		this.email = email;
-		updatePhotoUrl();
 	}
 	@Override
-	protected void updatePhotoUrl() {
-		setPhoto_url("http://www.gravatar.com/avatar/" + MD5Util.md5Hex(email) + ".jpg?s=250" + default_img);
+	protected Account updatePhotoUrl() {
+		if(email != null) setPhoto_url("http://www.gravatar.com/avatar/" + MD5Util.md5Hex(email) + ".jpg?s=250" + default_img);
+		return this;
 	}
 
 }

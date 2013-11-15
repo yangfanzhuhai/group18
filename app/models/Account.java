@@ -2,7 +2,7 @@ package models;
 
 public abstract class Account {
 	
-	protected String default_img = "&d=http://assets.eschools.co.uk/images/default_user_300x300.png";
+	protected static String default_img = "&d=http://assets.eschools.co.uk/images/default_user_300x300.png";
 
 	private String name;
 	private String photo_url;
@@ -21,6 +21,6 @@ public abstract class Account {
 		this.photo_url = photo_url;
 	}
 	
-	protected abstract void updatePhotoUrl();	
+	protected abstract Account updatePhotoUrl();	
 	
 }

@@ -1,6 +1,7 @@
 package models;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class UserModel extends Model {
 
@@ -10,10 +11,10 @@ public class UserModel extends Model {
 
 	@Override
 	public String toJSON() {
-		Gson gson = new Gson();
-		return "{" + super.toJSON() + "\"localAccount\" : " + gson.toJson(localAccount)
-							  		+ "\"fbAccount\" : " + gson.toJson(fbAccount)
-							  		+ "\"ghAccount\" : " + gson.toJson(ghAccount)
+		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+		return "{" + super.toJSON() + "\"localAccount\" : " + gson.toJson(localAccount.updatePhotoUrl())
+							  		+ "\"fbAccount\" : " + gson.toJson(fbAccount.updatePhotoUrl())
+							  		+ "\"ghAccount\" : " + gson.toJson(ghAccount.updatePhotoUrl())
 							  		+ "}";
 	}
 

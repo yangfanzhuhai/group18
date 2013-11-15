@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.bson.types.ObjectId;
 
+import com.google.gson.Gson;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -47,6 +48,16 @@ public class MongoLink {
 
 	//for testing
 	public static void main(String[] args) throws UnknownHostException {
+		
+		String json = "{ \"localAccount\": { \"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
+				"\"fbAccount\": {}, " +
+				"\"ghAccount\" : {}}";
+		
+		Gson gson = new Gson();
+		UserModel model = gson.fromJson(json, UserModel.class);
+		if (model.getLocalAccount() != null) {
+			System.out.println(model.toJSON());
+		}
 		MongoLink ml = new MongoLink(true);
 	
 		for(ArrayList<String> o: ml.getGroups("Piotr"))

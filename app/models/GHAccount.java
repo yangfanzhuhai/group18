@@ -18,7 +18,6 @@ public class GHAccount extends Account {
 	}
 	public void setGravatar_id(String gravatar_id) {
 		this.gravatar_id = gravatar_id;
-		updatePhotoUrl();
 	}
 	public String getHtml_url() {
 		return html_url;
@@ -28,8 +27,9 @@ public class GHAccount extends Account {
 	}
 	
 	@Override
-	protected void updatePhotoUrl() {
-		setPhoto_url("http://www.gravatar.com/avatar/" + gravatar_id + ".jpg?s=250" + default_img);
+	protected Account updatePhotoUrl() {
+		if(gravatar_id != null) setPhoto_url("http://www.gravatar.com/avatar/" + gravatar_id + ".jpg?s=250" + default_img);
+		return this;
 	}
 
 }

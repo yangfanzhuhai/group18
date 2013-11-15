@@ -18,6 +18,7 @@ import models.PersonActor;
 import models.TargetModel;
 import models.TaskID;
 import models.User;
+import models.UserModel;
 import models.UserWithGroup;
 import models.UsersWithGroup;
 import models.git.Branch;
@@ -163,7 +164,9 @@ public class Rest extends Controller {
 	}
 
 	public static Result registerUser() {
-		String credentialsJson = getValueFromRequest("credentials");
+		Gson gson = new Gson();
+		String credentialsJson = gson.fromJson(getValueFromRequest("credentials"), UserModel.class).toJSON();
+		
 
 		try {
 			if (MongoLink.MONGO_LINK.registerNewUser((DBObject) JSON
