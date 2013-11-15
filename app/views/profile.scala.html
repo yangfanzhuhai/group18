@@ -85,10 +85,20 @@
 
     FB.api("/me/picture?width=180&height=180",  function(response) {
 
-        console.log(response.data.url);
+      if (reponse != null && response != "") {
+
         document.getElementById("profileImage").src = response.data.url;
 
-    });  
+        var fb_image_json = "{\"fb_image\" : \"" + reponse.data.url + "\"}";
+
+              $.ajax({
+                  type: "POST",
+                  url: "/rest/addfbimage",
+                  dataType: "json",
+                  data: {"activity":fb_image_json}
+             }); 
+            }
+     });  
   }
 
 </script>
@@ -157,6 +167,7 @@
 
     var users = [];
     var usersJSON = [];
+    var user_images = new Array();
 
     document.getElementById("username").innerHTML="@userName";
 
@@ -205,32 +216,46 @@
 
         group_div.appendChild(group_images_div);
 
-        var group_name = data[i]['customID'];
-        var members_array = data[i]['members'];
+        var group_name = data[i][0]['customID'];
+
+        var members = data[i];
 
         var group_members_div = document.createElement("div");
         group_members_div.innerHTML = "Group Members: ";
 
-        var j = 0;
-        while (j < members_array.length) {
-          group_members_div.innerHTML += "<br>" + members_array[j];
+        var j = 1;
+        while (j < members.length) {
+          group_members_div.innerHTML += "<br>" + members[j]["username"];
           var user_image = document.createElement("image");
           user_image.style.height = "40px";
           user_image.style.width = "40px";
           user_image.style.borderRadius = "50px";
 
-          var email = "user" + String.fromCharCode(64) + "gmail.com";
+          var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
 
-          if (members_array[j] == "Rob") {
-                email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
+          var image_src;
+
+          if (members[j]["fb_image"] != "") {
+
+              image_src = members[j]["fb_image"];
+
+          } else if (members[j]["email"] != "") {
+
+            image_src = members[j]["email_hash"] + "&d=" + default_img;
+
+          } else {
+
+            image_src = "http://www.gravatar.com/avatar/cba1f2d695a5ca39ee6f343297a761a4.jpg?s=250"
+                          + "&d=" + default_img;
           }
 
-          var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
+          user_image.src= image_src;
+          user_images[members[j]["username"]] = image_src;
 
           group_images_div.appendChild(user_image);
 
           j++;
-        }
+        } 
 
         var a = document.createElement("a");
         var ref = "/../" + group_name;

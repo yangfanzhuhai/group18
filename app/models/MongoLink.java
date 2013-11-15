@@ -3,8 +3,10 @@ package models;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 
@@ -48,6 +50,12 @@ public class MongoLink {
 	//for testing
 	public static void main(String[] args) throws UnknownHostException {
 		MongoLink ml = new MongoLink(true);
+	
+		for(ArrayList<String> o: ml.getGroups("Piotr"))
+		{
+			System.out.println(o);
+		}
+		
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
 		//Prints last 20 items of newsFeed
@@ -297,10 +305,24 @@ public class MongoLink {
 	 * @param username - Username of the current user
 	 * @return A list of groups which the member is part of
 	 */
-	public ArrayList<String> getGroups(String username) {
-		ArrayList<String> retList = new ArrayList<String>();
+	public ArrayList<ArrayList<String>> getGroups(String username) {
+		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
 		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
 	
+		for(int i = 0; i < list.size(); i++)
+		{
+			ArrayList<String> temp = getInfoAboutUsers(((BasicDBList) list.get(i).get("members")).toArray(new String[0]));
+			temp.add(0, list.get(i).toString());
+			retList.add(i, temp);
+		}
+	
+		return retList;
+	}
+	
+	public ArrayList<String> getInfoAboutUsers(String ... usernames) {
+		List<DBObject> list = users.find(QueryBuilder.start("username").in(usernames).get()).toArray();	
+		ArrayList<String> retList = new ArrayList<String>();
+		
 		for(DBObject o : list)
 		{
 			retList.add(o.toString());

@@ -174,6 +174,7 @@
   var task_ids = [];
   var tasks = [];
   var task_names = [];
+  var user_images = new Array();
 
   document.getElementById("title").style.marginTop = "20px";
   document.getElementById("title").style.marginBottom = "10px";
@@ -253,6 +254,16 @@
   function refreshFeed() {
       document.getElementById("stream").innerHTML = "";
       if(@toggle==0) {
+        $.ajax({
+
+          type: "GET",
+          url: "/rest/groups",
+          dataType: "json",
+          success: function(data){   
+
+              getUserImages(data);
+          }}); 
+
       	$.ajax({
       	
           type: "GET",
@@ -312,6 +323,7 @@
 
   $(document).ready(refreshFeed);	
 
+
   function addTasks(task_array) {
 
 
@@ -332,6 +344,30 @@
   	}
 
   }
+
+  function getUserImages(data) {
+
+    for (var i = 0; i < data.length; i++) {
+
+      for (var j = 0; j < data[i].length; j++) {
+
+          var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
+
+          var image_src = "http://www.gravatar.com/avatar/cba1f2d695a5ca39ee6f343297a761a4.jpg?s=250"
+                          + "&d=" + default_img;
+
+          if (data[i][j]["email_hash"] != "") {
+
+            image_src = data[i][j]["email_hash"] + "&d=" + default_img;
+
+          }
+
+          user_images[data[i][j]["username"]] = image_src;
+      }
+    }
+  }
+
+
 
   function autocomplete_setup() {
   $(function ()  {
@@ -499,17 +535,7 @@
       user_image.style.marginLeft = "10px";
       user_image.style.border = "3px solid white";
 
-      var email = "user" + String.fromCharCode(64) + "gmail.com";
-
-      if (publisher == "Rob") {
-
-        email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
-
-      }
-
-      var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
-
-      user_image.src= get_gravatar(email, 250) + "&d=" + default_img;
+      user_image.src= user_images[publisher];
       post.appendChild(user_image);
 
   		post_options.style.padding = "10px";
@@ -769,17 +795,8 @@
           reply_publisher.setAttribute("class", "media-heading");
   				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"];
 
-          var email = "user" + String.fromCharCode(64) + "gmail.com";
 
-          if (reply_publisher.innerHTML == "Rob") {
-
-            email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
-
-          }
-
-          var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
-
-          user_image.src= get_gravatar(email, 250) + "&d=" + default_img;
+          user_image.src=user_images[reply_publisher.innerHTML];
 
   				var reply_message_text = document.createElement("p");
   				reply_message_text.innerHTML = changeReferencesToLinks(stream_array[i][j]['object']["message"]);
