@@ -29,16 +29,23 @@
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav" role="navigation">
-          <li id="newsfeed_nav" class = "active">
-            <a href="@routes.Application.feed(groupID,0)">News Feed</a>
-          </li>
+          <!--<li id="newsfeed_nav" class = "active"><a href="@routes.Application.feed(groupID,0)">News Feed</a></li>-->
+          
+           <li id="newsfeed_nav" class="dropdown">
+            <a href="@routes.Application.feed(groupID,0)" class="dropdown-toggle" data-toggle="dropdown">
+              News Feed 
+              <b class="caret"></b></a>
+            <ul id="newsDrop" class="dropdown-menu">
+        	</ul>
+      	  </li>
+          
           <!--<li id="tasklist_nav"><a href="@routes.Application.feed(groupID,1)">Task List</a></li>-->
           
           <li id="tasklist_nav" class="dropdown">
             <a href="@routes.Application.feed(groupID,1)" class="dropdown-toggle" data-toggle="dropdown">
               Task List 
               <b class="caret"></b></a>
-            <ul class="dropdown-menu">
+            <ul id="taskDrop" class="dropdown-menu">
               <li><a href="@routes.Application.feed(groupID,1)">All Tasks</a></li>
           	  <li onclick = "setTaskStatus(this.id)" id = "TO_DO"><a href="#">TO DO</a></li>
           	  <li onclick = "setTaskStatus(this.id)" id = "DOING"><a href="#">DOING</a></li>
@@ -103,6 +110,8 @@
 
 
   <script>
+  var localToggle = @toggle;
+  
   $.fn.outerHTML = function(){
 
 	    // IE, Chrome & Safari will comply with the non-standard outerHTML, all others (FF) will have a fall-back for cloning
@@ -123,31 +132,7 @@
    		}
 	});
   
-    if (@toggle == 0) {
-      document.title = "News Feed";
-      document.getElementById("newsfeed_nav").setAttribute("class","active");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("git_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
-    } else if(@toggle == 1) {
-    	document.title = "Task List"
-      document.getElementById("newsfeed_nav").setAttribute("class","");
-      document.getElementById("tasklist_nav").setAttribute("class","active");
-      document.getElementById("git_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
-    } else if(@toggle == 2) {
-      document.title = "Git Commits"
-      document.getElementById("git_nav").setAttribute("class","active");
-      document.getElementById("newsfeed_nav").setAttribute("class","");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
-    } else if(@toggle == 3) {
-      document.title = "Jenkins Builds"
-      document.getElementById("builds_nav").setAttribute("class","active");
-      document.getElementById("newsfeed_nav").setAttribute("class","");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("git_nav").setAttribute("class","");
-    }
+    
 
     function postFormOnKeyDown (currentElement) {
       if (event.keyCode == 13) { 
@@ -238,14 +223,17 @@
   }
 
   function setTaskStatus(status) {
+  localToggle=1;
     document.getElementById("stream").innerHTML = "";
     document.getElementById("task_status").innerHTML = status;
     $.ajax({
         type: "GET",
         url: "/" + "@groupID" + "/rest/tasks/" + status,
         dataType: "json",
-        success: function(data){   
+        success: function(data){
+        window.location="@routes.Application.feed(groupID, 1)";
             generateFeed(data);
+            
         }
       });
   }
@@ -253,6 +241,7 @@
   function refreshFeed() {
       document.getElementById("stream").innerHTML = "";
       if(@toggle==0) {
+      
       	$.ajax({
       	
           type: "GET",
@@ -263,6 +252,7 @@
               generateFeed(data);
           }});
 
+		//adds tasks to list of tasks for referencing
       	$.ajax({
       	
           type: "GET",
@@ -307,10 +297,75 @@
           }
       });
       }
+      generateNewsNav();
       
   }
 
-  $(document).ready(refreshFeed);	
+  function generateNewsNav() {
+  		$.ajax({
+
+          type: "GET",
+          url: "/rest/groups",
+          dataType: "json",
+          success: function(data){   
+
+              parseGroups(data);
+          }
+      });
+  }
+  
+  function parseGroups(data) {
+  	for (var i = 0; i < data.length; i++) {
+  		 var group_name = data[i]['name'];
+  		 var customID = data[i]['customID'];
+  		 var ul = document.getElementById("newsDrop");
+		 var li = document.createElement("li");
+		 var a = document.createElement("a");
+		 li.appendChild(document.createTextNode(group_name));
+		 a.id = group_name;
+		 group_name.href = "/../" + group_name;
+		 li.appendChild(a);
+		 li.onclick = (function(customID) {
+            	  return function() {
+                    goToGroup(customID);
+                   }
+         	 }(customID));
+		 
+		 ul.appendChild(li);
+		 
+		 var status_array = data[i]['statuses']
+		 for(var j=0; j < status_array.length; j++) {
+		 	var status = status_array[j];
+		 	var ul = document.getElementById("taskDrop");
+		 	var li = document.createElement("li");
+		 	li.appendChild(document.createTextNode(status));
+		 	li.onclick = (function(status) {
+            	  return function() {
+                    setTaskStatus(status);
+                   }
+         	 }(status));
+         	 
+         	 ul.appendChild(li);
+		 }
+		 
+  	}
+  }
+  
+  function goToGroup(id) {
+  document.getElementById("stream").innerHTML = "";
+  document.getElementById("task_status").innerHTML = "";
+    $.ajax({
+        type: "GET",
+        url: "/" + id + "/rest/feed",
+        dataType: "json",
+        success: function(data){   
+            generateFeed(data);
+        }
+      });
+  }
+	
+
+  $(document).ready(refreshFeed);
 
   function addTasks(task_array) {
 
@@ -416,6 +471,31 @@
 
   	for (var i=0; i < stream_array.length;i++) {
 
+		if (localToggle == 0) {
+      document.title = "News Feed";
+      document.getElementById("newsfeed_nav").setAttribute("class","active");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("git_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(localToggle == 1) {
+    	document.title = "Task List"
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","active");
+      document.getElementById("git_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(localToggle == 2) {
+      document.title = "Git Commits"
+      document.getElementById("git_nav").setAttribute("class","active");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(localToggle == 3) {
+      document.title = "Jenkins Builds"
+      document.getElementById("builds_nav").setAttribute("class","active");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("git_nav").setAttribute("class","");
+    }
 
   		var message_type = stream_array[i][0]['object']["objectType"];
 
