@@ -302,6 +302,26 @@ public class MongoLink {
 		return (int) users.getCount() == oldCount + 1;
 	}
 	
+	public boolean registerOrLogin(DBObject obj) {
+		
+		if(obj.containsField("localAccount")) {
+			
+		}
+		else if(obj.containsField("fbAccount")) {
+			
+			
+			return true;
+		}
+		else if(obj.containsField("ghAccount")) {
+			
+			
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 	/** Checks whether the username and password supplied in 'obj' match an
 	 * entry in the database
 	 * 
