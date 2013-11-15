@@ -9,6 +9,7 @@ import java.util.Map;
 
 import models.ActivityModel;
 import models.ActorModel;
+import models.FBImage;
 import models.GitObject;
 import models.JenkinsObject;
 import models.MongoLink;
@@ -111,6 +112,13 @@ public class Rest extends Controller {
 	public static Result getGroups(){
 		String userName = session("connected");
 		return ok(MongoLink.MONGO_LINK.getGroups(userName).toString());
+	}
+	
+	public static Result addFBImage() {
+		Gson gson = new Gson();
+		FBImage url = gson.fromJson(getValueFromRequest("activity"), FBImage.class);
+		MongoLink.MONGO_LINK.addFBImage(session("connected"), url.fb_image);
+		return ok();
 	}
 
 	public static Result getActivities(String groupID) {

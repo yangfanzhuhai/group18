@@ -349,6 +349,10 @@ public class MongoLink {
 		return members.contains(username);
 	}
 	
+	public void addFBImage(String username, String url) {
+		users.update(QueryBuilder.start("username").is(username).get(), new BasicDBObject("fb_image", url));
+	}
+	
 	/** Method which changes either the status or priority of a task
 	 * 
 	 * @param customID - ID of collection to be used
