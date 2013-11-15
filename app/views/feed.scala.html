@@ -119,6 +119,8 @@
 	
 	$(window).scroll(function () {
    		if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
+        //alert("end of page");
+
 
    		}
 	});
@@ -529,8 +531,6 @@
   	    post_body.appendChild(user);
   		  post_body.appendChild(message);
         post_body.appendChild(date_and_time);
-  		  post_body.appendChild(reply_message_div);
-  		  post_body.appendChild(reply_button);
         post.appendChild(post_body);
 
         break;
@@ -600,8 +600,6 @@
         post_body.appendChild(task_details);
   			post_body.appendChild(task_data);	
         post_body.appendChild(date_and_time);	
-  			post_body.appendChild(reply_message_div);
-  			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			//post.appendChild(post_options);
 			break;
@@ -638,8 +636,6 @@
   			post_body.appendChild(jenkins);
   			post_body.appendChild(build_data);
         post_body.appendChild(date_and_time);
-  			post_body.appendChild(reply_message_div);
-  			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			break;
   		case "GIT":
@@ -709,8 +705,6 @@
   			post_body.appendChild(git_data);
   			post_body.appendChild(commit_data);
         post_body.appendChild(date_and_time);
-  			post_body.appendChild(reply_message_div);
-  			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
   			break;
   		}
@@ -796,11 +790,13 @@
           reply_div_body.appendChild(reply_published);
           reply_div_body.appendChild(reply_message_text);    
   			j++;
-
   		}
 
 
   		}
+
+      post_body.appendChild(reply_message_div);
+      post_body.appendChild(reply_button);
   	  post.appendChild(post_options);
 
 
