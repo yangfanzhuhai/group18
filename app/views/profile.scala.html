@@ -79,7 +79,9 @@
     console.log('Welcome!  Fetching your information.... ');
     FB.api('/me', function(response) {
       console.log('Good to see you, ' + response.name + '.');
+
     });
+
     FB.api("/me/picture?width=180&height=180",  function(response) {
 
       if (response != null && response != "") {
@@ -100,13 +102,6 @@
 
 </script>
 
-<!--
-  Below we include the Login Button social plugin. This button uses the JavaScript SDK to
-  present a graphical Login button that triggers the FB.login() function when clicked.
-
-  Learn more about options for the login button plugin:
-  /docs/reference/plugins/login/ -->
-
 
 </script>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -117,11 +112,11 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="@routes.Application.login">Progress</a>
+        <a class="navbar-brand" href="@routes.Application.profile()">Progress</a>
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav" role="navigation">
-          <li id="newsfeed_nav"><a id="newsLink" href="@routes.Application.login()">News Feed</a></li>
+          <li id="newsfeed_nav"><a id="newsLink" href="@routes.Application.profile()">News Feed</a></li>
           <li id="tasklist_nav"><a id="taskLink" href="@routes.Application.profile()">Task List</a></li>
           <li id="git_nav"><a id="gitLink" href="@routes.Application.profile()">Git Commits</a></li>
           <li id = "builds_nav"><a id="buildLink" href="@routes.Application.profile()">Builds</a></li>
@@ -144,7 +139,9 @@
 
 
       <h1 id="username"> </h1> 
-      <fb:login-button show-faces="true" width="200" max-rows="1" style = "float: right"></fb:login-button>
+      <div id = "fb_login" style = "marginRight: 100px" >
+      <fb:login-button autologoutlink="true" width="1000" max-rows="10" style = "float: right" size = "xlarge" ></fb:login-button>
+    </div>
 
       <div id = "picture" class = "profile_picture" float = "right">
       <img id="profileImage" width="107" height="98" class = "profile_picture">
@@ -217,36 +214,40 @@
         var j = 1;
         while (j < members.length) {
           group_members_div.innerHTML += "<br>" + members[j]["username"];
-          var user_image = document.createElement("image");
-          user_image.style.height = "40px";
-          user_image.style.width = "40px";
-          user_image.style.borderRadius = "50px";
 
-          var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
+          if (j < 9) {
 
-          var image_src;
+           var user_image = document.createElement("image");
+           user_image.style.height = "40px";
+           user_image.style.width = "40px";
+           user_image.style.borderRadius = "50px";
 
-          if (members[j]["fb_image"] != "") {
+            var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
 
-              image_src = members[j]["fb_image"];
+            var image_src;
 
-          } else if (members[j]["email"] != "") {
+            if (members[j]["fb_image"] != "") {
 
-            image_src = members[j]["email_hash"] + "&d=" + default_img;
+                image_src = members[j]["fb_image"];
 
-          } else {
+            } else if (members[j]["email"] != "") {
 
-            image_src = "http://www.gravatar.com/avatar/cba1f2d695a5ca39ee6f343297a761a4.jpg?s=250"
+              image_src = members[j]["email_hash"] + "&d=" + default_img;
+
+            } else {
+
+              image_src = "http://www.gravatar.com/avatar/cba1f2d695a5ca39ee6f343297a761a4.jpg?s=250"
                           + "&d=" + default_img;
-          }
+            }
 
-          user_image.src= image_src;
-          user_images[members[j]["username"]] = image_src;
+            user_image.src= image_src;
+            user_images[members[j]["username"]] = image_src;
 
-          group_images_div.appendChild(user_image);
+             group_images_div.appendChild(user_image);
 
+          } 
           j++;
-        } 
+        }
 
         var profileImage = document.getElementById("profileImage");
         profileImage.src = user_images["@userName"];
@@ -309,6 +310,8 @@
           leave_group_button.className = "btn btn-danger btn-xs";
           leave_group_button.innerHTML = "Leave group";
           leave_group_button.style.float = "right";
+          leave_group_button.style.width = "10%";
+          leave_group_button.style.height = "40px";
           leave_group_button.onclick = (function (group_name) {
             return function() {
 

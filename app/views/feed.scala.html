@@ -285,6 +285,18 @@
           }});
 
       } else if (@toggle==1){
+
+        $.ajax({
+
+          type: "GET",
+          url: "/rest/groups",
+          dataType: "json",
+          success: function(data){   
+
+              getUserImages(data);
+        }}); 
+
+
           $.ajax({
           
             type: "GET",
@@ -296,6 +308,17 @@
           });
 
       } else if (@toggle==2){
+
+        $.ajax({
+
+          type: "GET",
+          url: "/rest/groups",
+          dataType: "json",
+          success: function(data){   
+
+              getUserImages(data);
+          }}); 
+
       	$.ajax({
       	
           type: "GET",
@@ -307,6 +330,18 @@
           }
       });
       } else if (@toggle==3){
+
+        $.ajax({
+
+          type: "GET",
+          url: "/rest/groups",
+          dataType: "json",
+          success: function(data){   
+
+              getUserImages(data);
+        }}); 
+
+
       	$.ajax({
       	
           type: "GET",
@@ -359,7 +394,7 @@
 
               image_src = data[i][j]["fb_image"];
 
-          } else if (data[i][j]["email"] != "") {
+          } else if (data[i][j]["email_hash"] != "") {
 
             image_src = data[i][j]["email_hash"] + "&d=" + default_img;
 
