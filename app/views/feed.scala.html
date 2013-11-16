@@ -121,31 +121,24 @@
 
 	}
 
-  
+
+    document.getElementById("newsfeed_nav").setAttribute("class","");
+    document.getElementById("tasklist_nav").setAttribute("class","");
+    document.getElementById("git_nav").setAttribute("class","");
+    document.getElementById("builds_nav").setAttribute("class","");
+ 
     if (@toggle == 0) {
       document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("git_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 1) {
     	document.title = "Task List"
-      document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","active");
-      document.getElementById("git_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 2) {
       document.title = "Git Commits"
       document.getElementById("git_nav").setAttribute("class","active");
-      document.getElementById("newsfeed_nav").setAttribute("class","");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 3) {
       document.title = "Jenkins Builds"
       document.getElementById("builds_nav").setAttribute("class","active");
-      document.getElementById("newsfeed_nav").setAttribute("class","");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("git_nav").setAttribute("class","");
     }
 
     function postFormOnKeyDown (currentElement) {
@@ -415,44 +408,30 @@
   function loadMoreFeed() {
     $('#loadMoreButton').hide();
     $('#loader').show();
-    if(@toggle==0) {
-          $.ajax({
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
-            dataType: "json",
-            success: function(data){   
-                addToFeed(data);
-            }});
-    } else if (@toggle==1) {
-          $.ajax({
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/moretask/" + final_post_id,
-            dataType: "json",
-            success: function(data){   
-                addToFeed(data);
-            }});
-    } else if (@toggle==2) {
-          $.ajax({
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/moregit/" + final_post_id,
-            dataType: "json",
-            success: function(data){   
-                addToFeed(data);
-            }});
-    } else if (@toggle==3){
-          $.ajax({
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/morebuild/" + final_post_id,
-            dataType: "json",
-            success: function(data){   
-                addToFeed(data);
-            }});
-    } else{
-          alert("end of page");
-    }
+    var getUrl = "/" + "@groupID" + "/rest/";
+    switch(@toggle)
+      {
+      case 0:
+        getUrl += "morefeed/";
+        break;
+      case 1:
+        getUrl += "moretask/";
+        break;
+      case 2:
+        getUrl += "moregit/";
+        break;
+      case 3:
+        getUrl += "morebuild/";
+        break;
+      }
+    $.ajax({    
+      type: "GET",
+      url: getUrl + final_post_id,
+      dataType: "json",
+      success: function(data){   
+          generateFeed(data);
+      }});
   }
-
-
 
   function generateFeed(stream_array) {
     addToFeed(stream_array);
