@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
 
 import com.google.gson.Gson;
@@ -198,8 +197,7 @@ public class MongoLink {
 			while(i < posts.size())
 			{
 				ArrayList<String> tempList = getReplies(newsFeed, posts.get(i).get("_id").toString());
-				
-				ActivityModel post = new ActivityModel(posts.get(i).toString());
+				ActivityModel post = ActivityModel.activityModelGson.fromJson(posts.get(i).toString(), ActivityModel.class);
 				post.setID(posts.get(i).get("_id").toString());
 				
 				tempList.add(0, post.toJSON());
@@ -375,7 +373,7 @@ public class MongoLink {
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
 	public boolean checkLogin(String email, String password) {
-		return users.findOne(QueryBuilder.start("localAccount.email").is(email).and("localAccount.password").is(password).get()) != null;
+		return users.findOne(QueryBuilder.start("username").is(email).and("password").is(password).get()) != null;
 	}
 	
 	/**
@@ -696,7 +694,7 @@ public class MongoLink {
 		}
 		
 		String id = tempPost.get("_id").toString();
-		ActivityModel am = new ActivityModel(tempPost.toString());
+		ActivityModel am = ActivityModel.activityModelGson.fromJson(tempPost.toString(), ActivityModel.class);
 		
 		// TODO This sort of thing should not be needed once activity model is refactored
 		am.setID(id);
@@ -733,7 +731,7 @@ public class MongoLink {
 		
 		for(DBObject o : list) {
 			
-			ActivityModel am = new ActivityModel(o.toString());
+			ActivityModel am = ActivityModel.activityModelGson.fromJson(o.toString(), ActivityModel.class);
 			am.setID(o.get("_id").toString());
 			
 			retList.add(am.toJSON());
@@ -758,7 +756,7 @@ public class MongoLink {
 		
 		for(DBObject o : list) {
 			
-			ActivityModel am = new ActivityModel(o.toString());
+			ActivityModel am = ActivityModel.activityModelGson.fromJson(o.toString(), ActivityModel.class);
 			am.setID(o.get("_id").toString());
 			
 			retList.add(am.toJSON());

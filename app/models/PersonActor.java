@@ -4,17 +4,12 @@ public class PersonActor extends ActorModel {
 
   public PersonActor(String displayName) {
     super(displayName);
-
+    objectType = ActorType.PERSON;
   }
 
   @Override
-  public ActorType getType() {
-    return ActorType.PERSON;
+  public void setType() {
+    objectType = ActorType.PERSON;
   }
 
-  @Override
-  public String toJSON() {
-    return "{\"objectType\" : \"" + getType() + "\", \"displayName\" : \""
-        + getDisplayName() + "\"}";
-  }
 }

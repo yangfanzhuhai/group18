@@ -47,15 +47,9 @@ public class JenkinsObject extends ObjectModel {
 	}
 
 	@Override
-	public ObjectType getType() {
-		return ObjectType.JENKINS;
+	public void setType() {
+		this.objectType = ObjectType.JENKINS;
 	}
 
-	@Override
-	public String toJSON() {
-		return "{\"objectType\" : \"" + getType() + "\", \"name\" : \"" + getName() + "\" , \"number\" : "
-				+ getNumber() + " , \"status\" : \"" + getStatus()
-				+ "\" , \"url\" : \"" + getUrl() + "\"}";
-	}
 
 }

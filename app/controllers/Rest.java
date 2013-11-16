@@ -40,7 +40,7 @@ public class Rest extends Controller {
 		String activityJson = getValueFromRequest("activity");
 
 		try {
-			ActivityModel activity = new ActivityModel(activityJson);
+			ActivityModel activity = ActivityModel.activityModelGson.fromJson(activityJson, ActivityModel.class);
 			activity.save(groupID);
 			return ok();
 		} catch (Exception e) {
