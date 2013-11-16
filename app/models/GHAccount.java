@@ -2,16 +2,13 @@ package models;
 
 public class GHAccount extends Account {
 	
-	private String email;
 	private String gravatar_id;
 	private String html_url;
 	
-	
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
+	public GHAccount(String gravatar_id, String html_url) {
+		super();
+		this.gravatar_id = gravatar_id;
+		this.html_url = html_url;
 	}
 	public String getGravatar_id() {
 		return gravatar_id;

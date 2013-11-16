@@ -10,6 +10,7 @@ import java.util.Map;
 import models.ActivityModel;
 import models.ActorModel;
 import models.FBImage;
+import models.GHAccount;
 import models.GitObject;
 import models.JenkinsObject;
 import models.MongoLink;
@@ -114,6 +115,25 @@ public class Rest extends Controller {
 	public static Result getGroups(){
 		String userName = session("connected");
 		return ok(MongoLink.MONGO_LINK.getGroups(userName).toString());
+	}
+	
+	public static Result parseGitHubData() {
+		JsonNode json = request().body().asJson();
+		System.out.println(json.toString());
+		
+		String gravatar_id = getStringValueFromJson(json, "gravatar_id");
+		String html_url = getStringValueFromJson(json, "html_url");
+		System.out.println(gravatar_id);
+		GHAccount ghAccount = new GHAccount(gravatar_id, html_url);
+		UserModel userModel = new UserModel(ghAccount);
+		
+		MongoLink.MONGO_LINK.registerOrLogin((DBObject) JSON.parse(userModel.toJSON()));
+		
+		
+		
+		session("connected", "gitaccount");
+		
+		return ok();
 	}
 	
 	public static Result addFBImage() {

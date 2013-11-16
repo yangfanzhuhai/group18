@@ -8,6 +8,19 @@ public class UserModel extends Model {
 	private LocalAccount localAccount;
 	private FBAccount fbAccount;
 	private GHAccount ghAccount;
+	
+
+	public UserModel(GHAccount ghAccount) {
+		super();
+		this.localAccount = new LocalAccount();
+		this.fbAccount = new FBAccount();
+		this.ghAccount = ghAccount;
+	}
+
+	public UserModel(FBAccount fbAccount) {
+		super();
+		this.fbAccount = fbAccount;
+	}
 
 	@Override
 	public String toJSON() {
