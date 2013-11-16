@@ -19,7 +19,9 @@ public class UserModel extends Model {
 
 	public UserModel(FBAccount fbAccount) {
 		super();
+		this.localAccount = new LocalAccount();
 		this.fbAccount = fbAccount;
+		this.ghAccount = new GHAccount();
 	}
 
 	@Override

@@ -174,7 +174,7 @@
 			 $.ajax({
 			type: "POST",
 			url: "/rest/facebook",
-			data: {"credentials":"{\"profile_id\" : \"" + response.id + "\" \"name\": \"" + response.name + "\"}"},
+			data: {"credentials":"{\"profile_id\" : \"" + response.id + "\",\"name\": \"" + response.name + "\"}"},
  			success: function(data){
         			window.location.href = '@routes.Application.profile()'
         		}});
@@ -203,15 +203,6 @@
     	});		
 	});
 
-    }
-    function httpGet(theUrl)
-    {
-	var xmlHttp = null;
-
-	xmlHttp = new XMLHttpRequest();
-    	xmlHttp.open( "GET", theUrl, false );
-    	xmlHttp.send( null );
-    	return xmlHttp.responseText;
     }
         
     </script>

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import models.ActivityModel;
 import models.ActorModel;
+import models.FBAccount;
 import models.FBImage;
 import models.GHAccount;
 import models.GitObject;
@@ -138,7 +139,15 @@ public class Rest extends Controller {
 	
 	public static Result parseFBData() {
 		
-		System.out.println(getValueFromRequest("credentials"));
+		String fbAccountJson = getValueFromRequest("credentials");
+		System.out.println(fbAccountJson);
+		Gson gson = new Gson();
+		FBAccount fbAccount = gson.fromJson(fbAccountJson, FBAccount.class);
+		UserModel userModel = new UserModel(fbAccount);
+		
+		MongoLink.MONGO_LINK.registerOrLogin((DBObject) JSON.parse(userModel.toJSON()));
+		
+		session("connected", "fbaccount");
 		
 		return ok();
 	}

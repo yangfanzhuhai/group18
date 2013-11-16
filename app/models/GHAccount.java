@@ -10,6 +10,9 @@ public class GHAccount extends Account {
 		this.gravatar_id = gravatar_id;
 		this.html_url = html_url;
 	}
+	public GHAccount() {
+	}
+	
 	public String getGravatar_id() {
 		return gravatar_id;
 	}
