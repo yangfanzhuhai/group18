@@ -400,18 +400,18 @@ public class MongoLink {
 
 	/**
 	 * @param customID - ID of collection to be used
-	 * @param lastID - String ID of the last post currently in news feed
+	 * @param lastID - String ID of the last post currently in task list
 	 * @param postLimit - Maximum number of tasks to fetch
-	 * @return An array of news feed posts (with replies and references) 
+	 * @return An array of task posts (with replies and references) 
 	 * 			that were posted after the task with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextTasks(String customID, String lastID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
 	}
 	
 	/**
 	 * @param customID - ID of collection to be used
-	 * @param lastID - String ID of the last post currently in news feed
+	 * @param lastID - String ID of the last post currently in task list
 	 * @return An array of (at most 20) task posts (with replies and references) 
 	 * 			that were posted after the task with the given ID
 	 */
@@ -480,6 +480,27 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getGitCommits(String customID) {
 		return getGitCommits(customID, 20);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param lastID - String ID of the last commit currently in git commits page
+	 * @param postLimit - Maximum number of commits to fetch
+	 * @return An array of git commit posts (with replies and references) 
+	 * 			that were posted after the commit with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextGitCommits(String customID, String lastID, int postLimit) {
+		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+	}
+	
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param lastID - String ID of the last post currently in news feed
+	 * @return An array of (at most 20) news feed posts (with replies and references) 
+	 * 			that were posted after the post with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextGitCommits(String customID, String lastID) {
+		return getNextGitCommits(customID, lastID, 20);
 	}
 	
 	/**

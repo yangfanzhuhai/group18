@@ -408,6 +408,10 @@
 
    });
 }
+    // Load on scroll to bottom is not used because when loading is low, multiple ajax calls 
+    // are sent to load the next 20 feeds before first call is finished. AS a result, multiple 
+    // copies of 20-40 posts are loaded. 
+    // Possible solution: use a timer to limit the number of ajax calls sent (e.g. 1 per 10 seconds?)
 
     /*$(window).scroll(function () {
       if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
@@ -447,7 +451,15 @@
             success: function(data){   
                 addToFeed(data);
             }});
-    } else{
+    } else if (@toggle==2) {
+          $.ajax({
+            type: "GET",
+            url: "/" + "@groupID" + "/rest/moregit/" + final_post_id,
+            dataType: "json",
+            success: function(data){   
+                addToFeed(data);
+            }});
+    } else {
           alert("end of page");
     }
 

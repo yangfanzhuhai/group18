@@ -140,6 +140,10 @@ public class Rest extends Controller {
 	public static Result getGits(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getGitCommits(groupID).toString());
 	}
+
+	public static Result getMoreGits(String groupID, String last_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNextGitCommits(groupID, last_post_id).toString());
+	}
 	
 	public static Result getBuilds(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getJenkinsBuilds(groupID).toString());
