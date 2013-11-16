@@ -148,8 +148,7 @@ public class ActivityModel extends Model {
 	}
 	
 	public void save(String groupID){
-		MongoLink.MONGO_LINK.insertNews(groupID, (DBObject) JSON.parse(this
-				.toJSON()));
+		MongoLink.MONGO_LINK.insertNews(groupID, (DBObject) JSON.parse(this.toJSON()));
 	}
 	
 

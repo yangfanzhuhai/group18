@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
 
 import com.google.gson.Gson;
@@ -21,6 +20,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
+import com.mongodb.util.JSON;
 
 public class MongoLink {
 	
@@ -44,7 +44,12 @@ public class MongoLink {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		
-		users = db.getCollection("userAccounts");
+		if(devMode){
+			users = db.getCollection("usertemp");
+		}
+		else {
+			users = db.getCollection("userAccounts");
+		}
 		groups = db.getCollection("groups");
 
 	}
@@ -56,16 +61,23 @@ public class MongoLink {
 			//	"\"fbAccount\": {\"name\": \"Luke\", \"photo_url\" : \"\", \"profile_id\" : \"f123\" }, " +
 				//"\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
 		
-		String json = "{ \"localAccount\": { \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
+	//	String json = "{ \"localAccount\": {}," +
+	//			"\"fbAccount\": {\"name\": \"Piotr\", \"photo_url\" : \"\", \"profile_id\" : \"654123\"}, " +
+	//			"\"ghAccount\" : {}}";
+		
+		String json = "{ \"localAccount\": {} ," +
 				"\"fbAccount\": {}, " +
-				"\"ghAccount\" : {}}";
+				"\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
 		
 		Gson gson = new Gson();
 		UserModel model = gson.fromJson(json, UserModel.class);
-		if (model.getLocalAccount() != null) {
-	//		System.out.println(model.toJSON());
-		}
+			System.out.println(model.toJSON());
 		MongoLink ml = new MongoLink(true);
+		
+		System.out.println(((DBObject) JSON.parse(model.toJSON())).toString());
+		
+		if(ml.registerOrLogin((DBObject) JSON.parse(model.toJSON())))
+			System.out.println("Registered");
 		
 	/*	ArrayList<ArrayList<String>> a = ml.getTaskDetails("QuantumCheese", "528002a5e4b0e00e6f371e80");
 		
@@ -301,6 +313,7 @@ public class MongoLink {
 	/**
 	 * Adds new user to the database, only if their username is not already
 	 * in the database
+	 * TODO DELETE
 	 * 
 	 * @param obj - Object containing new user's data
 	 * @return true if user was added, false if not
@@ -319,8 +332,8 @@ public class MongoLink {
 	
 	public boolean registerOrLogin(DBObject obj) {
 		
-		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString())) {
-			
+		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString().replaceAll("\\s+",""))) {
+			System.out.println("HERE");
 			if(users.findOne(QueryBuilder.start("localAccount.email").is(((DBObject) obj.get("localAccount")).get("email")).get()) == null)
 			{
 				int oldCount = (int) users.getCount();
@@ -330,7 +343,7 @@ public class MongoLink {
 			}
 			return false;
 		}
-		else if(obj.containsField("fbAccount") && !"{}".equals(obj.get("fbAccount").toString())) {
+		else if(obj.containsField("fbAccount") && !"{}".equals(obj.get("fbAccount").toString().replaceAll("\\s+",""))) {
 			
 			if(users.findOne(((DBObject) obj.get("fbAccount")).get("profile_id")) == null)
 			{
@@ -341,7 +354,7 @@ public class MongoLink {
 			}
 			return true;
 		}
-		else if(obj.containsField("ghAccount") && !"{}".equals(obj.get("ghAccount").toString())) {
+		else if(obj.containsField("ghAccount") && !"{}".equals(obj.get("ghAccount").toString().replaceAll("\\s+",""))) {
 			
 			if(users.findOne(((DBObject) obj.get("ghAccount")).get("email")) == null)
 			{
@@ -379,12 +392,12 @@ public class MongoLink {
 	}
 	
 	/**
-	 * @param username - Username of the current user
+	 * @param userID - ID of the current user
 	 * @return A list of groups which the member is part of
 	 */
-	public ArrayList<ArrayList<String>> getGroups(String username) {
+	public ArrayList<ArrayList<String>> getGroups(String userID) {
 		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
-		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
+		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new ObjectId[]{new ObjectId(userID)}).get()).toArray();
 	
 		for(int i = 0; i < list.size(); i++)
 		{
@@ -486,7 +499,6 @@ public class MongoLink {
 	/**Returns a list of postLimit tasks**/
 	public ArrayList<ArrayList<String>> getTasks(String customID, int postLimit) {
 		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
-		
 	}
 
 	/**Default method to return last 20 tasks**/
