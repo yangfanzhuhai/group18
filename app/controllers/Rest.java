@@ -169,12 +169,14 @@ public class Rest extends Controller {
 
 	public static Result registerUser() {
 		Gson gson = new Gson();
-		String credentialsJson = gson.fromJson(getValueFromRequest("credentials"), UserModel.class).toJSON();
+		UserModel userModel = gson.fromJson(getValueFromRequest("credentials"), UserModel.class);
+		String credentialsJson = userModel.toJSON();
 		
 
 		try {
-			if (MongoLink.MONGO_LINK.registerNewUser((DBObject) JSON
+			if (MongoLink.MONGO_LINK.registerOrLogin((DBObject) JSON
 					.parse(credentialsJson))) {
+				session("connected", userModel.getLocalAccount().getName());
 				return ok();
 			} else {
 				return status(400);

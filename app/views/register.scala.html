@@ -106,16 +106,12 @@
           var emailHash = get_gravatar(email, 250);
 
 
-          var credentials = "{\"username\" : "
-              + "\"" + username + "\", "
-              + "\"password\" : "
-              + "\"" + password + "\", "
-              + "\"email\" : "
-              + "\"" + email + "\", "
-              + "\"emailHash\" : "
-              + "\"" + emailHash + "\", "
-              + "\"fb_image\" : \"\" "
-              + "}";
+          var credentials = "{\"localAccount\": {"
+              + "\"password\": \"" + password + "\","
+              + "\"email\": \"" + email + "\","
+              + "\"name\": \"" + username + "\"},"
+          	  + "\"fbAccount\": {},"
+          	  +	"\"ghAccount\": {}}"
 
               alert(credentials);
           
@@ -124,7 +120,7 @@
               url: "/rest/register",
               data: {"credentials":credentials},
               success: function(data){        
-  	            window.location.href = '@routes.Application.login())'
+  	            window.location.href = '@routes.Application.profile()'
               },
               error: function (xhr, ajaxOptions, thrownError) {
               	if (xhr.status == 400) {

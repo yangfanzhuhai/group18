@@ -65,9 +65,7 @@ public class MongoLink {
 	//			"\"fbAccount\": {\"name\": \"Piotr\", \"photo_url\" : \"\", \"profile_id\" : \"654123\"}, " +
 	//			"\"ghAccount\" : {}}";
 		
-		String json = "{ \"localAccount\": {} ," +
-				"\"fbAccount\": {}, " +
-				"\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
+		String json = "{\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
 		
 		Gson gson = new Gson();
 		UserModel model = gson.fromJson(json, UserModel.class);
@@ -387,7 +385,7 @@ public class MongoLink {
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
 	public boolean checkLogin(String email, String password) {
-		return users.findOne(QueryBuilder.start("username").is(email).and("password").is(password).get()) != null;
+		return users.findOne(QueryBuilder.start("localAccount.email").is(email).and("localAccount.password").is(password).get()) != null;
 	}
 	
 	/**
