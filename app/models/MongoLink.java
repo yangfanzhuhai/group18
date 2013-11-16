@@ -20,6 +20,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
+import com.mongodb.util.JSON;
 
 public class MongoLink {
 	
@@ -43,7 +44,12 @@ public class MongoLink {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		
-		users = db.getCollection("userAccounts");
+		if(devMode){
+			users = db.getCollection("usertemp");
+		}
+		else {
+			users = db.getCollection("userAccounts");
+		}
 		groups = db.getCollection("groups");
 
 	}
@@ -55,18 +61,25 @@ public class MongoLink {
 			//	"\"fbAccount\": {\"name\": \"Luke\", \"photo_url\" : \"\", \"profile_id\" : \"f123\" }, " +
 				//"\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
 		
-		String json = "{ \"localAccount\": { \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
+	//	String json = "{ \"localAccount\": {}," +
+	//			"\"fbAccount\": {\"name\": \"Piotr\", \"photo_url\" : \"\", \"profile_id\" : \"654123\"}, " +
+	//			"\"ghAccount\" : {}}";
+		
+		String json = "{ \"localAccount\": {} ," +
 				"\"fbAccount\": {}, " +
-				"\"ghAccount\" : {}}";
+				"\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
 		
 		Gson gson = new Gson();
 		UserModel model = gson.fromJson(json, UserModel.class);
-		if (model.getLocalAccount() != null) {
-	//		System.out.println(model.toJSON());
-		}
+			System.out.println(model.toJSON());
 		MongoLink ml = new MongoLink(true);
 		
-		ArrayList<ArrayList<String>> a = ml.getTaskDetails("QuantumCheese", "528002a5e4b0e00e6f371e80");
+		System.out.println(((DBObject) JSON.parse(model.toJSON())).toString());
+		
+		if(ml.registerOrLogin((DBObject) JSON.parse(model.toJSON())))
+			System.out.println("Registered");
+		
+	/*	ArrayList<ArrayList<String>> a = ml.getTaskDetails("QuantumCheese", "528002a5e4b0e00e6f371e80");
 		
 		for(ArrayList<String> x : a)
 		{
@@ -299,6 +312,7 @@ public class MongoLink {
 	/**
 	 * Adds new user to the database, only if their username is not already
 	 * in the database
+	 * TODO DELETE
 	 * 
 	 * @param obj - Object containing new user's data
 	 * @return true if user was added, false if not
@@ -317,8 +331,8 @@ public class MongoLink {
 	
 	public boolean registerOrLogin(DBObject obj) {
 		
-		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString())) {
-			
+		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString().replaceAll("\\s+",""))) {
+			System.out.println("HERE");
 			if(users.findOne(QueryBuilder.start("localAccount.email").is(((DBObject) obj.get("localAccount")).get("email")).get()) == null)
 			{
 				int oldCount = (int) users.getCount();
@@ -328,7 +342,7 @@ public class MongoLink {
 			}
 			return false;
 		}
-		else if(obj.containsField("fbAccount") && !"{}".equals(obj.get("fbAccount").toString())) {
+		else if(obj.containsField("fbAccount") && !"{}".equals(obj.get("fbAccount").toString().replaceAll("\\s+",""))) {
 			
 			if(users.findOne(((DBObject) obj.get("fbAccount")).get("profile_id")) == null)
 			{
@@ -339,7 +353,7 @@ public class MongoLink {
 			}
 			return true;
 		}
-		else if(obj.containsField("ghAccount") && !"{}".equals(obj.get("ghAccount").toString())) {
+		else if(obj.containsField("ghAccount") && !"{}".equals(obj.get("ghAccount").toString().replaceAll("\\s+",""))) {
 			
 			if(users.findOne(((DBObject) obj.get("ghAccount")).get("email")) == null)
 			{
@@ -377,12 +391,12 @@ public class MongoLink {
 	}
 	
 	/**
-	 * @param username - Username of the current user
+	 * @param userID - ID of the current user
 	 * @return A list of groups which the member is part of
 	 */
-	public ArrayList<ArrayList<String>> getGroups(String username) {
+	public ArrayList<ArrayList<String>> getGroups(String userID) {
 		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
-		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
+		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new ObjectId[]{new ObjectId(userID)}).get()).toArray();
 	
 		for(int i = 0; i < list.size(); i++)
 		{
@@ -488,7 +502,6 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getTasks(String customID, int postLimit) {
 		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
-		
 	}
 
 	/**
@@ -623,6 +636,10 @@ public class MongoLink {
 		deletePost(getGroupColl(customID), obj.get("id").toString());
 	}
 	
+	public ArrayList<ArrayList<String>> getTaskDetails(String groupID, String id) throws ParseException {
+		return getTaskDetails(getGroupColl(groupID), id);
+	}
+	
 	/** 
 	 * @param coll - Collection to be used
 	 * @param obj - News Feed object
@@ -660,10 +677,6 @@ public class MongoLink {
 		return getItemsWithoutReferences(coll, QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), reverseSort);
 	}
 	
-	public ArrayList<ArrayList<String>> getTaskDetails(String groupID, String id) throws ParseException {
-		return getTaskDetails(getGroupColl(groupID), id);
-	}
-	
 	private ArrayList<ArrayList<String>> getTaskDetails(DBCollection coll, String id) throws ParseException {
 		
 		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
@@ -684,13 +697,13 @@ public class MongoLink {
 		String targetPost = ((DBObject) referencingPost.get("target")).get("messageID").toString();
 		DBObject tempPost;
 		
-		if("\"\"".equals(targetPost))
+		if("".equals(targetPost))
 		{
 			tempPost = referencingPost;
 		}
 		else
 		{
-			tempPost = coll.findOne(QueryBuilder.start("_id").is(targetPost));
+			tempPost = coll.findOne(QueryBuilder.start("_id").is(new ObjectId(targetPost)).get());
 		}
 		
 		String id = tempPost.get("_id").toString();

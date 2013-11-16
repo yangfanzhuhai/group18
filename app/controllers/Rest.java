@@ -139,7 +139,7 @@ public class Rest extends Controller {
 		try {
 			Gson gson = new Gson();
 			TaskID task = gson.fromJson(getValueFromRequest("activity"), TaskID.class);
-			return ok(MongoLink.MONGO_LINK.getReferencedBy(groupID, task.id).toString());
+			return ok(MongoLink.MONGO_LINK.getTaskDetails(groupID, task.id).toString());
 		} catch (JsonSyntaxException e) {
 			return status(422);
 		} catch (ParseException e) {
