@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
 
 import com.google.gson.Gson;
@@ -304,16 +305,37 @@ public class MongoLink {
 	
 	public boolean registerOrLogin(DBObject obj) {
 		
-		if(obj.containsField("localAccount")) {
+		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString())) {
 			
+			if(users.findOne(((DBObject) obj.get("localAccount")).get("email")) == null)
+			{
+				int oldCount = (int) users.getCount();
+				
+				users.insert(obj);
+				return (int) users.getCount() == oldCount + 1;
+			}
+			return false;
 		}
-		else if(obj.containsField("fbAccount")) {
+		else if(obj.containsField("fbAccount") && !"{}".equals(obj.get("fbAccount").toString())) {
 			
-			
+			if(users.findOne(((DBObject) obj.get("fbAccount")).get("profile_id")) == null)
+			{
+				int oldCount = (int) users.getCount();
+				
+				users.insert(obj);
+				return (int) users.getCount() == oldCount + 1;
+			}
 			return true;
 		}
-		else if(obj.containsField("ghAccount")) {
+		else if(obj.containsField("ghAccount") && !"{}".equals(obj.get("ghAccount").toString())) {
 			
+			if(users.findOne(((DBObject) obj.get("ghAccount")).get("email")) == null)
+			{
+				int oldCount = (int) users.getCount();
+				
+				users.insert(obj);
+				return (int) users.getCount() == oldCount + 1;
+			}
 			
 			return true;
 		}
@@ -339,7 +361,7 @@ public class MongoLink {
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
 	public boolean checkLogin(String username, String password) {
-		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
+		return users.findOne(QueryBuilder.start("localAccount.name").is(username).and("localAccount.password").is(password).get()) != null;
 	}
 	
 	/**
