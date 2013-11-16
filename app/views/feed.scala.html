@@ -121,31 +121,24 @@
 
 	}
 
-  
+
+    document.getElementById("newsfeed_nav").setAttribute("class","");
+    document.getElementById("tasklist_nav").setAttribute("class","");
+    document.getElementById("git_nav").setAttribute("class","");
+    document.getElementById("builds_nav").setAttribute("class","");
+ 
     if (@toggle == 0) {
       document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("git_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 1) {
     	document.title = "Task List"
-      document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","active");
-      document.getElementById("git_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 2) {
       document.title = "Git Commits"
       document.getElementById("git_nav").setAttribute("class","active");
-      document.getElementById("newsfeed_nav").setAttribute("class","");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
     } else if(@toggle == 3) {
       document.title = "Jenkins Builds"
       document.getElementById("builds_nav").setAttribute("class","active");
-      document.getElementById("newsfeed_nav").setAttribute("class","");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("git_nav").setAttribute("class","");
     }
 
     function postFormOnKeyDown (currentElement) {
@@ -254,62 +247,42 @@
       document.getElementById("stream").innerHTML = "";
       $('#loader').hide();
       $('#loadMoreButton').hide();
-      if(@toggle==0) {
-      	$.ajax({
-      	
+
+      var getUrl = "/" + "@groupID" + "/rest/";
+
+      switch(@toggle)
+        {
+        case 0:
+          getUrl += "feed";
+          break;
+        case 1:
+          getUrl += "tasks";
+          break;
+        case 2:
+          getUrl += "git";
+          break;
+        case 3:
+          getUrl += "builds";
+          break;
+        }
+
+        $.ajax({    
           type: "GET",
-          url: "/" + "@groupID" + "/rest/feed",
+          url: getUrl,
           dataType: "json",
           success: function(data){   
-
               generateFeed(data);
           }});
 
-      	$.ajax({
-      	
+        if (@toggle==0) {
+          $.ajax({
           type: "GET",
           url: "/" + "@groupID" + "/rest/alltasks",
           dataType: "json",
           success: function(data){   
-
               addTasks(data);
           }});
-
-      } else if (@toggle==1){
-          $.ajax({
-          
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/tasks",
-            dataType: "json",
-            success: function(data){   
-                generateFeed(data);
-            }
-          });
-
-      } else if (@toggle==2){
-      	$.ajax({
-      	
-          type: "GET",
-          url: "/" + "@groupID" + "/rest/git",
-          dataType: "json",
-          success: function(data){   
-
-              generateFeed(data);
-          }
-      });
-      } else if (@toggle==3){
-      	$.ajax({
-      	
-          type: "GET",
-          url: "/" + "@groupID" + "/rest/builds",
-          dataType: "json",
-          success: function(data){   
-
-              generateFeed(data);
-          }
-      });
-      }
-      
+        }      
   }
 
   $(document).ready(refreshFeed);	
@@ -408,6 +381,10 @@
 
    });
 }
+    // Load on scroll to bottom is not used because when loading is low, multiple ajax calls 
+    // are sent to load the next 20 feeds before first call is finished. AS a result, multiple 
+    // copies of 20-40 posts are loaded. 
+    // Possible solution: use a timer to limit the number of ajax calls sent (e.g. 1 per 10 seconds?)
 
     /*$(window).scroll(function () {
       if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
@@ -431,29 +408,30 @@
   function loadMoreFeed() {
     $('#loadMoreButton').hide();
     $('#loader').show();
-    if(@toggle==0) {
-          $.ajax({
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
-            dataType: "json",
-            success: function(data){   
-                addToFeed(data);
-            }});
-    } else if (@toggle==1) {
-          $.ajax({
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/moretask/" + final_post_id,
-            dataType: "json",
-            success: function(data){   
-                addToFeed(data);
-            }});
-    } else{
-          alert("end of page");
-    }
-
+    var getUrl = "/" + "@groupID" + "/rest/";
+    switch(@toggle)
+      {
+      case 0:
+        getUrl += "morefeed/";
+        break;
+      case 1:
+        getUrl += "moretask/";
+        break;
+      case 2:
+        getUrl += "moregit/";
+        break;
+      case 3:
+        getUrl += "morebuild/";
+        break;
+      }
+    $.ajax({    
+      type: "GET",
+      url: getUrl + final_post_id,
+      dataType: "json",
+      success: function(data){   
+          generateFeed(data);
+      }});
   }
-
-
 
   function generateFeed(stream_array) {
     addToFeed(stream_array);
