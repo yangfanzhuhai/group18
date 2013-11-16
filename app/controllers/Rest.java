@@ -136,6 +136,13 @@ public class Rest extends Controller {
 		return ok();
 	}
 	
+	public static Result parseFBData() {
+		
+		System.out.println(getValueFromRequest("credentials"));
+		
+		return ok();
+	}
+	
 	public static Result addFBImage() {
 		Gson gson = new Gson();
 		FBImage url = gson.fromJson(getValueFromRequest("activity"), FBImage.class);
