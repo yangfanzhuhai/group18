@@ -354,8 +354,6 @@
             $results.css("border-color", "#AF3838");
             $results.css("z-index", "30 !important");
             $results.css("position", "absolute");
-
-
         }
      }).on("keypress", function (e) {
          var keys = [];
@@ -408,6 +406,9 @@
   function loadMoreFeed() {
     $('#loadMoreButton').hide();
     $('#loader').show();
+
+    //final_post_id = $("ul#stream li").last().id;
+
     var getUrl = "/" + "@groupID" + "/rest/";
     switch(@toggle)
       {
