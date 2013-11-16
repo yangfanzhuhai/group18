@@ -77,7 +77,7 @@ public class MongoLink {
 		System.out.println(((DBObject) JSON.parse(model.toJSON())).toString());
 		
 		if(ml.registerOrLogin((DBObject) JSON.parse(model.toJSON())))
-			System.out.println("Registered");
+			System.out.println("Registered/Logged in");
 		
 	/*	ArrayList<ArrayList<String>> a = ml.getTaskDetails("QuantumCheese", "528002a5e4b0e00e6f371e80");
 		
@@ -332,7 +332,7 @@ public class MongoLink {
 	public boolean registerOrLogin(DBObject obj) {
 		
 		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString().replaceAll("\\s+",""))) {
-			System.out.println("HERE");
+			
 			if(users.findOne(QueryBuilder.start("localAccount.email").is(((DBObject) obj.get("localAccount")).get("email")).get()) == null)
 			{
 				int oldCount = (int) users.getCount();
@@ -344,7 +344,7 @@ public class MongoLink {
 		}
 		else if(obj.containsField("fbAccount") && !"{}".equals(obj.get("fbAccount").toString().replaceAll("\\s+",""))) {
 			
-			if(users.findOne(((DBObject) obj.get("fbAccount")).get("profile_id")) == null)
+			if(users.findOne(QueryBuilder.start("fbAccount.email").is(((DBObject) obj.get("fbAccount")).get("email")).get()) == null)
 			{
 				int oldCount = (int) users.getCount();
 				
@@ -355,7 +355,7 @@ public class MongoLink {
 		}
 		else if(obj.containsField("ghAccount") && !"{}".equals(obj.get("ghAccount").toString().replaceAll("\\s+",""))) {
 			
-			if(users.findOne(((DBObject) obj.get("ghAccount")).get("email")) == null)
+			if(users.findOne(QueryBuilder.start("ghAccount.email").is(((DBObject) obj.get("ghAccount")).get("email")).get()) == null)
 			{
 				int oldCount = (int) users.getCount();
 				
