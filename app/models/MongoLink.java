@@ -379,6 +379,14 @@ public class MongoLink {
 	public ArrayList<ArrayList<String>> getNextNews(String customID, String lastID) {
 		return getNextNews(customID, lastID, 20);
 	}
+	
+	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID, int postLimit) {
+		return dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get(), reverseSort, postLimit);
+	}
+	
+	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID) {
+		return getNewNews(customID, newestID, 20);
+	}
 
 	 /** 
 	 * @param customID - ID of collection to be used
