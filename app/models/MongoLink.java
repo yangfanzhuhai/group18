@@ -3,8 +3,10 @@ package models;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
@@ -48,7 +50,7 @@ public class MongoLink {
 	}
 
 	//for testing
-	public static void main(String[] args) throws UnknownHostException {
+	public static void main(String[] args) throws UnknownHostException, ParseException {
 		
 		//String json = "{ \"localAccount\": { \"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
 			//	"\"fbAccount\": {\"name\": \"Luke\", \"photo_url\" : \"\", \"profile_id\" : \"f123\" }, " +
@@ -61,9 +63,21 @@ public class MongoLink {
 		Gson gson = new Gson();
 		UserModel model = gson.fromJson(json, UserModel.class);
 		if (model.getLocalAccount() != null) {
-			System.out.println(model.toJSON());
+	//		System.out.println(model.toJSON());
 		}
 		MongoLink ml = new MongoLink(true);
+		
+		ArrayList<ArrayList<String>> a = ml.getTaskDetails("QuantumCheese", "528002a5e4b0e00e6f371e80");
+		
+		for(ArrayList<String> x : a)
+		{
+			System.out.println();
+			System.out.println();
+			for(String y : x)
+			{
+				System.out.println(y);
+			}
+		}
 	
 	/*	for(ArrayList<String> o: ml.getGroups("Piotr"))
 		{
@@ -307,7 +321,7 @@ public class MongoLink {
 		
 		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString())) {
 			
-			if(users.findOne(((DBObject) obj.get("localAccount")).get("email")) == null)
+			if(users.findOne(QueryBuilder.start("localAccount.email").is(((DBObject) obj.get("localAccount")).get("email")).get()) == null)
 			{
 				int oldCount = (int) users.getCount();
 				
@@ -351,17 +365,17 @@ public class MongoLink {
 	 * @return true if parameters match some entry in the database, false if not
 	 */
 	public boolean checkLogin(DBObject obj) {
-		return checkLogin( obj.get("username").toString() ,obj.get("password").toString());
+		return checkLogin( ((DBObject) obj.get("localAccount")).get("email").toString() ,((DBObject) obj.get("localAccount")).get("password").toString());
 	}
 	
 	/** Checks the validity of the given username and password
 	 * 
-	 * @param username - Username entered by user
+	 * @param email - Username entered by user
 	 * @param password - Password entered by user
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
-	public boolean checkLogin(String username, String password) {
-		return users.findOne(QueryBuilder.start("localAccount.name").is(username).and("localAccount.password").is(password).get()) != null;
+	public boolean checkLogin(String email, String password) {
+		return users.findOne(QueryBuilder.start("localAccount.email").is(email).and("localAccount.password").is(password).get()) != null;
 	}
 	
 	/**
@@ -617,6 +631,50 @@ public class MongoLink {
 	private ArrayList<String> getReferencedBy(DBCollection coll, String id) throws ParseException {
 		
 		return getItemsWithoutReferences(coll, QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), reverseSort);
+	}
+	
+	public ArrayList<ArrayList<String>> getTaskDetails(String groupID, String id) throws ParseException {
+		return getTaskDetails(getGroupColl(groupID), id);
+	}
+	
+	private ArrayList<ArrayList<String>> getTaskDetails(DBCollection coll, String id) throws ParseException {
+		
+		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
+		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) coll.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(reverseSort).toArray();
+		
+		for(DBObject r : referencingItems)
+		{
+			retList.add(getEntireTopic(coll, r));
+		}
+		
+		return new ArrayList<ArrayList<String>>(retList);
+	}
+	
+	private ArrayList<String> getEntireTopic(DBCollection coll, DBObject referencingPost) throws ParseException {
+		
+		ArrayList<String> retList = new ArrayList<String>();
+		
+		String targetPost = ((DBObject) referencingPost.get("target")).get("messageID").toString();
+		DBObject tempPost;
+		
+		if("\"\"".equals(targetPost))
+		{
+			tempPost = referencingPost;
+		}
+		else
+		{
+			tempPost = coll.findOne(QueryBuilder.start("_id").is(targetPost));
+		}
+		
+		String id = tempPost.get("_id").toString();
+		ActivityModel am = new ActivityModel(tempPost.toString());
+		
+		// TODO This sort of thing should not be needed once activity model is refactored
+		am.setID(id);
+		retList.add(am.toJSON());
+		retList.addAll(getReplies(coll, id));
+		
+		return retList;
 	}
 	
 	/**
