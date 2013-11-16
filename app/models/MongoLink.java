@@ -655,6 +655,7 @@ public class MongoLink {
 		ArrayList<String> retList = new ArrayList<String>();
 		
 		String targetPost = ((DBObject) referencingPost.get("target")).get("messageID").toString();
+		System.out.println(targetPost);
 		DBObject tempPost;
 		
 		if("\"\"".equals(targetPost))
@@ -663,7 +664,7 @@ public class MongoLink {
 		}
 		else
 		{
-			tempPost = coll.findOne(QueryBuilder.start("_id").is(targetPost));
+			tempPost = coll.findOne(QueryBuilder.start("_id").is(new ObjectId(targetPost)).get());
 		}
 		
 		String id = tempPost.get("_id").toString();
