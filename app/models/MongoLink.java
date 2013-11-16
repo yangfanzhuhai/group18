@@ -495,9 +495,9 @@ public class MongoLink {
 	
 	/**
 	 * @param customID - ID of collection to be used
-	 * @param lastID - String ID of the last post currently in news feed
-	 * @return An array of (at most 20) news feed posts (with replies and references) 
-	 * 			that were posted after the post with the given ID
+	 * @param lastID - String ID of the last commit currently in git commits page
+	 * @return An array of (at most 20) git commit posts (with replies and references) 
+	 * 			that were posted after the commit with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextGitCommits(String customID, String lastID) {
 		return getNextGitCommits(customID, lastID, 20);
@@ -518,6 +518,27 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getJenkinsBuilds(String customID) {
 		return getJenkinsBuilds(customID, 20);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param lastID - String ID of the last build currently in builds page
+	 * @param postLimit - Maximum number of builds to fetch
+	 * @return An array of build posts (with replies and references) 
+	 * 			that were posted after the build with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextJenkinsBuilds(String customID, String lastID, int postLimit) {
+		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+	}
+	
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param lastID - String ID of the last build currently in builds page
+	 * @return An array of (at most 20) build posts (with replies and references) 
+	 * 			that were posted after the build with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextJenkinsBuilds(String customID, String lastID) {
+		return getNextJenkinsBuilds(customID, lastID, 20);
 	}
 	
 	/**

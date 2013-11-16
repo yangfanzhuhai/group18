@@ -149,6 +149,10 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getJenkinsBuilds(groupID).toString());
 	}
 
+	public static Result getMoreBuilds(String groupID, String last_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNextJenkinsBuilds(groupID, last_post_id).toString());
+	}
+
 	public static Result registerUser() {
 		String credentialsJson = getValueFromRequest("credentials");
 

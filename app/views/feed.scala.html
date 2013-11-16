@@ -459,10 +459,17 @@
             success: function(data){   
                 addToFeed(data);
             }});
-    } else {
+    } else if (@toggle==3){
+          $.ajax({
+            type: "GET",
+            url: "/" + "@groupID" + "/rest/morebuild/" + final_post_id,
+            dataType: "json",
+            success: function(data){   
+                addToFeed(data);
+            }});
+    } else{
           alert("end of page");
     }
-
   }
 
 
