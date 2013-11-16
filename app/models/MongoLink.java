@@ -67,7 +67,7 @@ public class MongoLink {
 		}
 		MongoLink ml = new MongoLink(true);
 		
-		ArrayList<ArrayList<String>> a = ml.getTaskDetails("QuantumCheese", "528002a5e4b0e00e6f371e80");
+	/*	ArrayList<ArrayList<String>> a = ml.getTaskDetails("QuantumCheese", "528002a5e4b0e00e6f371e80");
 		
 		for(ArrayList<String> x : a)
 		{
@@ -596,6 +596,10 @@ public class MongoLink {
 		deletePost(getGroupColl(customID), obj.get("id").toString());
 	}
 	
+	public ArrayList<ArrayList<String>> getTaskDetails(String groupID, String id) throws ParseException {
+		return getTaskDetails(getGroupColl(groupID), id);
+	}
+	
 	/** 
 	 * @param coll - Collection to be used
 	 * @param obj - News Feed object
@@ -633,10 +637,6 @@ public class MongoLink {
 		return getItemsWithoutReferences(coll, QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), reverseSort);
 	}
 	
-	public ArrayList<ArrayList<String>> getTaskDetails(String groupID, String id) throws ParseException {
-		return getTaskDetails(getGroupColl(groupID), id);
-	}
-	
 	private ArrayList<ArrayList<String>> getTaskDetails(DBCollection coll, String id) throws ParseException {
 		
 		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
@@ -655,10 +655,9 @@ public class MongoLink {
 		ArrayList<String> retList = new ArrayList<String>();
 		
 		String targetPost = ((DBObject) referencingPost.get("target")).get("messageID").toString();
-		System.out.println(targetPost);
 		DBObject tempPost;
 		
-		if("\"\"".equals(targetPost))
+		if("".equals(targetPost))
 		{
 			tempPost = referencingPost;
 		}
