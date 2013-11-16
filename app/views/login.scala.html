@@ -95,6 +95,9 @@
         <button type="submit" class="btn btn-success" name="github_button" id="github_button" onclick="gitHubLogin()" >
           Login with GitHub
         </button>
+        <button type="submit" class="btn btn-success" name="github_button" id="github_button" onclick="fbLogin()" >
+          Login with Facebook
+        </button>
       </div>
       </div> <!-- /login box -->
       <div id = "logo" align = "center" class = "title" >
@@ -150,11 +153,44 @@
       }
     }
 
+    function fbLogin() {
+	
+	FB.getLoginStatus(function(response) {
+  	if (response.status === 'connected') {
+   	 // the user is logged in and has authenticated your
+  	  // app, and response.authResponse supplies
+  	  // the user's ID, a valid access token, a signed
+  	  // request, and the time the access token 
+  	  // and signed request each expire
+  	  var uid = response.authResponse.userID;
+  	  var accessToken = response.authResponse.accessToken;
+ 	 } else if (response.status === 'not_authorized') {
+  	  // the user is logged in to Facebook, 
+  	  // but has not authenticated your app
+  	} else {
+  	   FB.login(function(response) {
+           if (response.authResponse) {
+   	  	FB.api('/me', function(response) {
+			 $.ajax({
+			type: "POST",
+			url: "/rest/facebook",
+			data: {"credentials":"{\"id\" : \"" + response.id + "\" \"name\": \"" + response.name + "\"}"},
+ 			success: function(data){
+        			window.location.href = '@routes.Application.profile()'
+        		}});
+   	  	});
+  	    } else {
+   	  	console.log('User cancelled login or did not fully authorize.');
+   	    }
+ 	    });
+  	    }
+ 	    });
+    }
+
     function gitHubLogin() {
 
 	OAuth.initialize('8PVoXQE0bWA1h3v_3E08C9Kkm3A');
-	OAuth.popup('github', function(error, success){
-		
+	OAuth.popup('github', function(error, success){		
 		$.ajax({
 			type: "POST",
 			url: "/rest/github",

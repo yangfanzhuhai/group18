@@ -627,6 +627,18 @@ public class MongoLink {
 		return retList;
 	}
 	
+	public String getDisplayName(String id) {
+		
+		String ret = null;
+		DBObject user = users.findOne(new ObjectId(id));
+		if(!"{}".equals(user.get("localAccount").toString().replaceAll("\\s+","")))
+		{
+			
+		}
+		
+		return ret;
+	}
+	
 	/**
 	 * @param customID - ID of collection to be used
 	 * @param obj - Object representing the news feed post to be deleted.
