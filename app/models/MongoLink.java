@@ -356,7 +356,7 @@ public class MongoLink {
 		}
 		else if(obj.containsField("ghAccount") && !"{}".equals(obj.get("ghAccount").toString().replaceAll("\\s+",""))) {
 			
-			if(users.findOne(QueryBuilder.start("ghAccount.email").is(((DBObject) obj.get("ghAccount")).get("email")).get()) == null)
+			if(users.findOne(QueryBuilder.start("ghAccount.html_url").is(((DBObject) obj.get("ghAccount")).get("html_url")).get()) == null)
 			{
 				int oldCount = (int) users.getCount();
 				
@@ -631,7 +631,7 @@ public class MongoLink {
 	public String getDisplayName(String id) {
 		
 		String ret = null;
-		DBObject user = users.findOne(new ObjectId(id));
+		DBObject user = users.findOne(QueryBuilder.start("_id").is(new ObjectId(id)));
 		if(!"{}".equals(user.get("localAccount").toString().replaceAll("\\s+","")))
 		{
 			ret = ((DBObject) user.get("localAccount")).get("name").toString();
