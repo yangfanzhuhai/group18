@@ -127,8 +127,8 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getNewsFeed(groupID).toString());
 	}
 	
-	public static Result getMoreActivities(String groupID) {
-		return ok(MongoLink.MONGO_LINK.getNextNews(groupID, getValueFromRequest("activity")).toString());
+	public static Result getMoreActivities(String groupID, String last_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNextNews(groupID, last_post_id).toString());
 	}
 
 	public static Result getTasks(String groupID) {
@@ -149,6 +149,10 @@ public class Rest extends Controller {
 
 	public static Result getAllTasks(String groupID) throws ParseException {
 		return ok(MongoLink.MONGO_LINK.getAllTasksByName(groupID).toString());
+	}
+
+	public static Result getMoreTasks(String groupID, String last_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNextTasks(groupID, last_post_id).toString());
 	}
 
 	public static Result getTasksWithStatus(String groupID, String status) {

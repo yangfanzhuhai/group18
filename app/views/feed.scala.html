@@ -94,11 +94,15 @@
     <div id = "posts" class = "float">
     </div>
 
-              <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
-"AJAX loader" title="AJAX loader" align="center" /></div>
-    
+    <div id="preloader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
+        "AJAX loader" title="AJAX loader"  /></div>
 
     <ul id = "stream" class = "media-list" ></ul>
+    <div align="center">
+      <button id = "loadMoreButton"class = "btn btn-info" onclick = "loadMoreFeed()">See more...</button>
+    </div>
+    <div id="loader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
+        "AJAX loader" title="AJAX loader"  /></div>
   </div> <!-- /container -->  
 
 
@@ -116,12 +120,7 @@
 	    })(this[0]));
 
 	}
-	
-	$(window).scroll(function () {
-   		if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
 
-   		}
-	});
   
     if (@toggle == 0) {
       document.title = "News Feed";
@@ -175,6 +174,8 @@
   var tasks = [];
   var task_names = [];
   var user_images = new Array();
+  var final_post_id;
+
 
   document.getElementById("title").style.marginTop = "20px";
   document.getElementById("title").style.marginBottom = "10px";
@@ -253,6 +254,8 @@
   
   function refreshFeed() {
       document.getElementById("stream").innerHTML = "";
+      $('#loader').hide();
+      $('#loadMoreButton').hide();
       if(@toggle==0) {
         $.ajax({
 
@@ -485,25 +488,69 @@
    });
 }
 
+    /*$(window).scroll(function () {
+      if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
+        if(@toggle==0) {
+          //alert("feed page");
+          $.ajax({
+            type: "GET",
+            url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
+            dataType: "json",
+            success: function(data){   
+                addToFeed(data);
+            }});
+        } else {
+          alert("end of page");
+        }
+
+      }
+  });*/
+
+
+  function loadMoreFeed() {
+    $('#loadMoreButton').hide();
+    $('#loader').show();
+    if(@toggle==0) {
+          $.ajax({
+            type: "GET",
+            url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
+            dataType: "json",
+            success: function(data){   
+                addToFeed(data);
+            }});
+    } else if (@toggle==1) {
+          $.ajax({
+            type: "GET",
+            url: "/" + "@groupID" + "/rest/moretask/" + final_post_id,
+            dataType: "json",
+            success: function(data){   
+                addToFeed(data);
+            }});
+    } else{
+          alert("end of page");
+    }
+
+  }
+
 
 
   function generateFeed(stream_array) {
+    addToFeed(stream_array);
+  }
+
+  function addToFeed(stream_array) {
 
   	//document.getElementById("username").innerHTML="@userName";
     document.getElementById("limitedtextfield").value = "";
 
   	for (var i=0; i < stream_array.length;i++) {
-
-
   		var message_type = stream_array[i][0]['object']["objectType"];
-
   		var post_no = 0;
-
   		var post_id = stream_array[i][0]['id'];
-  		
-  		if (i == (stream_array.length - 1)) {
-  			final_post_id = post_id;	
-  		}
+  		/*if (i == (stream_array.length - 1)) {
+  			final_post_id = post_id; 
+  		}*/
+      final_post_id = post_id;  
 
   		var published = stream_array[i][0]['published'];
 
@@ -522,11 +569,13 @@
       post_body.setAttribute("class", "media-body");
   	
   		var stream = document.getElementById("stream");
-  		if (post_count > 0) {
+      //stream.insertBefore(post);
+      stream.appendChild(post);
+  		/*if (post_count > 0) {
   			stream.insertBefore(post, stream.childNodes[0]);
   		} else {
-  			stream.insertBefore(post);
-  		}
+        stream.insertBefore(post);
+  		}*/
 
   		var date_and_time = document.createElement("small");
   		date_and_time.innerHTML = published + "<br>";
@@ -597,8 +646,6 @@
   	    post_body.appendChild(user);
   		  post_body.appendChild(message);
         post_body.appendChild(date_and_time);
-  		  post_body.appendChild(reply_message_div);
-  		  post_body.appendChild(reply_button);
         post.appendChild(post_body);
 
         break;
@@ -668,8 +715,6 @@
         post_body.appendChild(task_details);
   			post_body.appendChild(task_data);	
         post_body.appendChild(date_and_time);	
-  			post_body.appendChild(reply_message_div);
-  			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			//post.appendChild(post_options);
 			break;
@@ -706,8 +751,6 @@
   			post_body.appendChild(jenkins);
   			post_body.appendChild(build_data);
         post_body.appendChild(date_and_time);
-  			post_body.appendChild(reply_message_div);
-  			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			break;
   		case "GIT":
@@ -777,8 +820,6 @@
   			post_body.appendChild(git_data);
   			post_body.appendChild(commit_data);
         post_body.appendChild(date_and_time);
-  			post_body.appendChild(reply_message_div);
-  			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
   			break;
   		}
@@ -855,21 +896,22 @@
           reply_div_body.appendChild(reply_published);
           reply_div_body.appendChild(reply_message_text);    
   			j++;
-
   		}
 
 
   		}
+
+      post_body.appendChild(reply_message_div);
+      post_body.appendChild(reply_button);
   	  post.appendChild(post_options);
-
-
 
   		post_no = post_no + 1;
   	}
 
     autocomplete_setup();
     $('#preloader').hide();
-
+    $('#loader').hide();
+    $('#loadMoreButton').show();
   	
   }
 

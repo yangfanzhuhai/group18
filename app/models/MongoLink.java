@@ -483,16 +483,45 @@ public class MongoLink {
 		return getNextNews(customID, lastID, 20);
 	}
 
-	/**Returns a list of postLimit tasks**/
+	 /** 
+	 * @param customID - ID of collection to be used
+	 * @param postLimit - Maximum number of items to be fetched
+	 * @return List of the last 'postLimit' items from given collection with replies and references
+	 */
 	public ArrayList<ArrayList<String>> getTasks(String customID, int postLimit) {
 		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
 		
 	}
 
-	/**Default method to return last 20 tasks**/
+	/**
+	 * @param customID - ID of collection to be used
+	 * @return List of the last 20 items from given collection with replies and references
+	 */
 	public ArrayList<ArrayList<String>> getTasks(String customID){
 		return getTasks(customID, 20);
 	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param lastID - String ID of the last post currently in news feed
+	 * @param postLimit - Maximum number of tasks to fetch
+	 * @return An array of news feed posts (with replies and references) 
+	 * 			that were posted after the task with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextTasks(String customID, String lastID, int postLimit) {
+		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+	}
+	
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param lastID - String ID of the last post currently in news feed
+	 * @return An array of (at most 20) task posts (with replies and references) 
+	 * 			that were posted after the task with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextTasks(String customID, String lastID) {
+		return getNextTasks(customID, lastID, 20);
+	}
+
 
 	/**
 	 * @param customID - ID of collection to be used
