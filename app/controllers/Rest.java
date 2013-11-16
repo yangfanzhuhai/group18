@@ -116,6 +116,15 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getGroups(userName).toString());
 	}
 	
+	public static Result parseGitHubData() {
+		
+		System.out.println(getValueFromRequest("credentials"));
+		session("connected", "gitaccount");
+		// TODO WRITE THIS
+		
+		return ok();
+	}
+	
 	public static Result addFBImage() {
 		Gson gson = new Gson();
 		FBImage url = gson.fromJson(getValueFromRequest("activity"), FBImage.class);

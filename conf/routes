@@ -32,7 +32,7 @@ GET		/rest/user						controllers.Rest.getUser()
 GET		/rest/groups					controllers.Rest.getGroups()
 GET		/rest/allusers					controllers.Rest.getAllUsers()
 
-
+POST	/rest/github					controllers.Rest.parseGitHubData()
 POST	/rest/addfbimage				controllers.Rest.addFBImage()
 POST	/rest/addproject				controllers.Rest.addProject()
 POST	/rest/leaveproject				controllers.Rest.leaveProject()

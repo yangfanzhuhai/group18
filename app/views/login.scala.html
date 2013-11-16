@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script src="https://oauth.io/auth/download/latest/oauth.js"></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -91,6 +92,9 @@
         <button type="submit" class="btn btn-success" name="login_button" id="login_button" onclick="login()" >
           Login
         </button>
+        <button type="submit" class="btn btn-success" name="github_button" id="github_button" onclick="gitHubLogin()" >
+          Login with GitHub
+        </button>
       </div>
       </div> <!-- /login box -->
       <div id = "logo" align = "center" class = "title" >
@@ -144,6 +148,31 @@
           
       });  
       }
+    }
+
+    function gitHubLogin() {
+
+	OAuth.initialize('8PVoXQE0bWA1h3v_3E08C9Kkm3A');
+	OAuth.popup('github', function(error, success){
+		
+		$.ajax({
+			type: "POST",
+			url: "/rest/github",
+			data: {"credentials":httpGet("https://api.github.com/user?access_token=" + success.access_token)},
+ 			success: function(data){
+        			window.location.href = '@routes.Application.profile()'
+          		}});			
+	});
+
+    }
+    function httpGet(theUrl)
+    {
+	var xmlHttp = null;
+
+	xmlHttp = new XMLHttpRequest();
+    	xmlHttp.open( "GET", theUrl, false );
+    	xmlHttp.send( null );
+    	return xmlHttp.responseText;
     }
         
     </script>
