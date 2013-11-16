@@ -120,6 +120,10 @@ public class Rest extends Controller {
 	public static Result getMoreActivities(String groupID, String last_post_id) {
 		return ok(MongoLink.MONGO_LINK.getNextNews(groupID, last_post_id).toString());
 	}
+	
+	public static Result getNewActivities(String groupID, String newest_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNewNews(groupID, newest_post_id).toString());
+	}
 
 	public static Result getTasks(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getTasks(groupID).toString());
