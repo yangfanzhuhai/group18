@@ -167,6 +167,7 @@
   var tasks = [];
   var task_names = [];
   var final_post_id;
+  var first_post_id;
 
   document.getElementById("title").style.marginTop = "20px";
   document.getElementById("title").style.marginBottom = "10px";
@@ -247,6 +248,9 @@
       document.getElementById("stream").innerHTML = "";
       $('#loader').hide();
       $('#loadMoreButton').hide();
+      first_post_id = "";
+      autoRefreshing = false;
+      autoRefresh();
 
       var getUrl = "/" + "@groupID" + "/rest/";
 
@@ -401,13 +405,42 @@
 
       }
   });*/
-
+  var autoRefreshing;
+  function autoRefresh() {    
+    var getUrl = "/" + "@groupID" + "/rest/";
+    switch(@toggle)
+      {
+      case 0:
+        getUrl += "newfeed/";
+        break;
+    /*  case 1:
+        getUrl += "moretask/";
+        break;
+      case 2:
+        getUrl += "moregit/";
+        break;
+      case 3:
+        getUrl += "morebuild/";
+        break;*/
+      }
+    setInterval(function() {
+      $.ajax({    
+      type: "GET",
+      url: getUrl + first_post_id,
+      dataType: "json",
+      success: function(data){   
+          autoRefreshing = true;
+          addToFeed(data);
+          autoRefreshing = false;
+      }});
+    }, 500);
+  }
 
   function loadMoreFeed() {
     $('#loadMoreButton').hide();
     $('#loader').show();
 
-    //final_post_id = $("ul#stream li").last().id;
+    //final_post_id = $("ul#stream li").last().attr("id");
 
     var getUrl = "/" + "@groupID" + "/rest/";
     switch(@toggle)
@@ -441,7 +474,7 @@
   function addToFeed(stream_array) {
 
   	//document.getElementById("username").innerHTML="@userName";
-    document.getElementById("limitedtextfield").value = "";
+    
 
   	for (var i=0; i < stream_array.length;i++) {
   		var message_type = stream_array[i][0]['object']["objectType"];
@@ -451,6 +484,9 @@
   			final_post_id = post_id; 
   		}*/
       final_post_id = post_id;  
+      if (first_post_id == "" || autoRefreshing) {
+        first_post_id = post_id;
+      } 
 
   		var published = stream_array[i][0]['published'];
 
@@ -470,7 +506,13 @@
   	
   		var stream = document.getElementById("stream");
       //stream.insertBefore(post);
-      stream.appendChild(post);
+      if (autoRefreshing) {
+        $("#stream").prepend(post);
+      } else {
+        stream.appendChild(post);
+      }
+     
+
   		/*if (post_count > 0) {
   			stream.insertBefore(post, stream.childNodes[0]);
   		} else {
@@ -1055,8 +1097,6 @@
                     
         //document.getElementById("name").value = "";
         document.getElementById("limitedtextfield").value = ""; 
-
-
           
       } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
           
