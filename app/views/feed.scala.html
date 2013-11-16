@@ -254,62 +254,42 @@
       document.getElementById("stream").innerHTML = "";
       $('#loader').hide();
       $('#loadMoreButton').hide();
-      if(@toggle==0) {
-      	$.ajax({
-      	
+
+      var getUrl = "/" + "@groupID" + "/rest/";
+
+      switch(@toggle)
+        {
+        case 0:
+          getUrl += "feed";
+          break;
+        case 1:
+          getUrl += "tasks";
+          break;
+        case 2:
+          getUrl += "git";
+          break;
+        case 3:
+          getUrl += "builds";
+          break;
+        }
+
+        $.ajax({    
           type: "GET",
-          url: "/" + "@groupID" + "/rest/feed",
+          url: getUrl,
           dataType: "json",
           success: function(data){   
-
               generateFeed(data);
           }});
 
-      	$.ajax({
-      	
+        if (@toggle==0) {
+          $.ajax({
           type: "GET",
           url: "/" + "@groupID" + "/rest/alltasks",
           dataType: "json",
           success: function(data){   
-
               addTasks(data);
           }});
-
-      } else if (@toggle==1){
-          $.ajax({
-          
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/tasks",
-            dataType: "json",
-            success: function(data){   
-                generateFeed(data);
-            }
-          });
-
-      } else if (@toggle==2){
-      	$.ajax({
-      	
-          type: "GET",
-          url: "/" + "@groupID" + "/rest/git",
-          dataType: "json",
-          success: function(data){   
-
-              generateFeed(data);
-          }
-      });
-      } else if (@toggle==3){
-      	$.ajax({
-      	
-          type: "GET",
-          url: "/" + "@groupID" + "/rest/builds",
-          dataType: "json",
-          success: function(data){   
-
-              generateFeed(data);
-          }
-      });
-      }
-      
+        }      
   }
 
   $(document).ready(refreshFeed);	
