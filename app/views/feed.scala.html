@@ -29,15 +29,8 @@
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav" role="navigation">
-          <!--<li id="newsfeed_nav" class = "active"><a href="@routes.Application.feed(groupID,0)">News Feed</a></li>-->
-          
-           <li id="newsfeed_nav" class="dropdown">
-            <a href="@routes.Application.feed(groupID,0)" class="dropdown-toggle" data-toggle="dropdown">
-              News Feed 
-              <b class="caret"></b></a>
-            <ul id="newsDrop" class="dropdown-menu">
-        	</ul>
-      	  </li>
+          <li id="newsfeed_nav" class = "active"><a href="@routes.Application.feed(groupID,0)">News Feed</a></li>
+         
           
           <!--<li id="tasklist_nav"><a href="@routes.Application.feed(groupID,1)">Task List</a></li>-->
           
@@ -231,7 +224,7 @@
         url: "/" + "@groupID" + "/rest/tasks/" + status,
         dataType: "json",
         success: function(data){
-        window.location="@routes.Application.feed(groupID, 1)";
+        //window.location="@routes.Application.feed(groupID, 1)";
             generateFeed(data);
             
         }
@@ -297,11 +290,12 @@
           }
       });
       }
-      generateNewsNav();
+      //generateNewsNav();
       
   }
 
-  function generateNewsNav() {
+	//code in progress (matt)
+  /*function generateNewsNav() {
   		$.ajax({
 
           type: "GET",
@@ -312,9 +306,9 @@
               parseGroups(data);
           }
       });
-  }
+  }*/
   
-  function parseGroups(data) {
+  /*function parseGroups(data) {
   	for (var i = 0; i < data.length; i++) {
   		 var group_name = data[i]['name'];
   		 var customID = data[i]['customID'];
@@ -349,9 +343,9 @@
 		 }
 		 
   	}
-  }
+  }*/
   
-  function goToGroup(id) {
+  /*function goToGroup(id) {
   document.getElementById("stream").innerHTML = "";
   document.getElementById("task_status").innerHTML = "";
     $.ajax({
@@ -362,7 +356,7 @@
             generateFeed(data);
         }
       });
-  }
+  }*/
 	
 
   $(document).ready(refreshFeed);
@@ -1012,7 +1006,7 @@
                 + post_id
   	      + "\", \"taskIDs\" : ["
   	      + references
-                +  "]}} "; 
+                +  "]}} ";
 
       $.ajax({
       	type: "POST",
