@@ -83,7 +83,7 @@
     <div class="container col-md-offset-2 col-md-4">
     <select id="post_type" onchange="postTypeChange(this.value)" align = "center" style = "width: 50%" class="form-inline form-control">
       <option value="text_post">Text Post</option>
-      <option value="task">Task</option>
+      <option onclick="selectTaskOption()" value="task">Task</option>
     </select>
   </div>
      		
@@ -109,6 +109,13 @@
 
   <script>
   var localToggle = @toggle;
+  
+  function selectTaskOption() {
+  	var textField = Document.getElementById("limitedtextarea");
+  	textField.value="20";
+  	textField.placeholder="Task Name";
+  	
+  }
   
   $.fn.outerHTML = function(){
 
