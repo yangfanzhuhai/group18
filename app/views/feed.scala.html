@@ -66,13 +66,19 @@
       width="200" >
 
     </a>
+    
+    <form id="taskAliasForm" role="form" style="display:none">
+        <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
+    	 maxlength="8" class="form-control" placeholder="Task Alias" style = "resize: none" ></textarea>
+        <br>
+      </form>
 
     <div id = "post_options" align="center">
     		
       <form name="myform" role="form">
-        <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
+        <textarea name="limitedtextarea" type="text" id="limitedtextfield" rows="5" cols="30"
         onKeyDown="postFormOnKeyDown(this)" maxlength="140" class="form-control" 
-        placeholder="what's on your mind?" style = "resize: none"> </textarea>
+        placeholder="What's on your mind?" style = "resize: none"></textarea>
         <br>
         <small align="right"> <!--(Maximum characters: 140)-->
         You have <input readonly type="text" id="charCountdown" name="countdown" size="3" value="140"> characters left.</small>
@@ -211,6 +217,7 @@
   		limitedtextfield.cols = 30;
       limitedtextfield.value = "";
       document.getElementById("charCountdown").value = "140";
+      limitedtextfield.placeholder="What's on you mind?";
 
   	} else {
   		var limitedtextfield = document.getElementById("limitedtextfield");
@@ -220,6 +227,9 @@
       document.getElementById("charCountdown").value = "20";
       limitedtextfield.placeholder="Task Name";
       
+      var taskAliasForm = document.getElementById("taskAliasForm");
+      
+      taskAliasForm.style.display="inline";
     }
 
   }
@@ -410,9 +420,9 @@
     var getUrl = "/" + "@groupID" + "/rest/";
     switch(@toggle)
       {
-      case 0:
-        getUrl += "newfeed/";
-        break;
+      /*case 0:
+        getUrl += "newsfeed/";
+        break;*/
     /*  case 1:
         getUrl += "moretask/";
         break;
@@ -423,7 +433,7 @@
         getUrl += "morebuild/";
         break;*/
       }
-    setInterval(function() {
+   /* setInterval(function() {
       $.ajax({    
       type: "GET",
       url: getUrl + first_post_id,
@@ -433,7 +443,7 @@
           addToFeed(data);
           autoRefreshing = false;
       }});
-    }, 500);
+    }, 500);*/
   }
 
   function loadMoreFeed() {
