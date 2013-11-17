@@ -117,8 +117,12 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getNewsFeed(groupID).toString());
 	}
 	
-	public static Result getMoreActivities(String groupID) {
-		return ok(MongoLink.MONGO_LINK.getNextNews(groupID, getValueFromRequest("activity")).toString());
+	public static Result getMoreActivities(String groupID, String last_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNextNews(groupID, last_post_id).toString());
+	}
+	
+	public static Result getNewActivities(String groupID, String newest_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNewNews(groupID, newest_post_id).toString());
 	}
 
 	public static Result getTasks(String groupID) {
@@ -129,6 +133,10 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getAllTasksByName(groupID).toString());
 	}
 
+	public static Result getMoreTasks(String groupID, String last_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNextTasks(groupID, last_post_id).toString());
+	}
+
 	public static Result getTasksWithStatus(String groupID, String status) {
 		return ok(MongoLink.MONGO_LINK.getTasksWithStatus(groupID, status).toString());
 	}
@@ -136,9 +144,17 @@ public class Rest extends Controller {
 	public static Result getGits(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getGitCommits(groupID).toString());
 	}
+
+	public static Result getMoreGits(String groupID, String last_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNextGitCommits(groupID, last_post_id).toString());
+	}
 	
 	public static Result getBuilds(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getJenkinsBuilds(groupID).toString());
+	}
+
+	public static Result getMoreBuilds(String groupID, String last_post_id) {
+		return ok(MongoLink.MONGO_LINK.getNextJenkinsBuilds(groupID, last_post_id).toString());
 	}
 
 	public static Result registerUser() {

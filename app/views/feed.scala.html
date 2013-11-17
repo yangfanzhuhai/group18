@@ -99,6 +99,11 @@
     
 
     <ul id = "stream" class = "media-list" ></ul>
+    <div align="center">
+      <button id = "loadMoreButton"class = "btn btn-info" onclick = "loadMoreFeed()">See more...</button>
+    </div>
+    <div id="loader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
+        "AJAX loader" title="AJAX loader"  /></div>
   </div> <!-- /container -->  
 
 
@@ -152,6 +157,8 @@
   var task_ids = [];
   var tasks = [];
   var task_names = [];
+  var final_post_id;
+  var first_post_id;
 
   document.getElementById("title").style.marginTop = "20px";
   document.getElementById("title").style.marginBottom = "10px";
@@ -233,21 +240,41 @@
   
   function refreshFeed() {
       document.getElementById("stream").innerHTML = "";
-      if(@toggle==0) {
-      
-      	$.ajax({
-      	
+      $('#loader').hide();
+      $('#loadMoreButton').hide();
+      first_post_id = "";
+      autoRefreshing = false;
+      autoRefresh();
+
+      var getUrl = "/" + "@groupID" + "/rest/";
+
+      switch(@toggle)
+        {
+        case 0:
+          getUrl += "feed";
+          break;
+        case 1:
+          getUrl += "tasks";
+          break;
+        case 2:
+          getUrl += "git";
+          break;
+        case 3:
+          getUrl += "builds";
+          break;
+        }
+
+        $.ajax({    
           type: "GET",
-          url: "/" + "@groupID" + "/rest/feed",
+          url: getUrl,
           dataType: "json",
           success: function(data){   
 
               generateFeed(data);
           }});
 
-		//adds tasks to list of tasks for referencing
-      	$.ajax({
-      	
+        if (@toggle==0) {
+          $.ajax({
           type: "GET",
           url: "/" + "@groupID" + "/rest/alltasks",
           dataType: "json",
@@ -255,111 +282,10 @@
 
               addTasks(data);
           }});
-
-      } else if (@toggle==1){
-          $.ajax({
-          
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/tasks",
-            dataType: "json",
-            success: function(data){   
-                generateFeed(data);
-            }
-          });
-
-      } else if (@toggle==2){
-      	$.ajax({
-      	
-          type: "GET",
-          url: "/" + "@groupID" + "/rest/git",
-          dataType: "json",
-          success: function(data){   
-
-              generateFeed(data);
-          }
-      });
-      } else if (@toggle==3){
-      	$.ajax({
-      	
-          type: "GET",
-          url: "/" + "@groupID" + "/rest/builds",
-          dataType: "json",
-          success: function(data){   
-
-              generateFeed(data);
-          }
-      });
-      }
-      //generateNewsNav();
-      
+        }      
   }
 
-	//code in progress (matt)
-  /*function generateNewsNav() {
-  		$.ajax({
-
-          type: "GET",
-          url: "/rest/groups",
-          dataType: "json",
-          success: function(data){   
-
-              parseGroups(data);
-          }
-      });
-  }*/
-  
-  /*function parseGroups(data) {
-  	for (var i = 0; i < data.length; i++) {
-  		 var group_name = data[i]['name'];
-  		 var customID = data[i]['customID'];
-  		 var ul = document.getElementById("newsDrop");
-		 var li = document.createElement("li");
-		 var a = document.createElement("a");
-		 li.appendChild(document.createTextNode(group_name));
-		 a.id = group_name;
-		 group_name.href = "/../" + group_name;
-		 li.appendChild(a);
-		 li.onclick = (function(customID) {
-            	  return function() {
-                    goToGroup(customID);
-                   }
-         	 }(customID));
-		 
-		 ul.appendChild(li);
-		 
-		 var status_array = data[i]['statuses']
-		 for(var j=0; j < status_array.length; j++) {
-		 	var status = status_array[j];
-		 	var ul = document.getElementById("taskDrop");
-		 	var li = document.createElement("li");
-		 	li.appendChild(document.createTextNode(status));
-		 	li.onclick = (function(status) {
-            	  return function() {
-                    setTaskStatus(status);
-                   }
-         	 }(status));
-         	 
-         	 ul.appendChild(li);
-		 }
-		 
-  	}
-  }*/
-  
-  /*function goToGroup(id) {
-  document.getElementById("stream").innerHTML = "";
-  document.getElementById("task_status").innerHTML = "";
-    $.ajax({
-        type: "GET",
-        url: "/" + id + "/rest/feed",
-        dataType: "json",
-        success: function(data){   
-            generateFeed(data);
-        }
-      });
-  }*/
-	
-
-  $(document).ready(refreshFeed);
+  $(document).ready(refreshFeed);	
 
   function addTasks(task_array) {
 
@@ -455,13 +381,98 @@
 
    });
 }
+    // Load on scroll to bottom is not used because when loading is low, multiple ajax calls 
+    // are sent to load the next 20 feeds before first call is finished. AS a result, multiple 
+    // copies of 20-40 posts are loaded. 
+    // Possible solution: use a timer to limit the number of ajax calls sent (e.g. 1 per 10 seconds?)
 
+    /*$(window).scroll(function () {
+      if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
+        if(@toggle==0) {
+          //alert("feed page");
+          $.ajax({
+            type: "GET",
+            url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
+            dataType: "json",
+            success: function(data){   
+                addToFeed(data);
+            }});
+        } else {
+          alert("end of page");
+        }
 
+      }
+  });*/
+  var autoRefreshing;
+  function autoRefresh() {    
+    var getUrl = "/" + "@groupID" + "/rest/";
+    switch(@toggle)
+      {
+      case 0:
+        getUrl += "newfeed/";
+        break;
+    /*  case 1:
+        getUrl += "moretask/";
+        break;
+      case 2:
+        getUrl += "moregit/";
+        break;
+      case 3:
+        getUrl += "morebuild/";
+        break;*/
+      }
+    setInterval(function() {
+      $.ajax({    
+      type: "GET",
+      url: getUrl + first_post_id,
+      dataType: "json",
+      success: function(data){   
+          autoRefreshing = true;
+          addToFeed(data);
+          autoRefreshing = false;
+      }});
+    }, 500);
+  }
+
+  function loadMoreFeed() {
+    $('#loadMoreButton').hide();
+    $('#loader').show();
+
+    //final_post_id = $("ul#stream li").last().attr("id");
+
+    var getUrl = "/" + "@groupID" + "/rest/";
+    switch(@toggle)
+      {
+      case 0:
+        getUrl += "morefeed/";
+        break;
+      case 1:
+        getUrl += "moretask/";
+        break;
+      case 2:
+        getUrl += "moregit/";
+        break;
+      case 3:
+        getUrl += "morebuild/";
+        break;
+      }
+    $.ajax({    
+      type: "GET",
+      url: getUrl + final_post_id,
+      dataType: "json",
+      success: function(data){   
+          addToFeed(data);
+      }});
+  }
 
   function generateFeed(stream_array) {
+    addToFeed(stream_array);
+  }
+
+  function addToFeed(stream_array) {
 
   	//document.getElementById("username").innerHTML="@userName";
-    document.getElementById("limitedtextfield").value = "";
+    
 
   	for (var i=0; i < stream_array.length;i++) {
 
@@ -496,10 +507,13 @@
   		var post_no = 0;
 
   		var post_id = stream_array[i][0]['id'];
-  		
-  		if (i == (stream_array.length - 1)) {
-  			final_post_id = post_id;	
-  		}
+  		/*if (i == (stream_array.length - 1)) {
+  			final_post_id = post_id; 
+  		}*/
+      final_post_id = post_id;  
+      if (first_post_id == "" || autoRefreshing) {
+        first_post_id = post_id;
+      } 
 
   		var published = stream_array[i][0]['published'];
 
@@ -518,11 +532,19 @@
       post_body.setAttribute("class", "media-body");
   	
   		var stream = document.getElementById("stream");
-  		if (post_count > 0) {
+      //stream.insertBefore(post);
+      if (autoRefreshing) {
+        $("#stream").prepend(post);
+      } else {
+        stream.appendChild(post);
+      }
+     
+
+  		/*if (post_count > 0) {
   			stream.insertBefore(post, stream.childNodes[0]);
   		} else {
-  			stream.insertBefore(post);
-  		}
+        stream.insertBefore(post);
+  		}*/
 
   		var date_and_time = document.createElement("small");
   		date_and_time.innerHTML = published + "<br>";
@@ -875,6 +897,9 @@
 
 
   		}
+
+      post_body.appendChild(reply_message_div);
+      post_body.appendChild(reply_button);
   	  post.appendChild(post_options);
 
 
@@ -884,7 +909,8 @@
 
     autocomplete_setup();
     $('#preloader').hide();
-
+    $('#loader').hide();
+    $('#loadMoreButton').show();
   	
   }
 
@@ -1006,7 +1032,7 @@
                 + post_id
   	      + "\", \"taskIDs\" : ["
   	      + references
-                +  "]}} ";
+                +  "]}} "; 
 
       $.ajax({
       	type: "POST",
