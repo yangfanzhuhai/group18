@@ -57,6 +57,9 @@ public class MongoLink {
 
 	//for testing
 	public static void main(String[] args) throws UnknownHostException, ParseException {
+		MongoLink ml = new MongoLink(true);
+		
+		ml.addFieldToCollection(db.getCollection("TestingFields"), "complex.field2", "ABC");
 		
 		//String json = "{ \"localAccount\": { \"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
 			//	"\"fbAccount\": {\"name\": \"Luke\", \"photo_url\" : \"\", \"profile_id\" : \"f123\" }, " +
@@ -66,12 +69,14 @@ public class MongoLink {
 	//			"\"fbAccount\": {\"name\": \"Piotr\", \"photo_url\" : \"\", \"profile_id\" : \"654123\"}, " +
 	//			"\"ghAccount\" : {}}";
 		
-		String json = "{\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
+		
+		
+	/*	String json = "{\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
 		
 		Gson gson = new Gson();
 		UserModel model = gson.fromJson(json, UserModel.class);
 			System.out.println(model.toJSON());
-		MongoLink ml = new MongoLink(true);
+
 		
 		System.out.println(((DBObject) JSON.parse(model.toJSON())).toString());
 		
@@ -190,6 +195,21 @@ public class MongoLink {
 //		} else {
 //			System.out.println("insert failed");
 //		}*/
+	}
+	
+	
+	private void addFieldToCollection(DBCollection coll, String fieldName, Object defaultValue) {
+		coll.update(new BasicDBObject(), new BasicDBObject("$set", new BasicDBObject(fieldName, defaultValue)), false, true);
+	}
+	
+	private void addFieldToAllGroupCollections(String fieldName, Object defaultValue) {
+		
+		List<DBObject> groupList = groups.find().toArray();
+		
+		for(DBObject group : groupList)
+		{
+			addFieldToCollection(getGroupColl((String) group.get("customID")), fieldName, defaultValue);
+		}
 	}
 	
 	/**
@@ -343,7 +363,7 @@ public class MongoLink {
 		}
 		else if(obj.containsField("fbAccount") && !"{}".equals(obj.get("fbAccount").toString().replaceAll("\\s+",""))) {
 			
-			if(users.findOne(QueryBuilder.start("fbAccount.email").is(((DBObject) obj.get("fbAccount")).get("email")).get()) == null)
+			if(users.findOne(QueryBuilder.start("fbAccount.profile_id").is(((DBObject) obj.get("fbAccount")).get("profile_id")).get()) == null)
 			{
 				int oldCount = (int) users.getCount();
 				
