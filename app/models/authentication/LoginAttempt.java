@@ -2,7 +2,7 @@ package models.authentication;
 
 public class LoginAttempt {
 
-  private String username;
+  private String email;
   private String ipAddress;
   private Session session;
   
@@ -10,20 +10,18 @@ public class LoginAttempt {
   /**
    * Validate the given credentials.
    * 
-   * @param username
+   * @param email
    * @param password
    * @return
    * @throws LoginAttemptException 
    */
-  private static void validateCredentials(String username,
-      String password, String ipAddress) throws LoginAttemptException {
+  private static void validateCredentials(String email,
+    String password, String ipAddress) throws LoginAttemptException {
     
-    // TODO: Some database stuff.
-    
-    boolean credentialsAreValid = false;
+    boolean credentialsAreValid = MongoLink.MONGO_LINK.checkLogin(email, password);
     
     if(!credentialsAreValid) {
-      new FailedLoginAttempt(username, ipAddress);
+      new FailedLoginAttempt(email, ipAddress);
       throw new LoginAttemptException();
     }
   }
@@ -32,18 +30,18 @@ public class LoginAttempt {
   /**
    * Attempt a login.
    * 
-   * @param username
+   * @param email
    * @param ipAddress
    * @throws LoginAttemptException 
    */
-  public LoginAttempt(String username, String password, String ipAddress)
+  public LoginAttempt(String email, String password, String ipAddress)
       throws LoginAttemptException {
     
-    this.setUsername(username);
+    this.setEmail(email);
     this.setIpAddress(ipAddress);
     
     // Try to login
-    LoginAttempt.validateCredentials(username, password, ipAddress);
+    LoginAttempt.validateCredentials(email, password, ipAddress);
     
     // --- Login was successful --- 
     
@@ -55,22 +53,22 @@ public class LoginAttempt {
   
   
   /**
-   * Get the username associated with this login attempt.
+   * Get the email associated with this login attempt.
    * 
    * @return
    */
-  public String getUsername() {
-    return username;
+  public String getEmail() {
+    return email;
   }
 
 
   /**
-   * Set the username associated with this login attempt.
+   * Set the email associated with this login attempt.
    * 
-   * @param username
+   * @param email
    */
-  private void setUsername(String username) {
-    this.username = username;
+  private void setEmail(String email) {
+    this.email = email;
   }
   
   

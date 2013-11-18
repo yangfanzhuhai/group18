@@ -78,7 +78,7 @@ public class Rest extends Controller {
 	public static Result leaveProject() {
 		try {
 			String Json = getValueFromRequest("activity");
-			String userName = session("connected");
+			String userName = getUsernameFromSession();
 			
 			Gson gson = new Gson();
 			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
@@ -105,11 +105,17 @@ public class Rest extends Controller {
 	}
 
 	public static Result getUser() {
-		return ok(session("connected"));
+		return ok(getUsernameFromSession());
+	}
+
+	private static String getUsernameFromSession() {
+		String token = session("token");
+		Session session = Session.findSessionFromToken(token);
+		return session.getEmail();
 	}
 	
 	public static Result getGroups(){
-		String userName = session("connected");
+		String userName = getUsernameFromSession();
 		return ok(MongoLink.MONGO_LINK.getGroups(userName).toString());
 	}
 
@@ -181,16 +187,17 @@ public class Rest extends Controller {
 			User user = gson.fromJson(credentialsJson, User.class);
 			String username = user.username;
 			String password = user.password;
-			if (MongoLink.MONGO_LINK.checkLogin(username, password)) {
-				session("connected", username);
-				return ok();
-			} else {
-				return status(400);
-			}
+			String ipAddress = request().remoteAddress();
+
+			LoginAttempt attempt = new LoginAttempt(username, password, ipAddress);
+			Session currentSession = attempt.getSession();
+
+			session("token", session.getToken());
+			return ok();
+
 		} catch (Exception e) {
 			return status(422);
 		}
-
 	}
 	
 	public static Result getAllUsers() {

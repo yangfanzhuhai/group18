@@ -21,7 +21,7 @@
       <div id = "login_box" class = "login_box"> 
       <div padding = "50px" margin="50">
         <input name="username" type="text" maxlength="512"
-          placeholder="Username" id="username" onKeyDown="pressEnter()" align = "center" class="form-control"/>
+          placeholder="Email" id="username" onKeyDown="pressEnter()" align = "center" class="form-control"/>
         <input name="password" type="password" maxlength="512"
           placeholder="Password" id="password" onKeyDown="pressEnter()" align = "center" class="form-control"/>	    
       </div>
@@ -63,7 +63,7 @@
       var password = document.getElementById("password").value;
 
       if (username == "") {
-        alert("Please enter your username");
+        alert("Please enter your email");
       } else if (password == "") {
         alert("Please enter your password");
       } else {

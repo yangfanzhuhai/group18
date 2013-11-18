@@ -259,7 +259,6 @@
       $('#loadMoreButton').hide();
       first_post_id = "";
       autoRefreshing = false;
-      autoRefresh();
 
       var getUrl = "/" + "@groupID" + "/rest/";
 
@@ -423,9 +422,9 @@
     var getUrl = "/" + "@groupID" + "/rest/";
     switch(@toggle)
       {
-      /*case 0:
-        getUrl += "newsfeed/";
-        break;*/
+      case 0:
+        getUrl += "newfeed/";
+        break;
     /*  case 1:
         getUrl += "moretask/";
         break;
@@ -436,7 +435,7 @@
         getUrl += "morebuild/";
         break;*/
       }
-   /* setInterval(function() {
+    setInterval(function() {
       $.ajax({    
       type: "GET",
       url: getUrl + first_post_id,
@@ -446,7 +445,7 @@
           addToFeed(data);
           autoRefreshing = false;
       }});
-    }, 500);*/
+    }, 500);
   }
 
   function loadMoreFeed() {
@@ -482,6 +481,7 @@
 
   function generateFeed(stream_array) {
     addToFeed(stream_array);
+    autoRefresh();
   }
 
   function addToFeed(stream_array) {

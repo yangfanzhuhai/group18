@@ -1,5 +1,7 @@
 package models;
 
+import models.authentication;
+
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ public class MongoLink {
 	private static DB db;
 	private static DBCollection users;
 	private static DBCollection groups;
+	private static DBCollection sessions;
 	
 	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 	
@@ -42,6 +45,7 @@ public class MongoLink {
 		
 		users = db.getCollection("userAccounts");
 		groups = db.getCollection("groups");
+		sessions = db.getCollection("session");
 
 	}
 
@@ -291,6 +295,36 @@ public class MongoLink {
 	 */
 	public boolean checkLogin(String username, String password) {
 		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
+	}
+
+	/*
+	* Creates a new session entry
+	*/ 
+	public boolean createNewSession(Session session) {
+
+		int oldCount = (int) sessions.getCount();
+
+		DBObject obj = (DBObject) JSON.parse(session.toJSON());
+		
+		String token = sessions.insert(obj);
+
+		ObjectId token = (ObjectId)obj.get( "_id" );
+
+		session.setToken(token.toString());
+		
+		return (int) sessions.getCount() == oldCount + 1;
+	}
+
+
+	/*
+	* Returns a session with the given token
+	*/ 
+	public Session getSession(String token) {
+
+		DBObject query = QueryBuilder.start("_id").is(token).get();
+		ArrayList<DBObject> list = (ArrayList<DBObject>) sessions.find(query).toArray();
+ 
+		return new Session(list.get(0).toString());
 	}
 	
 	/**
