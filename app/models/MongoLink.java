@@ -62,8 +62,8 @@ public class MongoLink {
 	//	ml.removeFieldFromCollection(db.getCollection("TestingFields"), "simple");
 	//	groups = db.getCollection("DEVgroups");
 
-		ml.removeFieldFromAllGroupCollections("alias");
-		ml.addFieldToAllGroupCollections(QueryBuilder.start("object.objectType").is("TASK").get(),"object.alias", "");
+	//	ml.removeFieldFromAllGroupCollections("alias");
+	//	ml.addFieldToAllGroupCollections(QueryBuilder.start("object.objectType").is("TASK").get(),"object.alias", "");
 		
 		//String json = "{ \"localAccount\": { \"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
 			//	"\"fbAccount\": {\"name\": \"Luke\", \"photo_url\" : \"\", \"profile_id\" : \"f123\" }, " +
@@ -73,7 +73,8 @@ public class MongoLink {
 	//			"\"fbAccount\": {\"name\": \"Piotr\", \"photo_url\" : \"\", \"profile_id\" : \"654123\"}, " +
 	//			"\"ghAccount\" : {}}";
 		
-		
+	//	String fbccount = "{\"fbAccount\": {\"name\": \"Piotr\", \"photo_url\" : \"\", \"profile_id\" : \"654123\"}}";
+	//	ml.linkAccount("5287aacfb7606861f8bc37f2", (DBObject) JSON.parse(fbccount));
 		
 	/*	String json = "{\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
 		
@@ -439,6 +440,10 @@ public class MongoLink {
 	 */
 	public boolean checkLogin(String email, String password) {
 		return users.findOne(QueryBuilder.start("localAccount.email").is(email).and("localAccount.password").is(password).get()) != null;
+	}
+	
+	public void linkAccount(String userID, DBObject obj) {
+		users.update(QueryBuilder.start("_id").is(new ObjectId(userID)).get(), new BasicDBObject("$set",obj));
 	}
 	
 	/**
