@@ -59,9 +59,11 @@ public class MongoLink {
 	public static void main(String[] args) throws UnknownHostException, ParseException {
 		MongoLink ml = new MongoLink(true);
 		
-		ml.addFieldToCollection(db.getCollection("TestingFields"), "complex.field2", "ABC");
-		groups = db.getCollection("DEVgroups");
-		ml.addFieldToAllGroupCollections("NewField", "123");
+	//	ml.removeFieldFromCollection(db.getCollection("TestingFields"), "simple");
+	//	groups = db.getCollection("DEVgroups");
+
+		ml.removeFieldFromAllGroupCollections("alias");
+		ml.addFieldToAllGroupCollections(QueryBuilder.start("object.objectType").is("TASK").get(),"object.alias", "");
 		
 		//String json = "{ \"localAccount\": { \"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
 			//	"\"fbAccount\": {\"name\": \"Luke\", \"photo_url\" : \"\", \"profile_id\" : \"f123\" }, " +
@@ -201,16 +203,44 @@ public class MongoLink {
 	
 	
 	private void addFieldToCollection(DBCollection coll, String fieldName, Object defaultValue) {
-		coll.update(new BasicDBObject(), new BasicDBObject("$set", new BasicDBObject(fieldName, defaultValue)), false, true);
+		addFieldToCollection(coll, new BasicDBObject(), fieldName, defaultValue);
+	}
+	
+	private void addFieldToCollection(DBCollection coll, DBObject query, String fieldName, Object defaultValue) {
+		coll.update(query, new BasicDBObject("$set", new BasicDBObject(fieldName, defaultValue)), false, true);
 	}
 	
 	private void addFieldToAllGroupCollections(String fieldName, Object defaultValue) {
-		
+		addFieldToAllGroupCollections(new BasicDBObject(), fieldName, defaultValue);	
+	}
+	
+	private void addFieldToAllGroupCollections(DBObject query, String fieldName, Object defaultValue) {
 		List<DBObject> groupList = groups.find().toArray();
 		
 		for(DBObject group : groupList)
 		{
-			addFieldToCollection(getGroupColl((String) group.get("customID")), fieldName, defaultValue);
+			addFieldToCollection(getGroupColl((String) group.get("customID")), query, fieldName, defaultValue);
+		}
+	}
+	
+	private void removeFieldFromCollection(DBCollection coll, String fieldName) {
+		removeFieldFromCollection(coll, new BasicDBObject(), fieldName);
+	}
+	
+	private void removeFieldFromCollection(DBCollection coll, DBObject query, String fieldName) {
+		coll.update(query, new BasicDBObject("$unset", new BasicDBObject(fieldName, "")), false, true);
+	}
+	
+	private void removeFieldFromAllGroupCollections(String fieldName) {
+		removeFieldFromAllGroupCollections(new BasicDBObject(), fieldName);	
+	}
+	
+	private void removeFieldFromAllGroupCollections(DBObject query, String fieldName) {
+		List<DBObject> groupList = groups.find().toArray();
+		
+		for(DBObject group : groupList)
+		{
+			removeFieldFromCollection(getGroupColl((String) group.get("customID")), query, fieldName);
 		}
 	}
 	
