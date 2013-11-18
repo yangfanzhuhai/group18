@@ -214,25 +214,25 @@
   }
 
   function postTypeChange(option) {
+  
+  	var limitedtextfield = document.getElementById("limitedtextfield");
+  	var charCount = document.getElementById("charCountdown");
+  	var taskAliasForm = document.getElementById("taskAliasForm");
+  	limitedtextfield.cols = 30;
+  	limitedtextfield.value = "";
+  	
   	if (option == "text_post") {
-  		var limitedtextfield = document.getElementById("limitedtextfield");
+  		
   		limitedtextfield.rows = 5
-  		limitedtextfield.cols = 30;
-      limitedtextfield.value = "";
-      document.getElementById("charCountdown").value = "140";
-      limitedtextfield.placeholder="What's on you mind?";
+  		charCount.value = "140";
+        limitedtextfield.placeholder="What's on you mind?";
+        taskAliasForm.style.display="none";
 
   	} else {
-  		var limitedtextfield = document.getElementById("limitedtextfield");
   		limitedtextfield.rows = 1;
-  		limitedtextfield.cols = 30;
-      limitedtextfield.value = "";
-      document.getElementById("charCountdown").value = "20";
-      limitedtextfield.placeholder="Your Task";
-      
-      var taskAliasForm = document.getElementById("taskAliasForm");
-      
-      taskAliasForm.style.display="inline";
+        charCount.value = "20";
+        limitedtextfield.placeholder="Your Task";
+	    taskAliasForm.style.display="inline";
     }
 
   }
