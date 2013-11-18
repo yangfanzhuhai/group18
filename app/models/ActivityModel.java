@@ -75,7 +75,9 @@ public class ActivityModel {
 					.$bslash("status").toString());
 			int priority = Integer.parseInt(ActivityModel.cleanJsonStringValue(object
 					.$bslash("priority").toString()));
-			objectModel = new TaskObject(name, status, priority);
+			String alias = ActivityModel.cleanJsonStringValue(object
+					.$bslash("alias").toString());
+			objectModel = new TaskObject(name, status, priority, alias);
 			break;
 		case GIT:
 			objectModel = gson.fromJson(object.toString(), GitObject.class);
@@ -159,6 +161,7 @@ public class ActivityModel {
 	}
 	
 	public void save(String groupID){
+		System.out.println(JSON.parse(this.toJSON()));
 		MongoLink.MONGO_LINK.insertNews(groupID, (DBObject) JSON.parse(this
 				.toJSON()));
 	}

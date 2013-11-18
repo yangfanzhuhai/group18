@@ -67,6 +67,8 @@
 
     </a>
     
+    <h1 id="groupNameTitle" align="center"><b></b></h1>
+    
     <form id="taskAliasForm" role="form" style="display:none">
         <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
     	 maxlength="8" class="form-control" placeholder="Task Alias" style = "resize: none" ></textarea>
@@ -115,6 +117,28 @@
 
   <script>
   var localToggle = @toggle;
+  
+  function getGroupName() {
+  	$.ajax({
+        type: "GET",
+        url: "/rest/groups",
+        dataType: "json",
+        success: function(data){
+        
+        for (var i=0; i < data.length; i++) {
+        	var currGroupID = data[i]['customID'];
+  			var groupName = data[i]['name'];
+
+  			if(currGroupID == "@groupID"){
+  				document.getElementById("groupNameTitle").innerHTML=groupName;
+  			}
+  		}	
+        }
+      });
+      	
+  }
+  
+  getGroupName();
   
   $.fn.outerHTML = function(){
 
@@ -423,9 +447,9 @@
     var getUrl = "/" + "@groupID" + "/rest/";
     switch(@toggle)
       {
-      /*case 0:
-        getUrl += "newsfeed/";
-        break;*/
+      case 0:
+        getUrl += "newfeed/";
+        break;
     /*  case 1:
         getUrl += "moretask/";
         break;
@@ -1158,8 +1182,10 @@
           var references = [];
 		  
 		  var alias = document.getElementById("taskAliasText").value;
+		  alert(alias);
 		  
-          var task_object = generateTaskObject(message_text, "TO_DO", "1")
+          var task_object = generateTaskObject(message_text, "TO_DO", "1", alias)
+          alert(task_object);
           var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
 
          $.ajax({

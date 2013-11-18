@@ -9,6 +9,7 @@ public class TaskObject extends ObjectModel {
   private String status;
   private int priority;
   private String assignedUsername = null;
+  private String alias = "";
 
   /**
    * Construct a new Task with the given name, status and priority.
@@ -17,10 +18,11 @@ public class TaskObject extends ObjectModel {
    * @param status
    * @param priority
    */
-  public TaskObject(String name, String status, int priority) {
+  public TaskObject(String name, String status, int priority, String alias) {
     this.setName(name);
     this.setStatus(status);
     this.setPriority(priority);
+    this.setAlias(alias);
   }
 
   /**
@@ -75,6 +77,14 @@ public class TaskObject extends ObjectModel {
    */
   public void setPriority(int priority) {
     this.priority = priority;
+  }
+  
+  public String getAlias() {
+	  return this.alias;
+  }
+  
+  public void setAlias(String alias) {
+	  this.alias=alias;
   }
 
   /**
@@ -138,7 +148,8 @@ public class TaskObject extends ObjectModel {
     }
 
     return "{" + 
-      "\"objectType\" : \"" + getType() + "\"," + 
+      "\"objectType\" : \"" + getType() + "\"," +
+      "\"alias\" : \"" + getAlias() + "\"," +
       "\"name\" : \"" + getName() + "\"," + 
       "\"status\" : \"" + getStatus() + "\"," + 
       "\"priority\" : \"" + getPriority() + "\"" + 
