@@ -70,7 +70,7 @@
     <form id="taskAliasForm" role="form" style="display:none">
         <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
     	 maxlength="8" class="form-control" placeholder="Task Alias" style = "resize: none" ></textarea>
-        <br>
+        <p><b>Task Alias</b> - Up to 8 characters to use when referencing this task.</p>
       </form>
 
     <div id = "post_options" align="center">
@@ -198,11 +198,14 @@
                 +  "]}} ";
   }
 
-  function generateTaskObject(name, status, priority) {
+  function generateTaskObject(name, status, priority, alias) {
+  
     return "{\"objectType\" : \"TASK\" , " 
            + "\"name\" : \"" + name + "\" , "
            + "\"status\" : \"" + status + "\" , "
-           + "\"priority\" : \"" + priority + "\"}";
+           + "\"priority\" : \"" + priority + "\", "
+           + "\"alias\" : \"" + alias + "\" }";
+           
   }
 
   function generateMessageObject(message) {
@@ -225,7 +228,7 @@
   		limitedtextfield.cols = 30;
       limitedtextfield.value = "";
       document.getElementById("charCountdown").value = "20";
-      limitedtextfield.placeholder="Task Name";
+      limitedtextfield.placeholder="Your Task";
       
       var taskAliasForm = document.getElementById("taskAliasForm");
       
@@ -1151,10 +1154,11 @@
 
           
       } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
-          
 
           var references = [];
-
+		  
+		  var alias = document.getElementById("taskAliasText").value;
+		  
           var task_object = generateTaskObject(message_text, "TO_DO", "1")
           var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
 
