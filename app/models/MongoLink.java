@@ -1,6 +1,6 @@
 package models;
 
-import models.authentication;
+import models.authentication.*;
 
 import java.net.UnknownHostException;
 import java.text.ParseException;
@@ -19,6 +19,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
+import com.mongodb.util.JSON;
 
 public class MongoLink {
 	
@@ -306,7 +307,7 @@ public class MongoLink {
 
 		DBObject obj = (DBObject) JSON.parse(session.toJSON());
 		
-		String token = sessions.insert(obj);
+		sessions.insert(obj);
 
 		ObjectId token = (ObjectId)obj.get( "_id" );
 
@@ -319,7 +320,7 @@ public class MongoLink {
 	/*
 	* Returns a session with the given token
 	*/ 
-	public Session getSession(String token) {
+	public Session getSession(String token) throws ParseException {
 
 		DBObject query = QueryBuilder.start("_id").is(token).get();
 		ArrayList<DBObject> list = (ArrayList<DBObject>) sessions.find(query).toArray();

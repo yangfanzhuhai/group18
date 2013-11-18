@@ -1,7 +1,16 @@
 package models.authentication;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+
+import play.api.libs.json.JsValue;
+import play.api.libs.json.Json;
+
+import models.ActivityModel;
+import models.MongoLink;
 
 public class Session {
   
@@ -23,7 +32,7 @@ public class Session {
   }
   
   
-  public Session(String jsonString) {
+  public Session(String jsonString) throws ParseException {
     JsValue obj = Json.parse(jsonString);
     Date expirytime = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy",
                      Locale.ENGLISH).parse(ActivityModel.cleanJsonStringValue(
@@ -50,8 +59,9 @@ public class Session {
    * 
    * @param token
    * @return
+   * @throws ParseException 
    */
-  public static Session findSessionFromToken(String token) {
+  public static Session findSessionFromToken(String token) throws ParseException {
     return MongoLink.MONGO_LINK.getSession(token);
   }
 

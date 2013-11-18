@@ -18,6 +18,8 @@ import models.TargetModel;
 import models.User;
 import models.UserWithGroup;
 import models.UsersWithGroup;
+import models.authentication.LoginAttempt;
+import models.authentication.Session;
 import models.git.Branch;
 import models.git.Commit;
 import models.git.Repository;
@@ -110,8 +112,15 @@ public class Rest extends Controller {
 
 	private static String getUsernameFromSession() {
 		String token = session("token");
-		Session session = Session.findSessionFromToken(token);
-		return session.getEmail();
+		Session session;
+    try {
+      session = Session.findSessionFromToken(token);
+      return session.getEmail();
+    } catch (ParseException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
+    }
 	}
 	
 	public static Result getGroups(){
@@ -192,7 +201,7 @@ public class Rest extends Controller {
 			LoginAttempt attempt = new LoginAttempt(username, password, ipAddress);
 			Session currentSession = attempt.getSession();
 
-			session("token", session.getToken());
+			session("token", currentSession.getToken());
 			return ok();
 
 		} catch (Exception e) {

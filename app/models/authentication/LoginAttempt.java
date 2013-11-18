@@ -1,5 +1,7 @@
 package models.authentication;
 
+import models.MongoLink;
+
 public class LoginAttempt {
 
   private String email;
