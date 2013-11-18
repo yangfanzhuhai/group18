@@ -29,16 +29,16 @@
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav" role="navigation">
-          <li id="newsfeed_nav" class = "active">
-            <a href="@routes.Application.feed(groupID,0)">News Feed</a>
-          </li>
+          <li id="newsfeed_nav" class = "active"><a href="@routes.Application.feed(groupID,0)">News Feed</a></li>
+         
+          
           <!--<li id="tasklist_nav"><a href="@routes.Application.feed(groupID,1)">Task List</a></li>-->
           
           <li id="tasklist_nav" class="dropdown">
             <a href="@routes.Application.feed(groupID,1)" class="dropdown-toggle" data-toggle="dropdown">
               Task List 
               <b class="caret"></b></a>
-            <ul class="dropdown-menu">
+            <ul id="taskDrop" class="dropdown-menu">
               <li><a href="@routes.Application.feed(groupID,1)">All Tasks</a></li>
           	  <li onclick = "setTaskStatus(this.id)" id = "TO_DO"><a href="#">TO DO</a></li>
           	  <li onclick = "setTaskStatus(this.id)" id = "DOING"><a href="#">DOING</a></li>
@@ -66,13 +66,19 @@
       width="200" >
 
     </a>
+    
+    <form id="taskAliasForm" role="form" style="display:none">
+        <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
+    	 maxlength="8" class="form-control" placeholder="Task Alias" style = "resize: none" ></textarea>
+        <br>
+      </form>
 
     <div id = "post_options" align="center">
     		
       <form name="myform" role="form">
-        <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
+        <textarea name="limitedtextarea" type="text" id="limitedtextfield" rows="5" cols="30"
         onKeyDown="postFormOnKeyDown(this)" maxlength="140" class="form-control" 
-        placeholder="what's on your mind?" style = "resize: none"> </textarea>
+        placeholder="What's on your mind?" style = "resize: none"></textarea>
         <br>
         <small align="right"> <!--(Maximum characters: 140)-->
         You have <input readonly type="text" id="charCountdown" name="countdown" size="3" value="140"> characters left.</small>
@@ -94,8 +100,9 @@
     <div id = "posts" class = "float">
     </div>
 
-    <div id="preloader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
-        "AJAX loader" title="AJAX loader"  /></div>
+              <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
+"AJAX loader" title="AJAX loader" align="center" /></div>
+    
 
     <ul id = "stream" class = "media-list" ></ul>
     <div align="center">
@@ -107,6 +114,8 @@
 
 
   <script>
+  var localToggle = @toggle;
+  
   $.fn.outerHTML = function(){
 
 	    // IE, Chrome & Safari will comply with the non-standard outerHTML, all others (FF) will have a fall-back for cloning
@@ -120,26 +129,14 @@
 	    })(this[0]));
 
 	}
+	
+	$(window).scroll(function () {
+   		if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
 
-
-    document.getElementById("newsfeed_nav").setAttribute("class","");
-    document.getElementById("tasklist_nav").setAttribute("class","");
-    document.getElementById("git_nav").setAttribute("class","");
-    document.getElementById("builds_nav").setAttribute("class","");
- 
-    if (@toggle == 0) {
-      document.title = "News Feed";
-      document.getElementById("newsfeed_nav").setAttribute("class","active");
-    } else if(@toggle == 1) {
-    	document.title = "Task List"
-      document.getElementById("tasklist_nav").setAttribute("class","active");
-    } else if(@toggle == 2) {
-      document.title = "Git Commits"
-      document.getElementById("git_nav").setAttribute("class","active");
-    } else if(@toggle == 3) {
-      document.title = "Jenkins Builds"
-      document.getElementById("builds_nav").setAttribute("class","active");
-    }
+   		}
+	});
+  
+    
 
     function postFormOnKeyDown (currentElement) {
       if (event.keyCode == 13) { 
@@ -220,6 +217,7 @@
   		limitedtextfield.cols = 30;
       limitedtextfield.value = "";
       document.getElementById("charCountdown").value = "140";
+      limitedtextfield.placeholder="What's on you mind?";
 
   	} else {
   		var limitedtextfield = document.getElementById("limitedtextfield");
@@ -227,19 +225,27 @@
   		limitedtextfield.cols = 30;
       limitedtextfield.value = "";
       document.getElementById("charCountdown").value = "20";
+      limitedtextfield.placeholder="Task Name";
+      
+      var taskAliasForm = document.getElementById("taskAliasForm");
+      
+      taskAliasForm.style.display="inline";
     }
 
   }
 
   function setTaskStatus(status) {
+  localToggle=1;
     document.getElementById("stream").innerHTML = "";
     document.getElementById("task_status").innerHTML = status;
     $.ajax({
         type: "GET",
         url: "/" + "@groupID" + "/rest/tasks/" + status,
         dataType: "json",
-        success: function(data){   
+        success: function(data){
+        //window.location="@routes.Application.feed(groupID, 1)";
             generateFeed(data);
+            
         }
       });
   }
@@ -275,6 +281,7 @@
           url: getUrl,
           dataType: "json",
           success: function(data){   
+
               generateFeed(data);
           }});
 
@@ -284,6 +291,7 @@
           url: "/" + "@groupID" + "/rest/alltasks",
           dataType: "json",
           success: function(data){   
+
               addTasks(data);
           }});
         }      
@@ -358,6 +366,8 @@
             $results.css("border-color", "#AF3838");
             $results.css("z-index", "30 !important");
             $results.css("position", "absolute");
+
+
         }
      }).on("keypress", function (e) {
          var keys = [];
@@ -410,9 +420,9 @@
     var getUrl = "/" + "@groupID" + "/rest/";
     switch(@toggle)
       {
-      case 0:
-        getUrl += "newfeed/";
-        break;
+      /*case 0:
+        getUrl += "newsfeed/";
+        break;*/
     /*  case 1:
         getUrl += "moretask/";
         break;
@@ -423,7 +433,7 @@
         getUrl += "morebuild/";
         break;*/
       }
-    setInterval(function() {
+   /* setInterval(function() {
       $.ajax({    
       type: "GET",
       url: getUrl + first_post_id,
@@ -433,7 +443,7 @@
           addToFeed(data);
           autoRefreshing = false;
       }});
-    }, 500);
+    }, 500);*/
   }
 
   function loadMoreFeed() {
@@ -477,8 +487,37 @@
     
 
   	for (var i=0; i < stream_array.length;i++) {
+
+		if (localToggle == 0) {
+      document.title = "News Feed";
+      document.getElementById("newsfeed_nav").setAttribute("class","active");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("git_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(localToggle == 1) {
+    	document.title = "Task List"
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","active");
+      document.getElementById("git_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(localToggle == 2) {
+      document.title = "Git Commits"
+      document.getElementById("git_nav").setAttribute("class","active");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(localToggle == 3) {
+      document.title = "Jenkins Builds"
+      document.getElementById("builds_nav").setAttribute("class","active");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("git_nav").setAttribute("class","");
+    }
+
   		var message_type = stream_array[i][0]['object']["objectType"];
+
   		var post_no = 0;
+
   		var post_id = stream_array[i][0]['id'];
   		/*if (i == (stream_array.length - 1)) {
   			final_post_id = post_id; 
@@ -598,6 +637,8 @@
   	    post_body.appendChild(user);
   		  post_body.appendChild(message);
         post_body.appendChild(date_and_time);
+  		  post_body.appendChild(reply_message_div);
+  		  post_body.appendChild(reply_button);
         post.appendChild(post_body);
 
         break;
@@ -667,6 +708,8 @@
         post_body.appendChild(task_details);
   			post_body.appendChild(task_data);	
         post_body.appendChild(date_and_time);	
+  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			//post.appendChild(post_options);
 			break;
@@ -703,6 +746,8 @@
   			post_body.appendChild(jenkins);
   			post_body.appendChild(build_data);
         post_body.appendChild(date_and_time);
+  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			break;
   		case "GIT":
@@ -772,6 +817,8 @@
   			post_body.appendChild(git_data);
   			post_body.appendChild(commit_data);
         post_body.appendChild(date_and_time);
+  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
   			break;
   		}
@@ -857,6 +904,7 @@
           reply_div_body.appendChild(reply_published);
           reply_div_body.appendChild(reply_message_text);    
   			j++;
+
   		}
 
 
@@ -865,6 +913,8 @@
       post_body.appendChild(reply_message_div);
       post_body.appendChild(reply_button);
   	  post.appendChild(post_options);
+
+
 
   		post_no = post_no + 1;
   	}
@@ -1097,6 +1147,8 @@
                     
         //document.getElementById("name").value = "";
         document.getElementById("limitedtextfield").value = ""; 
+
+
           
       } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
           
