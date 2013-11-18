@@ -60,6 +60,8 @@ public class MongoLink {
 		MongoLink ml = new MongoLink(true);
 		
 		ml.addFieldToCollection(db.getCollection("TestingFields"), "complex.field2", "ABC");
+		groups = db.getCollection("DEVgroups");
+		ml.addFieldToAllGroupCollections("NewField", "123");
 		
 		//String json = "{ \"localAccount\": { \"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
 			//	"\"fbAccount\": {\"name\": \"Luke\", \"photo_url\" : \"\", \"profile_id\" : \"f123\" }, " +
