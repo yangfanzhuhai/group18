@@ -444,6 +444,7 @@ public class MongoLink {
 	
 	public void linkAccount(String userID, DBObject obj) {
 		users.update(QueryBuilder.start("_id").is(new ObjectId(userID)).get(), new BasicDBObject("$set",obj));
+		//TODO check if merge needed on database side
 	}
 	
 	/**
