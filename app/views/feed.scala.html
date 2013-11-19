@@ -71,7 +71,7 @@
     <form id="taskAliasForm" role="form" style="display:none">
         <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
     	 maxlength="8" class="form-control" onKeyUp="illegalSpace()" placeholder="Task Alias" style = "resize: none" ></textarea>
-        <p><b>Task Alias</b> - Up to 8 characters to use when referencing this task.</p>
+        <p><b>Task Alias</b> - (Optional) Up to 8 characters to use when referencing this task.</p>
       </form>
 
     <div id = "post_options" align="center">
@@ -339,21 +339,21 @@
 
   function addTasks(task_array) {
 
-
   	for (var i=0; i < task_array.length; i++) {
-
   		var task_id = task_array[i]['id'];
   		task_ids[i] = task_id;
-
-
-  		var task_name = task_array[i]['object']["name"];
-      task_names[i] = task_name;
-      tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
-      tasks[i] = jQuery.parseJSON(tasks[i]);
-
-  		var option = document.createElement("option");
-  		option.text = task_name;
-  		option.style.width = "45%";
+  		var task_alias = task_name = task_array[i]['object']["alias"];
+  		var task_details = task_array[i]['object']["name"];
+  		var task_name;
+  		if(task_alias != "") {
+  			task_name = task_alias + " - " + task_details;
+  		} else {
+  			task_name = task_details;
+  		}
+     	task_names[i] = task_name;
+      	tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
+      	tasks[i] = jQuery.parseJSON(tasks[i]);
+  		
   	}
 
   }
