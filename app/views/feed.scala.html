@@ -196,6 +196,7 @@
     }
 
   var post_count = 0;
+  var task_aliases = [];
   var task_ids = [];
   var tasks = [];
   var task_names = [];
@@ -343,19 +344,18 @@
   		var task_id = task_array[i]['id'];
   		task_ids[i] = task_id;
   		var task_alias = task_name = task_array[i]['object']["alias"];
+  		task_aliases[i] = task_alias;
   		var task_details = task_array[i]['object']["name"];
   		var task_name;
   		if(task_alias != "") {
-  			task_name = task_alias + " - " + task_details;
+  			task_name = task_alias;
   		} else {
   			task_name = task_details;
   		}
      	task_names[i] = task_name;
       	tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
       	tasks[i] = jQuery.parseJSON(tasks[i]);
-  		
   	}
-
   }
 
   function autocomplete_setup() {
@@ -514,7 +514,7 @@
           addToFeed(data);
       }});
   }
-
+  
   function generateFeed(stream_array) {
     addToFeed(stream_array);
   }
@@ -788,7 +788,9 @@
   			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			break;
+  			
   		case "GIT":
+  		
   			var repo = stream_array[i][0]['object']['repository'];
   			var repo_name = repo["name"];
   			var repo_url = repo["url"];
@@ -826,6 +828,11 @@
   				var commit_url = commit["url"];
   				var commit_author = commit["author"];
   				var commit_message = commit["message"];
+  				var commit_ref = extractReferences(commit_message);
+  				if(commit_ref != "") {
+  					var refID = getRefId(commit_ref);
+  					alert(refID);
+  				}
   				var commit_link = document.createElement('a');
   				commit_link.href = commit_url;
   				commit_link.innerHTML = "See commit"
@@ -1053,15 +1060,10 @@
 
       var reference = extractReferences(reply_message_text);
         var ref_id = getRefId(reference);
-
         var references = [];
-
         if (ref_id != "") {
-
           references =  ["\"" + ref_id + "\""];
-
         }
-
 
   /*	var reply = generateJSON(date_and_time_stamp, reply_name_text, "MESSAGE",
   							 reply_message_text, post_id, references); */
