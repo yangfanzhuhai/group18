@@ -682,9 +682,10 @@
         break;
       case "TASK":
   		var task_name = stream_array[i][0]['object']["name"];
+		var task_alias = stream_array[i][0]['object']["alias"];
         var task_heading = document.createElement("h4");
         task_heading.setAttribute("class", "media-heading");
-        task_heading.innerHTML = "Task";
+        task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_alias + "#");
         
   		var task_data = document.createElement("p");
 
@@ -828,10 +829,6 @@
   				var commit_url = commit["url"];
   				var commit_author = commit["author"];
   				var commit_message = commit["message"];
-  				var commit_ref = extractReferences(commit_message);
-  				if(commit_ref != "") {
-  					var refID = getRefId(commit_ref);
-  				}
   				commit_message = changeReferencesToLinks(commit_message);
   				var commit_link = document.createElement('a');
   				commit_link.href = commit_url;
