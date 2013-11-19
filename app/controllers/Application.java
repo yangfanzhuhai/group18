@@ -20,7 +20,7 @@ public class Application extends Controller {
 
 	public static Result feed(String groupID, Integer toggle) {
 		if (loggedIn()) {
-			String userName = session("connected");
+			String userName = Rest.getUsernameFromSession();
 			if(MongoLink.MONGO_LINK.isMember(userName, groupID)) {
 				return ok(feed.render(groupID, toggle, userName));
 			} else {
@@ -67,12 +67,12 @@ public class Application extends Controller {
 	 * 		   a session value
 	 */
 	private static boolean loggedIn(){
-		return session("connected") != null;
+		return Rest.getUsernameFromSession() != null;
 	}
 
 	public static Result profile() {
 		if (loggedIn()) {
-			String userName = session("connected");
+			String userName = Rest.getUsernameFromSession();
 			return ok(profile.render(userName));
 		} else {
 			return redirect(controllers.routes.Application.login());

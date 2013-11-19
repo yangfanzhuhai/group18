@@ -1,4 +1,4 @@
-@(userName: String)
+@(groupID: String, toggle: Integer, userName: String)
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -27,14 +27,14 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="@routes.Application.login">Progress</a>
+        <a class="navbar-brand" href="@routes.Application.feed(groupID,0)">Progress</a>
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav" role="navigation">
-          <li id="newsfeed_nav"><a id="newsLink" href="@routes.Application.login()">News Feed</a></li>
-          <li id="tasklist_nav"><a id="taskLink" href="@routes.Application.profile()">Task List</a></li>
-          <li id="git_nav"><a id="gitLink" href="@routes.Application.profile()">Git Commits</a></li>
-          <li id = "builds_nav"><a id="buildLink" href="@routes.Application.profile()">Builds</a></li>
+          <li id="newsfeed_nav"><a id="newsLink" href="@routes.Application.feed(groupID,0)">News Feed</a></li>
+          <li id="tasklist_nav"><a id="taskLink" href="@routes.Application.feed(groupID,1)">Task List</a></li>
+          <li id="git_nav"><a id="gitLink" href="@routes.Application.feed(groupID,2)">Git Commits</a></li>
+          <li id = "builds_nav"><a id="buildLink" href="@routes.Application.feed(groupID,3)">Builds</a></li>
           <li id = "about_nav" ><a href="@routes.Application.about">About</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right" role="navigation">

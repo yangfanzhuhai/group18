@@ -110,7 +110,7 @@ public class Rest extends Controller {
 		return ok(getUsernameFromSession());
 	}
 
-	private static String getUsernameFromSession() {
+	public static String getUsernameFromSession() {
 		String token = session("token");
 		Session session;
     try {
