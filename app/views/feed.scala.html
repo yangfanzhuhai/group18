@@ -48,7 +48,6 @@
           
           <li id="git_nav"><a href="@routes.Application.feed(groupID,2)">Git Commits</a></li>
           <li id = "builds_nav"><a href="@routes.Application.feed(groupID,3)">Builds</a></li>
-          <li><a href="@routes.Application.about">About</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right" role="navigation">
           <li><a href="@routes.Application.profile">@userName</a></li>
@@ -71,7 +70,7 @@
     
     <form id="taskAliasForm" role="form" style="display:none">
         <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
-    	 maxlength="8" class="form-control" placeholder="Task Alias" style = "resize: none" ></textarea>
+    	 maxlength="8" class="form-control" onKeyUp="illegalSpace()" placeholder="Task Alias" style = "resize: none" ></textarea>
         <p><b>Task Alias</b> - Up to 8 characters to use when referencing this task.</p>
       </form>
 
@@ -79,11 +78,11 @@
     		
       <form name="myform" role="form">
         <textarea name="limitedtextarea" type="text" id="limitedtextfield" rows="5" cols="30"
-        onKeyDown="postFormOnKeyDown(this)" maxlength="140" class="form-control" 
-        placeholder="What's on your mind?" style = "resize: none"></textarea>
+        onKeyUp="postFormOnKeyDown()" class="form-control" 
+        placeholder="What's on your mind?" style="resize: none"></textarea>
         <br>
         <small align="right"> <!--(Maximum characters: 140)-->
-        You have <input readonly type="text" id="charCountdown" name="countdown" size="3" value="140"> characters left.</small>
+        You have <input readonly type="text" id="charCountdown" name="countdown" size="3" > characters left.</small>
 
       </form>
 
@@ -117,6 +116,12 @@
 
   <script>
   var localToggle = @toggle;
+  var msgTextLimit = 140;
+  var aliasLimit = 8;
+  var taskTextLimit = 64;
+  
+  charCountdown.value=msgTextLimit;
+  limitedtextfield.maxlength=msgTextLimit;
   
   function getGroupName() {
   	$.ajax({
@@ -160,26 +165,33 @@
    		}
 	});
   
-    
+    function illegalSpace() {
+    	if(event.keyCode == 32) {
+    		taskAliasText.value = taskAliasText.value.substring(0, taskAliasText.value.length-1);
+    		return false;
+    	}
+    }
 
-    function postFormOnKeyDown (currentElement) {
+    function postFormOnKeyDown () {
       if (event.keyCode == 13) { 
         postToFeed(); 
         return false; 
       }
       var dropdown = document.getElementById("post_type");
+      var charLimit;
       if (dropdown.options[dropdown.selectedIndex].value == "task") {
-        limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,20);
+      	charLimit = taskTextLimit;
       } else {
-        limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
+        charLimit = msgTextLimit;
       }
+      limitText(charLimit);
     }
-
-    function limitText(limitField, limitCount, limitNum) {
-      if (limitField.value.length > limitNum) {
-        limitField.value = limitField.value.substring(0, limitNum);
+    
+    function limitText(limitNum) {
+      if (limitedtextfield.value.length > limitNum) {
+        limitedtextfield.value = limitedtextfield.value.substring(0, limitNum);
       } else {
-        limitCount.value = limitNum - limitField.value.length;
+        charCountdown.value = limitNum - limitedtextfield.value.length;
       }
     }
 
@@ -239,22 +251,21 @@
 
   function postTypeChange(option) {
   
-  	var limitedtextfield = document.getElementById("limitedtextfield");
-  	var charCount = document.getElementById("charCountdown");
-  	var taskAliasForm = document.getElementById("taskAliasForm");
   	limitedtextfield.cols = 30;
   	limitedtextfield.value = "";
   	
   	if (option == "text_post") {
-  		
+  	
   		limitedtextfield.rows = 5
-  		charCount.value = "140";
+  		limitedtextfield.maxlength=msgTextLimit;
+  		charCountdown.value = msgTextLimit;
         limitedtextfield.placeholder="What's on you mind?";
         taskAliasForm.style.display="none";
 
   	} else {
   		limitedtextfield.rows = 1;
-        charCount.value = "20";
+  		limitedtextfield.maxlength=taskTextLimit;
+        charCountdown.value = taskTextLimit;
         limitedtextfield.placeholder="Your Task";
 	    taskAliasForm.style.display="inline";
     }
@@ -1172,20 +1183,14 @@
   	        complete: refreshFeed                
         });
                     
-        //document.getElementById("name").value = "";
-        document.getElementById("limitedtextfield").value = ""; 
-
-
-          
       } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
 
           var references = [];
 		  
 		  var alias = document.getElementById("taskAliasText").value;
-		  alert(alias);
 		  
           var task_object = generateTaskObject(message_text, "TO_DO", "1", alias)
-          alert(task_object);
+          
           var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
 
          $.ajax({
@@ -1201,7 +1206,8 @@
           
       } 
       document.getElementById("limitedtextfield").value = "";
-      document.getElementById("charCountdown").value = "140";
+      document.getElementById("taskAliasText").value = "";
+      document.getElementById("charCountdown").value = msgTextLimit;
   }
 
   </script>
