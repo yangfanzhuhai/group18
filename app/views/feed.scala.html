@@ -71,7 +71,7 @@
     <form id="taskAliasForm" role="form" style="display:none">
         <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
     	 maxlength="8" class="form-control" onKeyUp="illegalSpace()" placeholder="Task Alias" style = "resize: none" ></textarea>
-        <p><b>Task Alias</b> - Up to 8 characters to use when referencing this task.</p>
+        <p><b>Task Alias</b> - (Optional) Up to 8 characters to use when referencing this task.</p>
       </form>
 
     <div id = "post_options" align="center">
@@ -196,6 +196,7 @@
     }
 
   var post_count = 0;
+  var task_aliases = [];
   var task_ids = [];
   var tasks = [];
   var task_names = [];
@@ -339,23 +340,22 @@
 
   function addTasks(task_array) {
 
-
   	for (var i=0; i < task_array.length; i++) {
-
   		var task_id = task_array[i]['id'];
   		task_ids[i] = task_id;
-
-
-  		var task_name = task_array[i]['object']["name"];
-      task_names[i] = task_name;
-      tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
-      tasks[i] = jQuery.parseJSON(tasks[i]);
-
-  		var option = document.createElement("option");
-  		option.text = task_name;
-  		option.style.width = "45%";
+  		var task_alias = task_name = task_array[i]['object']["alias"];
+  		task_aliases[i] = task_alias;
+  		var task_details = task_array[i]['object']["name"];
+  		var task_name;
+  		if(task_alias != "") {
+  			task_name = task_alias;
+  		} else {
+  			task_name = task_details;
+  		}
+     	task_names[i] = task_name;
+      	tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
+      	tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
-
   }
 
   function autocomplete_setup() {
@@ -368,7 +368,7 @@
          source: function (request, response) {
             var limitedtextfield = this.element;
 	    var dropdown = document.getElementById("post_type");
-             if (lastHash>=0 && dropdown.options[dropdown.selectedIndex].value == "text_post") {
+             if (lastHash>=0 /* && dropdown.options[dropdown.selectedIndex].value == "text_post"*/) {
                  response($.ui.autocomplete.filter(
                  tasks, request.term.substring(lastHash+1)));          
              }
@@ -514,7 +514,7 @@
           addToFeed(data);
       }});
   }
-
+  
   function generateFeed(stream_array) {
     addToFeed(stream_array);
   }
@@ -682,9 +682,10 @@
         break;
       case "TASK":
   		var task_name = stream_array[i][0]['object']["name"];
+		var task_alias = stream_array[i][0]['object']["alias"];
         var task_heading = document.createElement("h4");
         task_heading.setAttribute("class", "media-heading");
-        task_heading.innerHTML = "Task";
+        task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_alias + "#");
         
   		var task_data = document.createElement("p");
 
@@ -788,7 +789,9 @@
   			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			break;
+  			
   		case "GIT":
+  		
   			var repo = stream_array[i][0]['object']['repository'];
   			var repo_name = repo["name"];
   			var repo_url = repo["url"];
@@ -826,6 +829,7 @@
   				var commit_url = commit["url"];
   				var commit_author = commit["author"];
   				var commit_message = commit["message"];
+  				commit_message = changeReferencesToLinks(commit_message);
   				var commit_link = document.createElement('a');
   				commit_link.href = commit_url;
   				commit_link.innerHTML = "See commit"
@@ -1053,15 +1057,10 @@
 
       var reference = extractReferences(reply_message_text);
         var ref_id = getRefId(reference);
-
         var references = [];
-
         if (ref_id != "") {
-
           references =  ["\"" + ref_id + "\""];
-
         }
-
 
   /*	var reply = generateJSON(date_and_time_stamp, reply_name_text, "MESSAGE",
   							 reply_message_text, post_id, references); */
