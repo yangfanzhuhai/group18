@@ -22,6 +22,7 @@ public class LoginAttempt {
     
     boolean credentialsAreValid = MongoLink.MONGO_LINK.checkLogin(email, password);
     
+    System.out.println(credentialsAreValid);
     if(!credentialsAreValid) {
       new FailedLoginAttempt(email, ipAddress);
       throw new LoginAttemptException();

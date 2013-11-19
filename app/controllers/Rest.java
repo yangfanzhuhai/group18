@@ -190,7 +190,6 @@ public class Rest extends Controller {
 
 	public static Result loginUser() {
 		String credentialsJson = getValueFromRequest("credentials");
-
 		try {
 			Gson gson = new Gson();
 			User user = gson.fromJson(credentialsJson, User.class);
@@ -203,8 +202,8 @@ public class Rest extends Controller {
 
 			session("token", currentSession.getToken());
 			return ok();
-
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return status(422);
 		}
 	}

@@ -285,7 +285,7 @@ public class MongoLink {
 	 * @return true if parameters match some entry in the database, false if not
 	 */
 	public boolean checkLogin(DBObject obj) {
-		return checkLogin( obj.get("username").toString() ,obj.get("password").toString());
+		return checkLogin( obj.get("email").toString() ,obj.get("password").toString());
 	}
 	
 	/** Checks the validity of the given username and password
@@ -295,7 +295,7 @@ public class MongoLink {
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
 	public boolean checkLogin(String username, String password) {
-		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
+		return users.findOne(QueryBuilder.start("email").is(username).and("password").is(password).get()) != null;
 	}
 
 	/*
@@ -321,8 +321,8 @@ public class MongoLink {
 	* Returns a session with the given token
 	*/ 
 	public Session getSession(String token) throws ParseException {
-
-		DBObject query = QueryBuilder.start("_id").is(token).get();
+		ObjectId tokenID = new ObjectId(token);
+		DBObject query = QueryBuilder.start("_id").is(tokenID).get();
 		ArrayList<DBObject> list = (ArrayList<DBObject>) sessions.find(query).toArray();
  
 		return new Session(list.get(0).toString());

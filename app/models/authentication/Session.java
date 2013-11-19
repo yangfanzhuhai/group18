@@ -49,8 +49,7 @@ public class Session {
   public String toJSON() {
     
     return "{" + "\"expiryTime\" : \"" + getExpiryTime().toString()
-        + "\", \"email\" : " + getEmail() + ", \"_id\" : \""
-        + getToken() + "\"}";
+        + "\", \"email\" : \"" + getEmail() + "\"}";
   }
 
 
