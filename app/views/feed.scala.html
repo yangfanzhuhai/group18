@@ -368,7 +368,7 @@
          source: function (request, response) {
             var limitedtextfield = this.element;
 	    var dropdown = document.getElementById("post_type");
-             if (lastHash>=0 && dropdown.options[dropdown.selectedIndex].value == "text_post") {
+             if (lastHash>=0 /* && dropdown.options[dropdown.selectedIndex].value == "text_post"*/) {
                  response($.ui.autocomplete.filter(
                  tasks, request.term.substring(lastHash+1)));          
              }
@@ -831,8 +831,8 @@
   				var commit_ref = extractReferences(commit_message);
   				if(commit_ref != "") {
   					var refID = getRefId(commit_ref);
-  					alert(refID);
   				}
+  				commit_message = changeReferencesToLinks(commit_message);
   				var commit_link = document.createElement('a');
   				commit_link.href = commit_url;
   				commit_link.innerHTML = "See commit"
