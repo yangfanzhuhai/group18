@@ -107,6 +107,7 @@
         group_div.appendChild(group_images_div);
 
         var group_name = data[i]['customID'];
+        var group_display_name = data[i]['name'];
         var members_array = data[i]['members'];
 
         var group_members_div = document.createElement("div");
@@ -138,7 +139,7 @@
         var ref = "/../" + group_name;
         a.href = ref;
         var all_groups_div = document.getElementById("groups");
-        var linkText = document.createTextNode(group_name);
+        var linkText = document.createTextNode(group_display_name);
         
         var git_webhook_div = document.createElement("div");
         var git_webhook = window.location.origin + "/" +  group_name + "/rest/git";
