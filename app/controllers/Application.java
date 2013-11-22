@@ -3,11 +3,12 @@ package controllers;
 import models.MongoLink;
 import play.mvc.Controller;
 import play.mvc.Result;
+import scala.collection.mutable.Seq;
 import views.html.about;
 import views.html.feed;
 import views.html.login;
-import views.html.register;
 import views.html.profile;
+import views.html.register;
 
 public class Application extends Controller {
 	
