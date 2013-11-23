@@ -551,6 +551,14 @@ public class MongoLink {
 	public ArrayList<ArrayList<String>> getNextNews(String customID, String lastID) {
 		return getNextNews(customID, lastID, 20);
 	}
+	
+	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID, int postLimit) {
+		return dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get(), reverseSort, postLimit);
+	}
+	
+	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID) {
+		return getNewNews(customID, newestID, 20);
+	}
 
 	 /** 
 	 * @param customID - ID of collection to be used
@@ -571,18 +579,18 @@ public class MongoLink {
 
 	/**
 	 * @param customID - ID of collection to be used
-	 * @param lastID - String ID of the last post currently in news feed
+	 * @param lastID - String ID of the last post currently in task list
 	 * @param postLimit - Maximum number of tasks to fetch
-	 * @return An array of news feed posts (with replies and references) 
+	 * @return An array of task posts (with replies and references) 
 	 * 			that were posted after the task with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextTasks(String customID, String lastID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
 	}
 	
 	/**
 	 * @param customID - ID of collection to be used
-	 * @param lastID - String ID of the last post currently in news feed
+	 * @param lastID - String ID of the last post currently in task list
 	 * @return An array of (at most 20) task posts (with replies and references) 
 	 * 			that were posted after the task with the given ID
 	 */
@@ -652,6 +660,27 @@ public class MongoLink {
 	public ArrayList<ArrayList<String>> getGitCommits(String customID) {
 		return getGitCommits(customID, 20);
 	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param lastID - String ID of the last commit currently in git commits page
+	 * @param postLimit - Maximum number of commits to fetch
+	 * @return An array of git commit posts (with replies and references) 
+	 * 			that were posted after the commit with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextGitCommits(String customID, String lastID, int postLimit) {
+		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+	}
+	
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param lastID - String ID of the last commit currently in git commits page
+	 * @return An array of (at most 20) git commit posts (with replies and references) 
+	 * 			that were posted after the commit with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextGitCommits(String customID, String lastID) {
+		return getNextGitCommits(customID, lastID, 20);
+	}
 	
 	/**
 	 * @param customID - ID of collection to be used
@@ -668,6 +697,27 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getJenkinsBuilds(String customID) {
 		return getJenkinsBuilds(customID, 20);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param lastID - String ID of the last build currently in builds page
+	 * @param postLimit - Maximum number of builds to fetch
+	 * @return An array of build posts (with replies and references) 
+	 * 			that were posted after the build with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextJenkinsBuilds(String customID, String lastID, int postLimit) {
+		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+	}
+	
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param lastID - String ID of the last build currently in builds page
+	 * @return An array of (at most 20) build posts (with replies and references) 
+	 * 			that were posted after the build with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextJenkinsBuilds(String customID, String lastID) {
+		return getNextJenkinsBuilds(customID, lastID, 20);
 	}
 	
 	/**

@@ -29,16 +29,16 @@
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav" role="navigation">
-          <li id="newsfeed_nav" class = "active">
-            <a href="@routes.Application.feed(groupID,0)">News Feed</a>
-          </li>
+          <li id="newsfeed_nav" class = "active"><a href="@routes.Application.feed(groupID,0)">News Feed</a></li>
+         
+          
           <!--<li id="tasklist_nav"><a href="@routes.Application.feed(groupID,1)">Task List</a></li>-->
           
           <li id="tasklist_nav" class="dropdown">
             <a href="@routes.Application.feed(groupID,1)" class="dropdown-toggle" data-toggle="dropdown">
               Task List 
               <b class="caret"></b></a>
-            <ul class="dropdown-menu">
+            <ul id="taskDrop" class="dropdown-menu">
               <li><a href="@routes.Application.feed(groupID,1)">All Tasks</a></li>
           	  <li onclick = "setTaskStatus(this.id)" id = "TO_DO"><a href="#">TO DO</a></li>
           	  <li onclick = "setTaskStatus(this.id)" id = "DOING"><a href="#">DOING</a></li>
@@ -48,7 +48,6 @@
           
           <li id="git_nav"><a href="@routes.Application.feed(groupID,2)">Git Commits</a></li>
           <li id = "builds_nav"><a href="@routes.Application.feed(groupID,3)">Builds</a></li>
-          <li><a href="@routes.Application.about">About</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right" role="navigation">
           <li><a href="@routes.Application.profile">@userName</a></li>
@@ -66,16 +65,24 @@
       width="200" >
 
     </a>
+    
+    <h1 id="groupNameTitle" align="center"><b></b></h1>
+    
+    <form id="taskAliasForm" role="form" style="display:none">
+        <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
+    	 maxlength="8" class="form-control" onKeyUp="illegalSpace()" placeholder="Task Alias" style = "resize: none" ></textarea>
+        <p><b>Task Alias</b> - (Optional) Up to 8 characters to use when referencing this task.</p>
+      </form>
 
     <div id = "post_options" align="center">
     		
       <form name="myform" role="form">
-        <textarea name="limitedtextarea" type="text" id = "limitedtextfield" rows ="5" cols = "30"
-        onKeyDown="postFormOnKeyDown(this)" maxlength="140" class="form-control" 
-        placeholder="what's on your mind?" style = "resize: none"> </textarea>
+        <textarea name="limitedtextarea" type="text" id="limitedtextfield" rows="5" cols="30"
+        onKeyUp="postFormOnKeyDown()" class="form-control" 
+        placeholder="What's on your mind?" style="resize: none"></textarea>
         <br>
         <small align="right"> <!--(Maximum characters: 140)-->
-        You have <input readonly type="text" id="charCountdown" name="countdown" size="3" value="140"> characters left.</small>
+        You have <input readonly type="text" id="charCountdown" name="countdown" size="3" > characters left.</small>
 
       </form>
 
@@ -94,12 +101,13 @@
     <div id = "posts" class = "float">
     </div>
 
-    <div id="preloader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
-        "AJAX loader" title="AJAX loader"  /></div>
+              <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
+"AJAX loader" title="AJAX loader" align="center" /></div>
+    
 
     <ul id = "stream" class = "media-list" ></ul>
     <div align="center">
-      <button id = "loadMoreButton"class = "btn btn-info" onclick = "loadMoreFeed()">See more...</button>
+      <button id = "loadMoreButton"class = "btn btn-info" style = "margin: 10px" onclick = "loadMoreFeed()">See more...</button>
     </div>
     <div id="loader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
         "AJAX loader" title="AJAX loader"  /></div>
@@ -107,6 +115,36 @@
 
 
   <script>
+  var localToggle = @toggle;
+  var msgTextLimit = 140;
+  var aliasLimit = 8;
+  var taskTextLimit = 64;
+  
+  charCountdown.value=msgTextLimit;
+  limitedtextfield.maxlength=msgTextLimit;
+  
+  function getGroupName() {
+  	$.ajax({
+        type: "GET",
+        url: "/rest/groups",
+        dataType: "json",
+        success: function(data){
+        
+        for (var i=0; i < data.length; i++) {
+        	var currGroupID = data[i]['customID'];
+  			var groupName = data[i]['name'];
+
+  			if(currGroupID == "@groupID"){
+  				document.getElementById("groupNameTitle").innerHTML=groupName;
+  			}
+  		}	
+        }
+      });
+      	
+  }
+  
+  getGroupName();
+  
   $.fn.outerHTML = function(){
 
 	    // IE, Chrome & Safari will comply with the non-standard outerHTML, all others (FF) will have a fall-back for cloning
@@ -120,61 +158,51 @@
 	    })(this[0]));
 
 	}
+	
+	$(window).scroll(function () {
+   		if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
 
+   		}
+	});
   
-    if (@toggle == 0) {
-      document.title = "News Feed";
-      document.getElementById("newsfeed_nav").setAttribute("class","active");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("git_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
-    } else if(@toggle == 1) {
-    	document.title = "Task List"
-      document.getElementById("newsfeed_nav").setAttribute("class","");
-      document.getElementById("tasklist_nav").setAttribute("class","active");
-      document.getElementById("git_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
-    } else if(@toggle == 2) {
-      document.title = "Git Commits"
-      document.getElementById("git_nav").setAttribute("class","active");
-      document.getElementById("newsfeed_nav").setAttribute("class","");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("builds_nav").setAttribute("class","");
-    } else if(@toggle == 3) {
-      document.title = "Jenkins Builds"
-      document.getElementById("builds_nav").setAttribute("class","active");
-      document.getElementById("newsfeed_nav").setAttribute("class","");
-      document.getElementById("tasklist_nav").setAttribute("class","");
-      document.getElementById("git_nav").setAttribute("class","");
+    function illegalSpace() {
+    	if(event.keyCode == 32) {
+    		taskAliasText.value = taskAliasText.value.substring(0, taskAliasText.value.length-1);
+    		return false;
+    	}
     }
 
-    function postFormOnKeyDown (currentElement) {
+    function postFormOnKeyDown () {
       if (event.keyCode == 13) { 
         postToFeed(); 
         return false; 
       }
       var dropdown = document.getElementById("post_type");
+      var charLimit;
       if (dropdown.options[dropdown.selectedIndex].value == "task") {
-        limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,20);
+      	charLimit = taskTextLimit;
       } else {
-        limitText(currentElement.form.limitedtextfield, currentElement.form.countdown,140);
+        charLimit = msgTextLimit;
       }
+      limitText(charLimit);
     }
-
-    function limitText(limitField, limitCount, limitNum) {
-      if (limitField.value.length > limitNum) {
-        limitField.value = limitField.value.substring(0, limitNum);
+    
+    function limitText(limitNum) {
+      if (limitedtextfield.value.length > limitNum) {
+        limitedtextfield.value = limitedtextfield.value.substring(0, limitNum);
       } else {
-        limitCount.value = limitNum - limitField.value.length;
+        charCountdown.value = limitNum - limitedtextfield.value.length;
       }
     }
 
   var post_count = 0;
+  var task_aliases = [];
   var task_ids = [];
   var tasks = [];
   var task_names = [];
   var user_images = new Array();
   var final_post_id;
+  var first_post_id;
 
 
   document.getElementById("title").style.marginTop = "20px";
@@ -209,11 +237,14 @@
                 +  "]}} ";
   }
 
-  function generateTaskObject(name, status, priority) {
+  function generateTaskObject(name, status, priority, alias) {
+  
     return "{\"objectType\" : \"TASK\" , " 
            + "\"name\" : \"" + name + "\" , "
            + "\"status\" : \"" + status + "\" , "
-           + "\"priority\" : \"" + priority + "\"}";
+           + "\"priority\" : \"" + priority + "\", "
+           + "\"alias\" : \"" + alias + "\" }";
+           
   }
 
   function generateMessageObject(message) {
@@ -222,32 +253,40 @@
   }
 
   function postTypeChange(option) {
+  
+  	limitedtextfield.cols = 30;
+  	limitedtextfield.value = "";
+  	
   	if (option == "text_post") {
-  		var limitedtextfield = document.getElementById("limitedtextfield");
+  	
   		limitedtextfield.rows = 5
-  		limitedtextfield.cols = 30;
-      limitedtextfield.value = "";
-      document.getElementById("charCountdown").value = "140";
+  		limitedtextfield.maxlength=msgTextLimit;
+  		charCountdown.value = msgTextLimit;
+        limitedtextfield.placeholder="What's on you mind?";
+        taskAliasForm.style.display="none";
 
   	} else {
-  		var limitedtextfield = document.getElementById("limitedtextfield");
   		limitedtextfield.rows = 1;
-  		limitedtextfield.cols = 30;
-      limitedtextfield.value = "";
-      document.getElementById("charCountdown").value = "20";
+  		limitedtextfield.maxlength=taskTextLimit;
+        charCountdown.value = taskTextLimit;
+        limitedtextfield.placeholder="Your Task";
+	    taskAliasForm.style.display="inline";
     }
 
   }
 
   function setTaskStatus(status) {
+  localToggle=1;
     document.getElementById("stream").innerHTML = "";
     document.getElementById("task_status").innerHTML = status;
     $.ajax({
         type: "GET",
         url: "/" + "@groupID" + "/rest/tasks/" + status,
         dataType: "json",
-        success: function(data){   
+        success: function(data){
+        //window.location="@routes.Application.feed(groupID, 1)";
             generateFeed(data);
+            
         }
       });
   }
@@ -256,29 +295,39 @@
       document.getElementById("stream").innerHTML = "";
       $('#loader').hide();
       $('#loadMoreButton').hide();
-      if(@toggle==0) {
-        $.ajax({
+      first_post_id = "";
+      autoRefreshing = false;
+      autoRefresh();
 
+      var getUrl = "/" + "@groupID" + "/rest/";
+
+      switch(@toggle)
+        {
+        case 0:
+          getUrl += "feed";
+          break;
+        case 1:
+          getUrl += "tasks";
+          break;
+        case 2:
+          getUrl += "git";
+          break;
+        case 3:
+          getUrl += "builds";
+          break;
+        }
+
+        $.ajax({    
           type: "GET",
-          url: "/rest/groups",
-          dataType: "json",
-          success: function(data){   
-
-              getUserImages(data);
-          }}); 
-
-      	$.ajax({
-      	
-          type: "GET",
-          url: "/" + "@groupID" + "/rest/feed",
+          url: getUrl,
           dataType: "json",
           success: function(data){   
 
               generateFeed(data);
           }});
 
-      	$.ajax({
-      	
+        if (@toggle==0) {
+          $.ajax({
           type: "GET",
           url: "/" + "@groupID" + "/rest/alltasks",
           dataType: "json",
@@ -286,77 +335,7 @@
 
               addTasks(data);
           }});
-
-      } else if (@toggle==1){
-
-        $.ajax({
-
-          type: "GET",
-          url: "/rest/groups",
-          dataType: "json",
-          success: function(data){   
-
-              getUserImages(data);
-        }}); 
-
-
-          $.ajax({
-          
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/tasks",
-            dataType: "json",
-            success: function(data){   
-                generateFeed(data);
-            }
-          });
-
-      } else if (@toggle==2){
-
-        $.ajax({
-
-          type: "GET",
-          url: "/rest/groups",
-          dataType: "json",
-          success: function(data){   
-
-              getUserImages(data);
-          }}); 
-
-      	$.ajax({
-      	
-          type: "GET",
-          url: "/" + "@groupID" + "/rest/git",
-          dataType: "json",
-          success: function(data){   
-
-              generateFeed(data);
-          }
-      });
-      } else if (@toggle==3){
-
-        $.ajax({
-
-          type: "GET",
-          url: "/rest/groups",
-          dataType: "json",
-          success: function(data){   
-
-              getUserImages(data);
-        }}); 
-
-
-      	$.ajax({
-      	
-          type: "GET",
-          url: "/" + "@groupID" + "/rest/builds",
-          dataType: "json",
-          success: function(data){   
-
-              generateFeed(data);
-          }
-      });
-      }
-      
+        }      
   }
 
   $(document).ready(refreshFeed);	
@@ -364,23 +343,22 @@
 
   function addTasks(task_array) {
 
-
   	for (var i=0; i < task_array.length; i++) {
-
   		var task_id = task_array[i]['id'];
   		task_ids[i] = task_id;
-
-
-  		var task_name = task_array[i]['object']["name"];
-      task_names[i] = task_name;
-      tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
-      tasks[i] = jQuery.parseJSON(tasks[i]);
-
-  		var option = document.createElement("option");
-  		option.text = task_name;
-  		option.style.width = "45%";
+  		var task_alias = task_name = task_array[i]['object']["alias"];
+  		task_aliases[i] = task_alias;
+  		var task_details = task_array[i]['object']["name"];
+  		var task_name;
+  		if(task_alias != "") {
+  			task_name = task_alias;
+  		} else {
+  			task_name = task_details;
+  		}
+     	task_names[i] = task_name;
+      	tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
+      	tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
-
   }
 
   function getUserImages(data) {
@@ -424,7 +402,7 @@
          source: function (request, response) {
             var limitedtextfield = this.element;
 	    var dropdown = document.getElementById("post_type");
-             if (lastHash>=0 && dropdown.options[dropdown.selectedIndex].value == "text_post") {
+             if (lastHash>=0 /* && dropdown.options[dropdown.selectedIndex].value == "text_post"*/) {
                  response($.ui.autocomplete.filter(
                  tasks, request.term.substring(lastHash+1)));          
              }
@@ -487,6 +465,10 @@
 
    });
 }
+    // Load on scroll to bottom is not used because when loading is low, multiple ajax calls 
+    // are sent to load the next 20 feeds before first call is finished. AS a result, multiple 
+    // copies of 20-40 posts are loaded. 
+    // Possible solution: use a timer to limit the number of ajax calls sent (e.g. 1 per 10 seconds?)
 
     /*$(window).scroll(function () {
       if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
@@ -505,35 +487,68 @@
 
       }
   });*/
-
+  var autoRefreshing;
+  function autoRefresh() {    
+    var getUrl = "/" + "@groupID" + "/rest/";
+    switch(@toggle)
+      {
+      case 0:
+        getUrl += "newfeed/";
+        break;
+    /*  case 1:
+        getUrl += "moretask/";
+        break;
+      case 2:
+        getUrl += "moregit/";
+        break;
+      case 3:
+        getUrl += "morebuild/";
+        break;*/
+      }
+   /* setInterval(function() {
+      $.ajax({    
+      type: "GET",
+      url: getUrl + first_post_id,
+      dataType: "json",
+      success: function(data){   
+          autoRefreshing = true;
+          addToFeed(data);
+          autoRefreshing = false;
+      }});
+    }, 500);*/
+  }
 
   function loadMoreFeed() {
     $('#loadMoreButton').hide();
     $('#loader').show();
-    if(@toggle==0) {
-          $.ajax({
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
-            dataType: "json",
-            success: function(data){   
-                addToFeed(data);
-            }});
-    } else if (@toggle==1) {
-          $.ajax({
-            type: "GET",
-            url: "/" + "@groupID" + "/rest/moretask/" + final_post_id,
-            dataType: "json",
-            success: function(data){   
-                addToFeed(data);
-            }});
-    } else{
-          alert("end of page");
-    }
 
+    //final_post_id = $("ul#stream li").last().attr("id");
+
+    var getUrl = "/" + "@groupID" + "/rest/";
+    switch(@toggle)
+      {
+      case 0:
+        getUrl += "morefeed/";
+        break;
+      case 1:
+        getUrl += "moretask/";
+        break;
+      case 2:
+        getUrl += "moregit/";
+        break;
+      case 3:
+        getUrl += "morebuild/";
+        break;
+      }
+    $.ajax({    
+      type: "GET",
+      url: getUrl + final_post_id,
+      dataType: "json",
+      success: function(data){   
+          addToFeed(data);
+      }});
   }
-
-
-
+  
   function generateFeed(stream_array) {
     addToFeed(stream_array);
   }
@@ -541,16 +556,48 @@
   function addToFeed(stream_array) {
 
   	//document.getElementById("username").innerHTML="@userName";
-    document.getElementById("limitedtextfield").value = "";
+    
 
   	for (var i=0; i < stream_array.length;i++) {
+
+		if (localToggle == 0) {
+      document.title = "News Feed";
+      document.getElementById("newsfeed_nav").setAttribute("class","active");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("git_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(localToggle == 1) {
+    	document.title = "Task List"
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","active");
+      document.getElementById("git_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(localToggle == 2) {
+      document.title = "Git Commits"
+      document.getElementById("git_nav").setAttribute("class","active");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("builds_nav").setAttribute("class","");
+    } else if(localToggle == 3) {
+      document.title = "Jenkins Builds"
+      document.getElementById("builds_nav").setAttribute("class","active");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("git_nav").setAttribute("class","");
+    }
+
   		var message_type = stream_array[i][0]['object']["objectType"];
+
   		var post_no = 0;
+
   		var post_id = stream_array[i][0]['id'];
   		/*if (i == (stream_array.length - 1)) {
   			final_post_id = post_id; 
   		}*/
       final_post_id = post_id;  
+      if (first_post_id == "" || autoRefreshing) {
+        first_post_id = post_id;
+      } 
 
   		var published = stream_array[i][0]['published'];
 
@@ -570,7 +617,13 @@
   	
   		var stream = document.getElementById("stream");
       //stream.insertBefore(post);
-      stream.appendChild(post);
+      if (autoRefreshing) {
+        $("#stream").prepend(post);
+      } else {
+        stream.appendChild(post);
+      }
+     
+
   		/*if (post_count > 0) {
   			stream.insertBefore(post, stream.childNodes[0]);
   		} else {
@@ -646,14 +699,17 @@
   	    post_body.appendChild(user);
   		  post_body.appendChild(message);
         post_body.appendChild(date_and_time);
+  		  post_body.appendChild(reply_message_div);
+  		  post_body.appendChild(reply_button);
         post.appendChild(post_body);
 
         break;
       case "TASK":
   		var task_name = stream_array[i][0]['object']["name"];
+		var task_alias = stream_array[i][0]['object']["alias"];
         var task_heading = document.createElement("h4");
         task_heading.setAttribute("class", "media-heading");
-        task_heading.innerHTML = "Task";
+        task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_alias + "#");
         
   		var task_data = document.createElement("p");
 
@@ -715,6 +771,8 @@
         post_body.appendChild(task_details);
   			post_body.appendChild(task_data);	
         post_body.appendChild(date_and_time);	
+  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			//post.appendChild(post_options);
 			break;
@@ -751,9 +809,13 @@
   			post_body.appendChild(jenkins);
   			post_body.appendChild(build_data);
         post_body.appendChild(date_and_time);
+  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			break;
+  			
   		case "GIT":
+  		
   			var repo = stream_array[i][0]['object']['repository'];
   			var repo_name = repo["name"];
   			var repo_url = repo["url"];
@@ -791,6 +853,7 @@
   				var commit_url = commit["url"];
   				var commit_author = commit["author"];
   				var commit_message = commit["message"];
+  				commit_message = changeReferencesToLinks(commit_message);
   				var commit_link = document.createElement('a');
   				commit_link.href = commit_url;
   				commit_link.innerHTML = "See commit"
@@ -820,6 +883,8 @@
   			post_body.appendChild(git_data);
   			post_body.appendChild(commit_data);
         post_body.appendChild(date_and_time);
+  			post_body.appendChild(reply_message_div);
+  			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
   			break;
   		}
@@ -896,6 +961,7 @@
           reply_div_body.appendChild(reply_published);
           reply_div_body.appendChild(reply_message_text);    
   			j++;
+
   		}
 
 
@@ -904,6 +970,8 @@
       post_body.appendChild(reply_message_div);
       post_body.appendChild(reply_button);
   	  post.appendChild(post_options);
+
+
 
   		post_no = post_no + 1;
   	}
@@ -1004,15 +1072,10 @@
 
       var reference = extractReferences(reply_message_text);
         var ref_id = getRefId(reference);
-
         var references = [];
-
         if (ref_id != "") {
-
           references =  ["\"" + ref_id + "\""];
-
         }
-
 
   /*	var reply = generateJSON(date_and_time_stamp, reply_name_text, "MESSAGE",
   							 reply_message_text, post_id, references); */
@@ -1146,17 +1209,14 @@
   	        complete: refreshFeed                
         });
                     
-        //document.getElementById("name").value = "";
-        document.getElementById("limitedtextfield").value = ""; 
-
-
-          
       } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
-          
 
           var references = [];
-
-          var task_object = generateTaskObject(message_text, "TO_DO", "1")
+		  
+		  var alias = document.getElementById("taskAliasText").value;
+		  
+          var task_object = generateTaskObject(message_text, "TO_DO", "1", alias)
+          
           var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
 
          $.ajax({
@@ -1172,7 +1232,8 @@
           
       } 
       document.getElementById("limitedtextfield").value = "";
-      document.getElementById("charCountdown").value = "140";
+      document.getElementById("taskAliasText").value = "";
+      document.getElementById("charCountdown").value = msgTextLimit;
   }
 
   </script>
