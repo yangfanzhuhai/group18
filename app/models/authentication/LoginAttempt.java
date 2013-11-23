@@ -1,14 +1,46 @@
 package models.authentication;
 
+import play.api.libs.json.JsValue;
+import play.api.libs.json.Json;
+import models.ActivityModel;
 import models.MongoLink;
 
 public class LoginAttempt {
 
-  private String email;
+  private String username;
   private String ipAddress;
   private Session session;
   
-
+  /**
+   * Attempt a login.
+   * 
+   * @param username
+   * @param ipAddress
+   * @throws LoginAttemptException 
+   */
+  public LoginAttempt(String username, String password, String ipAddress)
+      throws LoginAttemptException {
+    
+    this.setUsername(username);
+    this.setIpAddress(ipAddress);
+    
+    // Try to login
+    LoginAttempt.validateCredentials(username, password, ipAddress);
+    
+    // --- Login was successful --- 
+    
+	//If user login with email, retrieve username that links to the email
+	if (MongoLink.MONGO_LINK.checkLoginWithEmail(username, password)) {
+		String userJson = MongoLink.MONGO_LINK.getUsernameFromEmail(username);
+		JsValue obj = Json.parse(userJson);
+		this.setUsername(ActivityModel.cleanJsonStringValue(obj.$bslash("username")
+				.toString()));
+	}
+    
+    // Establish a new session.
+    this.setSession(new Session(this));
+  }
+  
   /**
    * Validate the given credentials.
    * 
@@ -17,51 +49,24 @@ public class LoginAttempt {
    * @return
    * @throws LoginAttemptException 
    */
-  private static void validateCredentials(String email,
+  private static void validateCredentials(String username,
     String password, String ipAddress) throws LoginAttemptException {
-    
-    boolean credentialsAreValid = MongoLink.MONGO_LINK.checkLogin(email, password);
-    
-    System.out.println(credentialsAreValid);
+	boolean credentialsAreValid = MongoLink.MONGO_LINK.checkLogin(username, password);
+
+    //System.out.println(credentialsAreValid);
     if(!credentialsAreValid) {
-      new FailedLoginAttempt(email, ipAddress);
+      new FailedLoginAttempt(username, ipAddress);
       throw new LoginAttemptException();
     }
   }
-  
-  
-  /**
-   * Attempt a login.
-   * 
-   * @param email
-   * @param ipAddress
-   * @throws LoginAttemptException 
-   */
-  public LoginAttempt(String email, String password, String ipAddress)
-      throws LoginAttemptException {
-    
-    this.setEmail(email);
-    this.setIpAddress(ipAddress);
-    
-    // Try to login
-    LoginAttempt.validateCredentials(email, password, ipAddress);
-    
-    // --- Login was successful --- 
-    
-    // Establish a new session.
-    this.setSession(new Session(this));
-  }
-  
-  
-  
   
   /**
    * Get the email associated with this login attempt.
    * 
    * @return
    */
-  public String getEmail() {
-    return email;
+  public String getUsername() {
+    return username;
   }
 
 
@@ -70,8 +75,8 @@ public class LoginAttempt {
    * 
    * @param email
    */
-  private void setEmail(String email) {
-    this.email = email;
+  private void setUsername(String username) {
+    this.username = username;
   }
   
   

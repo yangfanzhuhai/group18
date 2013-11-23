@@ -120,7 +120,7 @@ public class Rest extends Controller {
 		Session session;
     try {
       session = Session.findSessionFromToken(token);
-      return session.getEmail();
+      return session.getUsername();
     } catch (ParseException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

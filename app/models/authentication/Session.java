@@ -18,7 +18,7 @@ public class Session {
   
   private Date expiryTime;
   private String token;
-  private String email; 
+  private String username; 
   
   /**
    * Construct a new session from a login attempt.
@@ -26,7 +26,7 @@ public class Session {
    * @param loginAttempt
    */
   public Session(LoginAttempt loginAttempt) {
-    setEmail(loginAttempt.getEmail());   
+    setUsername(loginAttempt.getUsername());   
     this.refreshExpiryTime();
     MongoLink.MONGO_LINK.createNewSession(this);
   }
@@ -38,7 +38,7 @@ public class Session {
                      Locale.ENGLISH).parse(ActivityModel.cleanJsonStringValue(
                      obj.$bslash("expiryTime").toString()));
     setExpiryTime(expirytime);
-    setEmail(ActivityModel.cleanJsonStringValue(obj.$bslash("email").toString()));
+    setUsername(ActivityModel.cleanJsonStringValue(obj.$bslash("username").toString()));
     setToken(ActivityModel.cleanJsonStringValue(obj.$bslash("_id").toString()));
   }
 
@@ -49,7 +49,7 @@ public class Session {
   public String toJSON() {
     
     return "{" + "\"expiryTime\" : \"" + getExpiryTime().toString()
-        + "\", \"email\" : \"" + getEmail() + "\"}";
+        + "\", \"username\" : \"" + getUsername() + "\"}";
   }
 
 
@@ -135,8 +135,8 @@ public class Session {
    * 
    * @return
    */
-  public String getEmail() {
-    return email;
+  public String getUsername() {
+    return username;
   }
 
 
@@ -145,8 +145,8 @@ public class Session {
    * 
    * @param String
    */
-  private void setEmail(String email) {
-    this.email = email;
+  private void setUsername(String username) {
+    this.username = username;
   }
   
   

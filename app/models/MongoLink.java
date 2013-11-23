@@ -433,7 +433,11 @@ public class MongoLink {
 	 * @return true if parameters match some entry in the database, false if not
 	 */
 	public boolean checkLogin(DBObject obj) {
-		return checkLogin( ((DBObject) obj.get("localAccount")).get("email").toString() ,((DBObject) obj.get("localAccount")).get("password").toString());
+		return checkLogin(obj.get("username").toString() ,((DBObject) obj.get("localAccount")).get("password").toString());
+	}
+	
+	public boolean checkLogin(String username, String password) {
+		return checkLoginWithUsername(username, password) || checkLoginWithEmail(username, password);
 	}
 	
 	/** Checks the validity of the given username and password
@@ -442,16 +446,36 @@ public class MongoLink {
 	 * @param password - Password entered by user
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
-
-	public boolean checkLogin(String email, String password) {
-		return users.findOne(QueryBuilder.start("localAccount.email").is(email).and("localAccount.password").is(password).get()) != null;
-	}
 	
 	public void linkAccount(String userID, DBObject obj) {
 		users.update(QueryBuilder.start("_id").is(new ObjectId(userID)).get(), new BasicDBObject("$set",obj));
 		//TODO check if merge needed on database side
 	}
-
+		
+	public boolean checkLoginWithUsername(String username, String password) {
+		return (users.findOne(QueryBuilder.start("username").is(username).and("localAccount.password").is(password).get()) != null);
+	}
+	
+	/** Checks the validity of the given email and password
+	 * 
+	 * @param username - Email entered by user
+	 * @param password - Password entered by user
+	 * @return True if there is an entry in the database with that exact email and password, False otherwise
+	 */
+	public boolean checkLoginWithEmail(String email, String password) {
+		return (users.findOne(QueryBuilder.start("localAccount.email").is(email).and("localAccount.password").is(password).get()) != null);	
+	}
+	
+	/** Retrieves the username that links to the email used for login
+	 * 
+	 * @param email
+	 * @return username
+	 */
+	public String getUsernameFromEmail(String email) {
+		return (users.findOne(QueryBuilder.start("localAccount.email").is(email).get()).toString());
+	}
+	
+	
 	/*
 	* Creates a new session entry
 	*/ 
