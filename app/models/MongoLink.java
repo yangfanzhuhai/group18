@@ -510,9 +510,9 @@ public class MongoLink {
 	 * @param userID - ID of the current user
 	 * @return A list of groups which the member is part of
 	 */
-	public ArrayList<ArrayList<String>> getGroups(String userID) {
+	public ArrayList<ArrayList<String>> getGroups(String username) {
 		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
-		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new ObjectId[]{new ObjectId(userID)}).get()).toArray();
+		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
 	
 		for(int i = 0; i < list.size(); i++)
 		{

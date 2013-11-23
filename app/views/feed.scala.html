@@ -504,18 +504,19 @@
         getUrl += "morebuild/";
         break;*/
       }
-    setInterval(function() {
-      $.ajax({    
-      type: "GET",
-      url: getUrl + first_post_id,
-      dataType: "json",
-      success: function(data){   
-          autoRefreshing = true;
-          addToFeed(data);
-          autoRefreshing = false;
-      }});
-    }, 500);
-  }
+      
+      //setInterval(function() {
+      //$.ajax({    
+      //type: "GET",
+      //url: getUrl + first_post_id,
+      //dataType: "json",
+      //success: function(data){   
+      //    autoRefreshing = true;
+      //    addToFeed(data);
+      //    autoRefreshing = false;
+      //}});
+    //}, 500);
+  } 
 
   function loadMoreFeed() {
     $('#loadMoreButton').hide();
