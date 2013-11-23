@@ -10,6 +10,7 @@
     <!-- Bootstrap core CSS -->
     <link href="@routes.Assets.at("stylesheets/bootstrap.min.css")" rel="stylesheet">
     
+    
     <!-- Our own style -->
     <link href ="@routes.Assets.at("stylesheets/theme.css")" rel="stylesheet" type="text/css">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.ico")">
@@ -349,11 +350,8 @@
 
      $(":input").autocomplete({
          source: usersJSON,
-         focus: function () {
-             return false;
-         },
          messages: {
-           noResults:'',
+           noResults: "",
            results: function() {}
          },
         // position: {
