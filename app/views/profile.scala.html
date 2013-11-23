@@ -10,6 +10,7 @@
     <!-- Bootstrap core CSS -->
     <link href="@routes.Assets.at("stylesheets/bootstrap.min.css")" rel="stylesheet">
     
+    
     <!-- Our own style -->
     <link href ="@routes.Assets.at("stylesheets/theme.css")" rel="stylesheet" type="text/css">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.ico")">
@@ -56,7 +57,7 @@
 
       <h1 id="username"> </h1> 
       <div id = "picture" class = "profile_picture" float = "right">
-      <img id="profileImage" width="107" height="98" class = "profile_picture">
+      <img id="profileImage" width="107" height="98">
     </div>
       <div id="groups"> 
       <a id="group_name" class = "h1"></a>
@@ -146,9 +147,11 @@
         var git_webhook_div = document.createElement("div");
         var git_webhook = window.location.origin + "/" +  group_name + "/rest/git";
 		    git_webhook_div.innerHTML = "Git Web Hook: ".bold() +  git_webhook;
+        git_webhook_div.style.marginTop = "10px";
 		    var jenkins_webhook_div = document.createElement("div");
         var jenkins_webhook = window.location.origin + "/" +  group_name + "/rest/jenkins";
 		    jenkins_webhook_div.innerHTML = "Jenkins Web Hook: ".bold() +  git_webhook;
+        jenkins_webhook_div.style.marginTop = "10px";
         
         	progress_nav.href= ref;
 		    newsLink.href = ref;
@@ -251,13 +254,17 @@
         group_div.appendChild(group_members_div);
         group_div.appendChild(add_users_box);
         group_div.appendChild(add_group_members_button);
+        group_div.appendChild(git_webhook_div);
+
         if (j > 1) {
           group_div.appendChild(leave_group_button);
         } else {
           group_div.appendChild(close_group_button);
         }
-        group_div.appendChild(git_webhook_div);
+
         group_div.appendChild(jenkins_webhook_div);
+
+
 
         all_groups_div.appendChild(group_div);
 
@@ -345,11 +352,8 @@
 
      $(":input").autocomplete({
          source: usersJSON,
-         focus: function () {
-             return false;
-         },
          messages: {
-           noResults:'',
+           noResults: "",
            results: function() {}
          },
         // position: {
