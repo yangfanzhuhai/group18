@@ -20,7 +20,7 @@ GET     /:groupID                  		controllers.Application.feed(groupID, toggl
 GET     /:groupID/tasks             	controllers.Application.feed(groupID, toggle = "tasks")
 GET     /:groupID/gits              	controllers.Application.feed(groupID, toggle = "gits")
 GET     /:groupID/builds            	controllers.Application.feed(groupID, toggle = "builds")
-GET		/:groupID/tasks/:status				controllers.Application.feed(groupID, status )
+GET		/:groupID/tasks/:status			controllers.Application.feed(groupID, status)
 
 GET		/:groupID/rest/feed				controllers.Rest.getActivities(groupID)
 GET		/:groupID/rest/morefeed/:fid	controllers.Rest.getMoreActivities(groupID, fid)

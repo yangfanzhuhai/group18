@@ -85,30 +85,50 @@
   charCountdown.value=msgTextLimit;
   limitedtextfield.maxlength=msgTextLimit;
   
-  function getGroupName() {
+  function getGroupAndStatuses() {
+  
   	$.ajax({
         type: "GET",
         url: "/rest/groups",
         dataType: "json",
         success: function(data){
-        
+        	
+        	var statuses;
+        	
+        	//Set News Feed dropdown to display projects
+        	//set Title to selected project
         	for (var i=0; i < data.length; i++) {
         		var currGroupID = data[i]['customID'];
   				var groupName = data[i]['name'];
+  				var li = document.createElement("li");
+  				var a = document.createElement("a");
+  				a.innerHTML=groupName;
+  				a.href="/" + currGroupID;
+  				li.appendChild(a);
+  				newsDrop.appendChild(li);
   				if(currGroupID == "@groupID"){
   					document.getElementById("groupNameTitle").innerHTML=groupName;
+  					statuses = data[i]['statuses'];
   				}
-  			}	
+  			}
+  			//set Tasks dropdown to display statuses
+  			for(var j=0; j<statuses.length; j++) {
+				var li = document.createElement("li");
+  				var a = document.createElement("a");
+  				a.innerHTML=statuses[j];
+  				a.href= "/" + "@groupID" + "/tasks/" + statuses[j].replace(" ", "_");
+  				li.appendChild(a);
+  				taskDrop.appendChild(li);
+  				
+  			}
+  			
+  			
         }
       });
-      	
+      
   }
   
-  function getTaskStatuses() {
-  	
-  }
-  
-  getGroupName();
+  getGroupAndStatuses();
   
   $.fn.outerHTML = function(){
 
