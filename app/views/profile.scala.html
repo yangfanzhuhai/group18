@@ -114,7 +114,7 @@
           j++;
         }
 
-        var a = document.createElement("a");
+       	var a = document.createElement("a");
         var ref = "/../" + group_name;
         a.href = ref;
         var all_groups_div = document.getElementById("groups");
@@ -124,7 +124,7 @@
         var git_webhook = window.location.origin + "/" +  group_name + "/rest/git";
 		    git_webhook_div.innerHTML = "Git Web Hook: ".bold() +  git_webhook;
         git_webhook_div.style.marginTop = "10px";
-		    var jenkins_webhook_div = document.createElement("div");
+		   var jenkins_webhook_div = document.createElement("div");
         var jenkins_webhook = window.location.origin + "/" +  group_name + "/rest/jenkins";
 		    jenkins_webhook_div.innerHTML = "Jenkins Web Hook: ".bold() +  git_webhook;
         jenkins_webhook_div.style.marginTop = "10px";

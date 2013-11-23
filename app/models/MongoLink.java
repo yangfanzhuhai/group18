@@ -317,7 +317,6 @@ public class MongoLink {
 	public boolean isMember(String username, String groupID) {
 		@SuppressWarnings("unchecked")
 		List<String> members = (List<String>) groups.findOne(queryForProject(groupID)).get("members");
-		
 		return members.contains(username);
 	}
 	

@@ -19,7 +19,7 @@ public class Application extends Controller {
 	 * 		   Else render login screen.
 	 */
 
-	public static Result feed(String groupID, Integer toggle) {
+	public static Result feed(String groupID, String toggle) {
 		if (loggedIn()) {
 			String userName = session("connected");
 			if(MongoLink.MONGO_LINK.isMember(userName, groupID)) {
