@@ -104,6 +104,10 @@
       	
   }
   
+  function getTaskStatuses() {
+  	
+  }
+  
   getGroupName();
   
   $.fn.outerHTML = function(){
@@ -422,7 +426,7 @@
       case "feed":
         getUrl += "newfeed/";
         break;
-    /*  case "tasks":
+      case "tasks":
         getUrl += "moretask/";
         break;
       case "gits":
@@ -430,9 +434,9 @@
         break;
       case "builds":
         getUrl += "morebuild/";
-        break;*/
+        break;
       }
-   /* setInterval(function() {
+    /*setInterval(function() {
       $.ajax({    
       type: "GET",
       url: getUrl + first_post_id,

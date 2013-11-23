@@ -20,7 +20,8 @@ public class Application extends Controller {
 	 */
 
 	public static Result feed(String groupID, String toggle) {
-		if (loggedIn()) {
+		
+		if (loggedIn() && isValidToggle(toggle)) {
 			String userName = session("connected");
 			if(MongoLink.MONGO_LINK.isMember(userName, groupID)) {
 				return ok(feed.render(groupID, toggle, userName));
@@ -31,6 +32,11 @@ public class Application extends Controller {
 		} else {
 			return redirect(controllers.routes.Application.login());
 		}
+	}
+	
+	private static boolean isValidToggle(String toggle) {
+		//waiting on db methods to implment
+		return true;
 	}
 
 	/**
