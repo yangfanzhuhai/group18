@@ -28,7 +28,7 @@ public class ActivityModel {
 		this.setTarget(target);
 	}
 
-	private static String cleanJsonStringValue(String stringValue) {
+	public static String cleanJsonStringValue(String stringValue) {
 		return stringValue.replaceAll("^\"|\"$", "");
 	}
 

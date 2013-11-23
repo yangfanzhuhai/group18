@@ -18,6 +18,8 @@ import models.TargetModel;
 import models.User;
 import models.UserWithGroup;
 import models.UsersWithGroup;
+import models.authentication.LoginAttempt;
+import models.authentication.Session;
 import models.git.Branch;
 import models.git.Commit;
 import models.git.Repository;
@@ -78,7 +80,7 @@ public class Rest extends Controller {
 	public static Result leaveProject() {
 		try {
 			String Json = getValueFromRequest("activity");
-			String userName = session("connected");
+			String userName = getUsernameFromSession();
 			
 			Gson gson = new Gson();
 			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
@@ -105,11 +107,24 @@ public class Rest extends Controller {
 	}
 
 	public static Result getUser() {
-		return ok(session("connected"));
+		return ok(getUsernameFromSession());
+	}
+
+	public static String getUsernameFromSession() {
+		String token = session("token");
+		Session session;
+    try {
+      session = Session.findSessionFromToken(token);
+      return session.getEmail();
+    } catch (ParseException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return null;
+    }
 	}
 	
 	public static Result getGroups(){
-		String userName = session("connected");
+		String userName = getUsernameFromSession();
 		return ok(MongoLink.MONGO_LINK.getGroups(userName).toString());
 	}
 
@@ -175,22 +190,22 @@ public class Rest extends Controller {
 
 	public static Result loginUser() {
 		String credentialsJson = getValueFromRequest("credentials");
-
 		try {
 			Gson gson = new Gson();
 			User user = gson.fromJson(credentialsJson, User.class);
 			String username = user.username;
 			String password = user.password;
-			if (MongoLink.MONGO_LINK.checkLogin(username, password)) {
-				session("connected", username);
-				return ok();
-			} else {
-				return status(400);
-			}
+			String ipAddress = request().remoteAddress();
+
+			LoginAttempt attempt = new LoginAttempt(username, password, ipAddress);
+			Session currentSession = attempt.getSession();
+
+			session("token", currentSession.getToken());
+			return ok();
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return status(422);
 		}
-
 	}
 	
 	public static Result getAllUsers() {

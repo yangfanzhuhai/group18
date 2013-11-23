@@ -1,5 +1,7 @@
 package models;
 
+import models.authentication.*;
+
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
+import com.mongodb.util.JSON;
 
 public class MongoLink {
 	
@@ -31,6 +34,7 @@ public class MongoLink {
 	private static DB db;
 	private static DBCollection users;
 	private static DBCollection groups;
+	private static DBCollection sessions;
 	
 	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 	
@@ -42,6 +46,7 @@ public class MongoLink {
 		
 		users = db.getCollection("userAccounts");
 		groups = db.getCollection("groups");
+		sessions = db.getCollection("session");
 
 	}
 
@@ -280,7 +285,7 @@ public class MongoLink {
 	 * @return true if parameters match some entry in the database, false if not
 	 */
 	public boolean checkLogin(DBObject obj) {
-		return checkLogin( obj.get("username").toString() ,obj.get("password").toString());
+		return checkLogin( obj.get("email").toString() ,obj.get("password").toString());
 	}
 	
 	/** Checks the validity of the given username and password
@@ -290,7 +295,37 @@ public class MongoLink {
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
 	public boolean checkLogin(String username, String password) {
-		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
+		return users.findOne(QueryBuilder.start("email").is(username).and("password").is(password).get()) != null;
+	}
+
+	/*
+	* Creates a new session entry
+	*/ 
+	public boolean createNewSession(Session session) {
+
+		int oldCount = (int) sessions.getCount();
+
+		DBObject obj = (DBObject) JSON.parse(session.toJSON());
+		
+		sessions.insert(obj);
+
+		ObjectId token = (ObjectId)obj.get( "_id" );
+
+		session.setToken(token.toString());
+		
+		return (int) sessions.getCount() == oldCount + 1;
+	}
+
+
+	/*
+	* Returns a session with the given token
+	*/ 
+	public Session getSession(String token) throws ParseException {
+		ObjectId tokenID = new ObjectId(token);
+		DBObject query = QueryBuilder.start("_id").is(tokenID).get();
+		ArrayList<DBObject> list = (ArrayList<DBObject>) sessions.find(query).toArray();
+ 
+		return new Session(list.get(0).toString());
 	}
 	
 	/**
