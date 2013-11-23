@@ -28,6 +28,10 @@ public class ActivityModel extends Model {
 		this.setTarget(target);
 	}
 
+	public static String cleanJsonStringValue(String stringValue) {
+		return stringValue.replaceAll("^\"|\"$", "");
+	}
+
 	public String getPublished() {
 		return published;
 	}

@@ -1,5 +1,7 @@
 package models;
 
+import models.authentication.*;
+
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ public class MongoLink {
 	private static DB db;
 	private static DBCollection users;
 	private static DBCollection groups;
+	private static DBCollection sessions;
 	
 	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 	
@@ -52,6 +55,7 @@ public class MongoLink {
 			users = db.getCollection("userAccounts");
 		}
 		groups = db.getCollection("groups");
+		sessions = db.getCollection("session");
 
 	}
 
@@ -438,6 +442,7 @@ public class MongoLink {
 	 * @param password - Password entered by user
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
+
 	public boolean checkLogin(String email, String password) {
 		return users.findOne(QueryBuilder.start("localAccount.email").is(email).and("localAccount.password").is(password).get()) != null;
 	}
@@ -445,6 +450,36 @@ public class MongoLink {
 	public void linkAccount(String userID, DBObject obj) {
 		users.update(QueryBuilder.start("_id").is(new ObjectId(userID)).get(), new BasicDBObject("$set",obj));
 		//TODO check if merge needed on database side
+	}
+
+	/*
+	* Creates a new session entry
+	*/ 
+	public boolean createNewSession(Session session) {
+
+		int oldCount = (int) sessions.getCount();
+
+		DBObject obj = (DBObject) JSON.parse(session.toJSON());
+		
+		sessions.insert(obj);
+
+		ObjectId token = (ObjectId)obj.get( "_id" );
+
+		session.setToken(token.toString());
+		
+		return (int) sessions.getCount() == oldCount + 1;
+	}
+
+
+	/*
+	* Returns a session with the given token
+	*/ 
+	public Session getSession(String token) throws ParseException {
+		ObjectId tokenID = new ObjectId(token);
+		DBObject query = QueryBuilder.start("_id").is(tokenID).get();
+		ArrayList<DBObject> list = (ArrayList<DBObject>) sessions.find(query).toArray();
+ 
+		return new Session(list.get(0).toString());
 	}
 	
 	/**

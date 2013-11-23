@@ -19,7 +19,7 @@
     <script>
 
 
-
+/*
   window.fbAsyncInit = function() {
   FB.init({
     appId      : '652586104782305', // App ID
@@ -69,7 +69,7 @@
    ref.parentNode.insertBefore(js, ref);
   }(document));
 
-
+*/
 </script>
     <div class="container">
       <div id = "title" align = "center" class ="title" >
@@ -78,7 +78,7 @@
       <div id = "login_box" class = "login_box"> 
       <div padding = "50px" margin="50">
         <input name="username" type="text" maxlength="512"
-          placeholder="Username" id="username" onKeyDown="pressEnter()" align = "center" class="form-control"/>
+          placeholder="Email" id="username" onKeyDown="pressEnter()" align = "center" class="form-control"/>
         <input name="password" type="password" maxlength="512"
           placeholder="Password" id="password" onKeyDown="pressEnter()" align = "center" class="form-control"/>	    
       </div>
@@ -91,12 +91,6 @@
         </button>
         <button type="submit" class="btn btn-success" name="login_button" id="login_button" onclick="login()" >
           Login
-        </button>
-        <button type="submit" class="btn btn-success" name="github_button" id="github_button" onclick="gitHubLogin()" >
-          Login with GitHub
-        </button>
-        <button type="submit" class="btn btn-success" name="github_button" id="github_button" onclick="fbLogin()" >
-          Login with Facebook
         </button>
       </div>
       </div> <!-- /login box -->
@@ -126,7 +120,7 @@
       var password = document.getElementById("password").value;
 
       if (username == "") {
-        alert("Please enter your username");
+        alert("Please enter your email");
       } else if (password == "") {
         alert("Please enter your password");
       } else {
