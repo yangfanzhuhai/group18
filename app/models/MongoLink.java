@@ -12,7 +12,7 @@ import java.util.Set;
 
 import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
-//import org.mindrot.jbcrypt.BCrypt;
+import org.mindrot.jbcrypt.BCrypt;
 
 import com.google.gson.Gson;
 import com.mongodb.BasicDBList;
@@ -463,8 +463,8 @@ public class MongoLink {
 	private boolean checkCredentials(DBObject user, String password) {
 		if(user != null) {
 			String hashedPassword = ((DBObject) user.get("localAccount")).get("password").toString();
-			//return BCrypt.checkpw(password, hashedPassword);
-			return true;
+			return BCrypt.checkpw(password, hashedPassword);
+			//return true;
 		}
 		return false;
 	}

@@ -312,16 +312,38 @@
         case 3:
           getUrl += "builds";
           break;
-        }
+        case 4:
+          getUrl += "taskdetails";
+          break;
 
-        $.ajax({    
-          type: "GET",
-          url: getUrl,
-          dataType: "json",
-          success: function(data){   
+        } 
+
+        if (localToggle == 4) {
+
+          var task_json = "{\"id\": \"@task\"}";
+          alert("querying " + getUrl + " with " + task_json);
+          $.ajax({    
+            type: "GET",
+            url: getUrl,
+            dataType: "json",
+            data: {"activity":task_json},
+            success: function(data){   
+
+                generateFeed(data);
+          }});
+
+
+        } else {
+
+          $.ajax({    
+           type: "GET",
+           url: getUrl,
+            dataType: "json",
+            success: function(data){   
 
               generateFeed(data);
           }});
+        }
 
         if (@toggle==0) {
           $.ajax({
@@ -342,7 +364,7 @@
 
   	for (var i=0; i < task_array.length; i++) {
   		var task_id = task_array[i]['id'];
-  		task_ids[i] = task_id;
+
   		var task_alias = task_name = task_array[i]['object']["alias"];
   		task_aliases[i] = task_alias;
   		var task_details = task_array[i]['object']["name"];
@@ -353,8 +375,9 @@
   			task_name = task_details;
   		}
      	task_names[i] = task_name;
-      	tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
-      	tasks[i] = jQuery.parseJSON(tasks[i]);
+            task_ids[task_name] = task_id;
+      tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
+      tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
   }
 
@@ -581,6 +604,13 @@
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("git_nav").setAttribute("class","");
+    } else if (localToggle == 4) {
+      document.title = "@task";
+      document.getElementById("builds_nav").setAttribute("class","");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("git_nav").setAttribute("class","");
+
     }
 
   		var message_type = stream_array[i][0]['object']["objectType"];
@@ -1118,7 +1148,9 @@
       var linked_tag = document.createElement('a');
       var tag_without_hashes = tag[0].substring(1, tag[0].length -1).trim();
 
-     lengthinked_tag.href = "http://www.google.com";
+      var task_id = task_ids[tag_without_hashes];
+
+      linked_tag.href = "/@groupID/taskref?task=" + task_id;
     
       linked_tag.innerHTML = tag;
 

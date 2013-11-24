@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-//import models.BCrypt;
+import org.mindrot.jbcrypt.BCrypt;
 
 import models.ActivityModel;
 import models.ActorModel;
@@ -250,8 +250,8 @@ public class Rest extends Controller {
 				UserModel.class);
 		LocalAccount localAccount = userModel.getLocalAccount();
 		String password = localAccount.getPassword();
-		//localAccount.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-		localAccount.setPassword(password);
+		localAccount.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+		//localAccount.setPassword(password);
 		String credentialsJson = userModel.toJSON();
 
 		try {
