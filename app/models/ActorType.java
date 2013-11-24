@@ -1,5 +1,5 @@
 package models;
 
 public enum ActorType {
-	PERSON
+	PERSON, JENKINS
 }

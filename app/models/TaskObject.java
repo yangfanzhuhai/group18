@@ -129,8 +129,8 @@ public class TaskObject extends ObjectModel {
    * @return
    */
   @Override
-  public ObjectType getType() {
-    return ObjectType.TASK;
+  public void setType() {
+    this.objectType = ObjectType.TASK;
   }
 
   /**
@@ -138,7 +138,6 @@ public class TaskObject extends ObjectModel {
    * 
    * @return
    */
-  @Override
   public String toJSON() {
 
     String assigned = "";

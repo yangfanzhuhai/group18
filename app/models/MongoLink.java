@@ -1,13 +1,20 @@
 package models;
 
+import models.authentication.*;
+
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
+import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
+import org.mindrot.jbcrypt.BCrypt;
 
+import com.google.gson.Gson;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -17,6 +24,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
+import com.mongodb.util.JSON;
 
 public class MongoLink {
 	
@@ -31,6 +39,7 @@ public class MongoLink {
 	private static DB db;
 	private static DBCollection users;
 	private static DBCollection groups;
+	private static DBCollection sessions;
 	
 	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 	
@@ -40,14 +49,70 @@ public class MongoLink {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		
-		users = db.getCollection("userAccounts");
+		users = db.getCollection("userAccountsV2");
 		groups = db.getCollection("groups");
+		sessions = db.getCollection("session");
 
 	}
 
 	//for testing
-	public static void main(String[] args) throws UnknownHostException {
+	public static void main(String[] args) throws UnknownHostException, ParseException {
 		MongoLink ml = new MongoLink(true);
+		
+	//	ml.removeFieldFromCollection(db.getCollection("TestingFields"), "simple");
+	//	groups = db.getCollection("DEVgroups");
+
+	//	ml.removeFieldFromAllGroupCollections("alias");
+	//	ml.addFieldToAllGroupCollections(QueryBuilder.start("object.objectType").is("TASK").get(),"object.alias", "");
+		
+		//String json = "{ \"localAccount\": { \"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
+			//	"\"fbAccount\": {\"name\": \"Luke\", \"photo_url\" : \"\", \"profile_id\" : \"f123\" }, " +
+				//"\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
+		
+	//	String json = "{ \"localAccount\": {}," +
+	//			"\"fbAccount\": {\"name\": \"Piotr\", \"photo_url\" : \"\", \"profile_id\" : \"654123\"}, " +
+	//			"\"ghAccount\" : {}}";
+		
+	//	String fbccount = "{\"fbAccount\": {\"name\": \"Piotr\", \"photo_url\" : \"\", \"profile_id\" : \"654123\"}}";
+	//	ml.linkAccount("5287aacfb7606861f8bc37f2", (DBObject) JSON.parse(fbccount));
+		
+	/*	String json = "{\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
+		
+		Gson gson = new Gson();
+		UserModel model = gson.fromJson(json, UserModel.class);
+			System.out.println(model.toJSON());
+
+		
+		System.out.println(((DBObject) JSON.parse(model.toJSON())).toString());
+		
+		if(ml.registerOrLogin((DBObject) JSON.parse(model.toJSON())))
+			System.out.println("Registered/Logged in");
+		
+	/*	ArrayList<ArrayList<String>> a = ml.getTaskDetails("QuantumCheese", "528002a5e4b0e00e6f371e80");
+		
+		for(ArrayList<String> x : a)
+		{
+			System.out.println();
+			System.out.println();
+			for(String y : x)
+			{
+				System.out.println(y);
+			}
+		}
+	
+	/*	for(ArrayList<String> o: ml.getGroups("Piotr"))
+		{
+			System.out.println(o);
+		}
+		
+		long startTime = System.currentTimeMillis();
+		for(int i = 0; i < 100; i++)
+		{
+			ml.getGroups("Piotr");
+		}
+		float totalTime = System.currentTimeMillis() - startTime;
+		System.out.println("Total time taken : " + totalTime/1000 + " (average: " + totalTime/100000 + ")");
+		
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
 		//Prints last 20 items of newsFeed
@@ -110,7 +175,7 @@ public class MongoLink {
 		
 		System.out.println("Adding new project");
 		*/
-		groups = db.createCollection("temp", null);
+	/*	groups = db.createCollection("temp", null);
 		long startTime = System.currentTimeMillis();
 		for(int i = 0; i < 200; i++)
 		{
@@ -137,6 +202,49 @@ public class MongoLink {
 //		}*/
 	}
 	
+	
+	private void addFieldToCollection(DBCollection coll, String fieldName, Object defaultValue) {
+		addFieldToCollection(coll, new BasicDBObject(), fieldName, defaultValue);
+	}
+	
+	private void addFieldToCollection(DBCollection coll, DBObject query, String fieldName, Object defaultValue) {
+		coll.update(query, new BasicDBObject("$set", new BasicDBObject(fieldName, defaultValue)), false, true);
+	}
+	
+	private void addFieldToAllGroupCollections(String fieldName, Object defaultValue) {
+		addFieldToAllGroupCollections(new BasicDBObject(), fieldName, defaultValue);	
+	}
+	
+	private void addFieldToAllGroupCollections(DBObject query, String fieldName, Object defaultValue) {
+		List<DBObject> groupList = groups.find().toArray();
+		
+		for(DBObject group : groupList)
+		{
+			addFieldToCollection(getGroupColl((String) group.get("customID")), query, fieldName, defaultValue);
+		}
+	}
+	
+	private void removeFieldFromCollection(DBCollection coll, String fieldName) {
+		removeFieldFromCollection(coll, new BasicDBObject(), fieldName);
+	}
+	
+	private void removeFieldFromCollection(DBCollection coll, DBObject query, String fieldName) {
+		coll.update(query, new BasicDBObject("$unset", new BasicDBObject(fieldName, "")), false, true);
+	}
+	
+	private void removeFieldFromAllGroupCollections(String fieldName) {
+		removeFieldFromAllGroupCollections(new BasicDBObject(), fieldName);	
+	}
+	
+	private void removeFieldFromAllGroupCollections(DBObject query, String fieldName) {
+		List<DBObject> groupList = groups.find().toArray();
+		
+		for(DBObject group : groupList)
+		{
+			removeFieldFromCollection(getGroupColl((String) group.get("customID")), query, fieldName);
+		}
+	}
+	
 	/**
 	 * @param newsFeed Collection from which to fetch data
 	 * @param searchCriteria - Criteria to use for search
@@ -154,8 +262,7 @@ public class MongoLink {
 			while(i < posts.size())
 			{
 				ArrayList<String> tempList = getReplies(newsFeed, posts.get(i).get("_id").toString());
-				
-				ActivityModel post = new ActivityModel(posts.get(i).toString());
+				ActivityModel post = ActivityModel.activityModelGson.fromJson(posts.get(i).toString(), ActivityModel.class);
 				post.setID(posts.get(i).get("_id").toString());
 				
 				tempList.add(0, post.toJSON());
@@ -257,6 +364,7 @@ public class MongoLink {
 	/**
 	 * Adds new user to the database, only if their username is not already
 	 * in the database
+	 * TODO DELETE
 	 * 
 	 * @param obj - Object containing new user's data
 	 * @return true if user was added, false if not
@@ -273,6 +381,47 @@ public class MongoLink {
 		return (int) users.getCount() == oldCount + 1;
 	}
 	
+	public boolean registerOrLogin(DBObject obj) {
+		
+		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString().replaceAll("\\s+",""))) {
+			
+			if(users.findOne(QueryBuilder.start("localAccount.email").is(((DBObject) obj.get("localAccount")).get("email")).get()) == null)
+			{
+				int oldCount = (int) users.getCount();
+				
+				users.insert(obj);
+				return (int) users.getCount() == oldCount + 1;
+			}
+			return false;
+		}
+		else if(obj.containsField("fbAccount") && !"{}".equals(obj.get("fbAccount").toString().replaceAll("\\s+",""))) {
+			
+			if(users.findOne(QueryBuilder.start("fbAccount.profile_id").is(((DBObject) obj.get("fbAccount")).get("profile_id")).get()) == null)
+			{
+				int oldCount = (int) users.getCount();
+				
+				users.insert(obj);
+				return (int) users.getCount() == oldCount + 1;
+			}
+			return true;
+		}
+		else if(obj.containsField("ghAccount") && !"{}".equals(obj.get("ghAccount").toString().replaceAll("\\s+",""))) {
+			
+			if(users.findOne(QueryBuilder.start("ghAccount.html_url").is(((DBObject) obj.get("ghAccount")).get("html_url")).get()) == null)
+			{
+				int oldCount = (int) users.getCount();
+				
+				users.insert(obj);
+				return (int) users.getCount() == oldCount + 1;
+			}
+			
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 	/** Checks whether the username and password supplied in 'obj' match an
 	 * entry in the database
 	 * 
@@ -280,27 +429,118 @@ public class MongoLink {
 	 * @return true if parameters match some entry in the database, false if not
 	 */
 	public boolean checkLogin(DBObject obj) {
-		return checkLogin( obj.get("username").toString() ,obj.get("password").toString());
+		return checkLogin(obj.get("username").toString() ,((DBObject) obj.get("localAccount")).get("password").toString());
+	}
+	
+	public boolean checkLogin(String username, String password) {
+		return checkLoginWithUsername(username, password) || checkLoginWithEmail(username, password);
 	}
 	
 	/** Checks the validity of the given username and password
 	 * 
-	 * @param username - Username entered by user
+	 * @param email - Username entered by user
 	 * @param password - Password entered by user
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
-	public boolean checkLogin(String username, String password) {
-		return users.findOne(QueryBuilder.start("username").is(username).and("password").is(password).get()) != null;
+	
+		
+	public boolean checkLoginWithUsername(String username, String password) {
+		DBObject user = users.findOne(QueryBuilder.start("username").is(username).get());
+		return checkCredentials(user, password);
+	}
+	
+	/** Checks the validity of the given email and password
+	 * 
+	 * @param username - Email entered by user
+	 * @param password - Password entered by user
+	 * @return True if there is an entry in the database with that exact email and password, False otherwise
+	 */
+	public boolean checkLoginWithEmail(String email, String password) {
+		DBObject user = users.findOne(QueryBuilder.start("localAccount.email").is(email).get());
+		return checkCredentials(user, password);
+	}
+
+	private boolean checkCredentials(DBObject user, String password) {
+		if(user != null) {
+			String hashedPassword = ((DBObject) user.get("localAccount")).get("password").toString();
+			return BCrypt.checkpw(password, hashedPassword);
+		}
+		return false;
+	}
+	
+	public void linkAccount(String userID, DBObject obj) {
+		users.update(QueryBuilder.start("_id").is(new ObjectId(userID)).get(), new BasicDBObject("$set",obj));
+		//TODO check if merge needed on database side
+	}
+	
+	/** Retrieves the username that links to the email used for login
+	 * 
+	 * @param email
+	 * @return username
+	 */
+	public String getUsernameFromEmail(String email) {
+		return (users.findOne(QueryBuilder.start("localAccount.email").is(email).get()).toString());
+	}
+	
+	public UserModel getUserFromUsername(String userName){
+		Gson gson = new Gson();
+		String userJson = (users.findOne(QueryBuilder.start("username").is(userName).get())).toString();
+		return gson.fromJson(userJson, UserModel.class);
+	}
+	
+	
+	/*
+	* Creates a new session entry
+	*/ 
+	public boolean createNewSession(Session session) {
+
+		int oldCount = (int) sessions.getCount();
+
+		DBObject obj = (DBObject) JSON.parse(session.toJSON());
+		
+		sessions.insert(obj);
+
+		ObjectId token = (ObjectId)obj.get( "_id" );
+
+		session.setToken(token.toString());
+		
+		return (int) sessions.getCount() == oldCount + 1;
+	}
+
+
+	/*
+	* Returns a session with the given token
+	*/ 
+	public Session getSession(String token) throws ParseException {
+		ObjectId tokenID = new ObjectId(token);
+		DBObject query = QueryBuilder.start("_id").is(tokenID).get();
+		ArrayList<DBObject> list = (ArrayList<DBObject>) sessions.find(query).toArray();
+ 
+		return new Session(list.get(0).toString());
 	}
 	
 	/**
-	 * @param username - Username of the current user
+	 * @param userID - ID of the current user
 	 * @return A list of groups which the member is part of
 	 */
-	public ArrayList<String> getGroups(String username) {
-		ArrayList<String> retList = new ArrayList<String>();
+	public ArrayList<ArrayList<String>> getGroups(String username) {
+		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
 		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
 	
+		for(int i = 0; i < list.size(); i++)
+		{
+			ArrayList<String> temp = getInfoAboutUsers(((BasicDBList) list.get(i).get("members")).toArray(new String[0]));
+			temp.add(0, list.get(i).toString());
+			retList.add(i, temp);
+		}
+	
+		return retList;
+	}
+	
+	public ArrayList<String> getInfoAboutUsers(String ... usernames) {
+		List<DBObject> list = users.find(QueryBuilder.start("username").in(usernames).get()).toArray();	
+		ArrayList<String> retList = new ArrayList<String>();
+		
 		for(DBObject o : list)
 		{
 			retList.add(o.toString());
@@ -319,6 +559,10 @@ public class MongoLink {
 		List<String> members = (List<String>) groups.findOne(queryForProject(groupID)).get("members");
 		
 		return members.contains(username);
+	}
+	
+	public void addFBImage(String username, String url) {
+		users.update(QueryBuilder.start("username").is(username).get(), new BasicDBObject("$set", new BasicDBObject("fb_image", url)));
 	}
 	
 	/** Method which changes either the status or priority of a task
@@ -395,7 +639,6 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getTasks(String customID, int postLimit) {
 		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
-		
 	}
 
 	/**
@@ -563,6 +806,26 @@ public class MongoLink {
 		return retList;
 	}
 	
+	public String getDisplayName(String id) {
+		
+		String ret = null;
+		DBObject user = users.findOne(QueryBuilder.start("_id").is(new ObjectId(id)));
+		if(!"{}".equals(user.get("localAccount").toString().replaceAll("\\s+","")))
+		{
+			ret = ((DBObject) user.get("localAccount")).get("name").toString();
+		}
+		else if(!"{}".equals(user.get("fbAccount").toString().replaceAll("\\s+","")))
+		{
+			ret = ((DBObject) user.get("fbAccount")).get("name").toString();
+		}
+		else
+		{
+			ret = ((DBObject) user.get("ghAccount")).get("name").toString();
+		}
+		
+		return ret;
+	}
+	
 	/**
 	 * @param customID - ID of collection to be used
 	 * @param obj - Object representing the news feed post to be deleted.
@@ -570,6 +833,10 @@ public class MongoLink {
 	 */
 	public void deletePost(String customID, DBObject obj) {
 		deletePost(getGroupColl(customID), obj.get("id").toString());
+	}
+	
+	public ArrayList<ArrayList<String>> getTaskDetails(String groupID, String id) throws ParseException {
+		return getTaskDetails(getGroupColl(groupID), id);
 	}
 	
 	/** 
@@ -593,6 +860,11 @@ public class MongoLink {
 		return getItemsWithoutReferences(coll, QueryBuilder.start("_id").in(taskIDObjs).get(), null);
 	}
 	
+	public ArrayList<String> getReferencedBy(String groupID, String id) throws ParseException {
+		
+		return getReferencedBy(getGroupColl(groupID), id);
+	}
+	
 	/**
 	 * @param coll - Collection to be used
 	 * @param id - ID string of the task
@@ -602,6 +874,46 @@ public class MongoLink {
 	private ArrayList<String> getReferencedBy(DBCollection coll, String id) throws ParseException {
 		
 		return getItemsWithoutReferences(coll, QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), reverseSort);
+	}
+	
+	private ArrayList<ArrayList<String>> getTaskDetails(DBCollection coll, String id) throws ParseException {
+		
+		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
+		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) coll.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(reverseSort).toArray();
+		
+		for(DBObject r : referencingItems)
+		{
+			retList.add(getEntireTopic(coll, r));
+		}
+		
+		return new ArrayList<ArrayList<String>>(retList);
+	}
+	
+	private ArrayList<String> getEntireTopic(DBCollection coll, DBObject referencingPost) throws ParseException {
+		
+		ArrayList<String> retList = new ArrayList<String>();
+		
+		String targetPost = ((DBObject) referencingPost.get("target")).get("messageID").toString();
+		DBObject tempPost;
+		
+		if("".equals(targetPost))
+		{
+			tempPost = referencingPost;
+		}
+		else
+		{
+			tempPost = coll.findOne(QueryBuilder.start("_id").is(new ObjectId(targetPost)).get());
+		}
+		
+		String id = tempPost.get("_id").toString();
+		ActivityModel am = ActivityModel.activityModelGson.fromJson(tempPost.toString(), ActivityModel.class);
+		
+		// TODO This sort of thing should not be needed once activity model is refactored
+		am.setID(id);
+		retList.add(am.toJSON());
+		retList.addAll(getReplies(coll, id));
+		
+		return retList;
 	}
 	
 	/**
@@ -631,7 +943,7 @@ public class MongoLink {
 		
 		for(DBObject o : list) {
 			
-			ActivityModel am = new ActivityModel(o.toString());
+			ActivityModel am = ActivityModel.activityModelGson.fromJson(o.toString(), ActivityModel.class);
 			am.setID(o.get("_id").toString());
 			
 			retList.add(am.toJSON());
@@ -656,7 +968,7 @@ public class MongoLink {
 		
 		for(DBObject o : list) {
 			
-			ActivityModel am = new ActivityModel(o.toString());
+			ActivityModel am = ActivityModel.activityModelGson.fromJson(o.toString(), ActivityModel.class);
 			am.setID(o.get("_id").toString());
 			
 			retList.add(am.toJSON());

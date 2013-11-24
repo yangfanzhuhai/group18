@@ -12,12 +12,15 @@ GET     /profile		    			controllers.Application.profile()
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               	controllers.Assets.at(path="/public", file)
 
+GET		/rest/user						controllers.Rest.getUser()
+GET		/rest/groups					controllers.Rest.getGroups()
+GET		/rest/allusers					controllers.Rest.getAllUsers()
 GET     /:groupID                   	controllers.Application.feed(groupID, toggle: Integer = 0)
 GET     /:groupID/tasks             	controllers.Application.feed(groupID, toggle: Integer = 1)
 GET     /:groupID/gits              	controllers.Application.feed(groupID, toggle: Integer = 2)
 GET     /:groupID/builds            	controllers.Application.feed(groupID, toggle: Integer = 3)
+GET		/:groupID/taskref				controllers.Application.feed(groupID, toggle: Integer = 4)
 #GET     /:groupID/tasks/:status         controllers.Application.feed(groupID, toggle: Integer = 4)
-
 
 
 GET		/:groupID/rest/feed				controllers.Rest.getActivities(groupID)
@@ -27,15 +30,16 @@ GET		/:groupID/rest/tasks			controllers.Rest.getTasks(groupID)
 GET		/:groupID/rest/moretask/:fid	controllers.Rest.getMoreTasks(groupID, fid)
 GET		/:groupID/rest/alltasks			controllers.Rest.getAllTasks(groupID)
 GET     /:groupID/rest/tasks/:status    controllers.Rest.getTasksWithStatus(groupID, status)
+GET		/:groupID/rest/taskdetails		controllers.Rest.getTaskDetails(groupID)
 GET		/:groupID/rest/git				controllers.Rest.getGits(groupID)
 GET		/:groupID/rest/moregit/:fid		controllers.Rest.getMoreGits(groupID, fid)
 GET		/:groupID/rest/builds			controllers.Rest.getBuilds(groupID)
 GET		/:groupID/rest/morebuild/:fid	controllers.Rest.getMoreBuilds(groupID, fid)
-GET		/rest/user						controllers.Rest.getUser()
-GET		/rest/groups					controllers.Rest.getGroups()
-GET		/rest/allusers					controllers.Rest.getAllUsers()
 
 
+POST	/rest/github					controllers.Rest.parseGitHubData()
+POST	/rest/facebook					controllers.Rest.parseFBData()
+POST	/rest/addfbimage				controllers.Rest.addFBImage()
 POST	/rest/addproject				controllers.Rest.addProject()
 POST	/rest/leaveproject				controllers.Rest.leaveProject()
 POST	/rest/deleteproject				controllers.Rest.deleteProject()

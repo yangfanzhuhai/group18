@@ -19,6 +19,7 @@ public class GitObject extends ObjectModel {
 		this.branch = branch;
 		this.commits = commits;
 		this.totalCommits = totalCommits;
+		this.objectType = ObjectType.GIT;
 	}
 
 	public Repository getRepository() {
@@ -54,16 +55,9 @@ public class GitObject extends ObjectModel {
 	}
 
 	@Override
-	public ObjectType getType() {
-		return ObjectType.GIT;
+	public void setType() {
+		this.objectType = ObjectType.GIT;
 	}
 
-	@Override
-	public String toJSON() {
-		return "{\"objectType\" : \"" + getType() + "\", \"repository\" : "
-				+ getRepository().toJSON() + " , \"branch\" : "
-				+ getBranch().toJSON() + " , \"commits\" : "
-				+ getCommits() + " , \"totalCommits\" : " + getTotalCommits() + "}";
-	}
 
 }

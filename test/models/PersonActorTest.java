@@ -7,17 +7,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import com.google.gson.Gson;
+
 public class PersonActorTest {
-	
+
 	private static final String DISPLAY_NAME = "display name";
+	private static final String USERNAME = "username";
+	private static final String PHOTO_URL = "photo_url";
 
 	@Test
 	public void testToJson() throws JSONException {
-		PersonActor personActor = new PersonActor(DISPLAY_NAME);
+		Gson gson = new Gson();
+		PersonActor personActor = new PersonActor(DISPLAY_NAME, USERNAME,
+				PHOTO_URL);
 
-		String expectedJSON = "{\"objectType\" : \"PERSON\", \"displayName\" : \""
-				+ DISPLAY_NAME + "\"}";
-		String actualJSON = personActor.toJSON();
+		String expectedJSON = "{\"username\":\"" + USERNAME
+				+ "\",\"photo_url\":\"" + PHOTO_URL + "\",\"displayName\":\""
+				+ DISPLAY_NAME + "\",\"objectType\":\"PERSON\"}";
+		String actualJSON = gson.toJson(personActor);
 		assertEquals(expectedJSON, actualJSON);
 		try {
 			new JSONObject(actualJSON);

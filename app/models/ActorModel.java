@@ -2,22 +2,26 @@ package models;
 
 public abstract class ActorModel {
 
-  protected String displayName;
+	private String displayName;
+	protected ActorType objectType;
 
-  public ActorModel(String displayName) {
-    this.setDisplayName(displayName);
-  }
-  
-  public String getDisplayName() {
-    return displayName;
-  }
+	public ActorModel(String displayName) {
+		this.displayName = displayName;
+	}
 
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
-  }
+	public String getDisplayName() {
+		return displayName;
+	}
 
-  public abstract ActorType getType();
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
 
-  public abstract String toJSON();
+	public ActorType getType() {
+		return objectType;
+	}
+	
+	public abstract void setType();
+
 
 }

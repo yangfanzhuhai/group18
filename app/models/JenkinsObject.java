@@ -12,6 +12,7 @@ public class JenkinsObject extends ObjectModel {
 		this.number = number;
 		this.status = status;
 		this.url = url;
+		this.objectType = ObjectType.JENKINS;
 	}
 
 	public String getName() {
@@ -47,15 +48,9 @@ public class JenkinsObject extends ObjectModel {
 	}
 
 	@Override
-	public ObjectType getType() {
-		return ObjectType.JENKINS;
+	public void setType() {
+		this.objectType = ObjectType.JENKINS;
 	}
 
-	@Override
-	public String toJSON() {
-		return "{\"objectType\" : \"" + getType() + "\", \"name\" : \"" + getName() + "\" , \"number\" : "
-				+ getNumber() + " , \"status\" : \"" + getStatus()
-				+ "\" , \"url\" : \"" + getUrl() + "\"}";
-	}
 
 }

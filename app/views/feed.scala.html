@@ -1,4 +1,4 @@
-@(groupID: String, toggle: Integer, userName: String)
+@(groupID: String, toggle: Integer, userName: String, displayName: String, photo_url: String)
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -200,8 +200,10 @@
   var task_ids = [];
   var tasks = [];
   var task_names = [];
+  var user_images = new Array();
   var final_post_id;
   var first_post_id;
+
 
   document.getElementById("title").style.marginTop = "20px";
   document.getElementById("title").style.marginBottom = "10px";
@@ -295,7 +297,6 @@
       $('#loadMoreButton').hide();
       first_post_id = "";
       autoRefreshing = false;
-      autoRefresh();
 
       var getUrl = "/" + "@groupID" + "/rest/";
 
@@ -338,6 +339,7 @@
 
   $(document).ready(refreshFeed);	
 
+
   function addTasks(task_array) {
 
   	for (var i=0; i < task_array.length; i++) {
@@ -357,6 +359,36 @@
       	tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
   }
+
+  function getUserImages(data) {
+
+    for (var i = 0; i < data.length; i++) {
+
+      for (var j = 0; j < data[i].length; j++) {
+
+          var image_src = "http://assets.eschools.co.uk/images/default_user_300x300.png";
+
+		/*
+          if (data[i][j]["fb_image"] != "") {
+
+              image_src = data[i][j]["fb_image"];
+
+          } else if (data[i][j]["email_hash"] != "") {
+
+            image_src = data[i][j]["email_hash"] + "&d=" + default_img;
+
+          } else {
+
+            image_src = "http://www.gravatar.com/avatar/cba1f2d695a5ca39ee6f343297a761a4.jpg?s=250"
+                          + "&d=" + default_img;
+          }
+			*/
+          user_images[data[i][j]["username"]] = image_src;
+      }
+    }
+  }
+
+
 
   function autocomplete_setup() {
   $(function ()  {
@@ -439,7 +471,6 @@
     /*$(window).scroll(function () {
       if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
         if(@toggle==0) {
-          //alert("feed page");
           $.ajax({
             type: "GET",
             url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
@@ -471,18 +502,19 @@
         getUrl += "morebuild/";
         break;*/
       }
-   /* setInterval(function() {
-      $.ajax({    
-      type: "GET",
-      url: getUrl + first_post_id,
-      dataType: "json",
-      success: function(data){   
-          autoRefreshing = true;
-          addToFeed(data);
-          autoRefreshing = false;
-      }});
-    }, 500);*/
-  }
+      
+      //setInterval(function() {
+      //$.ajax({    
+      //type: "GET",
+      //url: getUrl + first_post_id,
+      //dataType: "json",
+      //success: function(data){   
+      //    autoRefreshing = true;
+      //    addToFeed(data);
+      //    autoRefreshing = false;
+      //}});
+    //}, 500);
+  } 
 
   function loadMoreFeed() {
     $('#loadMoreButton').hide();
@@ -517,6 +549,7 @@
   
   function generateFeed(stream_array) {
     addToFeed(stream_array);
+    autoRefresh();
   }
 
   function addToFeed(stream_array) {
@@ -645,17 +678,7 @@
       user_image.style.marginLeft = "10px";
       user_image.style.border = "3px solid white";
 
-      var email = "user" + String.fromCharCode(64) + "gmail.com";
-
-      if (publisher == "Rob") {
-
-        email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
-
-      }
-
-      var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
-
-      user_image.src= get_gravatar(email, 250) + "&d=" + default_img;
+      user_image.src= user_images[publisher];
       post.appendChild(user_image);
 
   		post_options.style.padding = "10px";
@@ -919,17 +942,8 @@
           reply_publisher.setAttribute("class", "media-heading");
   				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"];
 
-          var email = "user" + String.fromCharCode(64) + "gmail.com";
 
-          if (reply_publisher.innerHTML == "Rob") {
-
-            email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
-
-          }
-
-          var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
-
-          user_image.src= get_gravatar(email, 250) + "&d=" + default_img;
+          user_image.src=user_images[reply_publisher.innerHTML];
 
   				var reply_message_text = document.createElement("p");
   				reply_message_text.innerHTML = changeReferencesToLinks(stream_array[i][j]['object']["message"]);
@@ -1101,13 +1115,23 @@
     var hashtagRegex = new RegExp("#[^#]*#");
     var tag = hashtagRegex.exec(message);
 
-    var linked_tag = document.createElement('a');
-    linked_tag.href = "http://www.google.com";
-    linked_tag.innerHTML = tag;
+    if (tag != null) {
 
-    return message.replace(tag, $(linked_tag).outerHTML());
+      var linked_tag = document.createElement('a');
+      var tag_without_hashes = tag[0].substring(1, tag[0].length -1).trim();
+
+     linked_tag.href = "@routes.Application.feed(groupID,1)";
+    
+      linked_tag.innerHTML = tag;
+
+      return message.replace(tag, $(linked_tag).outerHTML());
+
+    }
+
+    return message;
 
   }
+
 
   function extractReferences(message) {
 
