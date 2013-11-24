@@ -63,6 +63,10 @@ public class MongoLink {
 	public static void main(String[] args) throws UnknownHostException, ParseException {
 		MongoLink ml = new MongoLink(true);
 		
+	//	ml.addFieldToAllGroupCollections("actor.objectType", "PERSON");
+		
+	//	ml.a();
+	//	ml.addFieldToAllGroupCollections("actor.username", "");
 	//	ml.removeFieldFromCollection(db.getCollection("TestingFields"), "simple");
 	//	groups = db.getCollection("DEVgroups");
 
@@ -206,6 +210,20 @@ public class MongoLink {
 //		}*/
 	}
 	
+	private void a() {
+		List<DBObject> groupList = groups.find().toArray();
+		
+		for(DBObject group : groupList)
+		{
+			DBCollection c = getGroupColl((String) group.get("customID"));
+			List<DBObject> list = c.find().toArray();
+			for(DBObject o : list)
+			{
+				o.put("actor", new BasicDBObject("username", ((DBObject) o.get("actor")).get("displayName")));
+				c.save(o);
+			}
+		}
+	}
 	
 	private void addFieldToCollection(DBCollection coll, String fieldName, Object defaultValue) {
 		addFieldToCollection(coll, new BasicDBObject(), fieldName, defaultValue);
