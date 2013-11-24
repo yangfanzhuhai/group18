@@ -1,4 +1,4 @@
-@(groupID: String, toggle: Integer, userName: String)
+@(groupID: String, toggle: Integer, userName: String, displayName: String, photo_url: String)
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -472,7 +472,6 @@
     /*$(window).scroll(function () {
       if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
         if(@toggle==0) {
-          //alert("feed page");
           $.ajax({
             type: "GET",
             url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
@@ -1121,8 +1120,6 @@
 
       var linked_tag = document.createElement('a');
       var tag_without_hashes = tag[0].substring(1, tag[0].length -1).trim();
-
-       alert(tag_without_hashes);
 
      linked_tag.href = "@routes.Application.feed(groupID,1)";
     

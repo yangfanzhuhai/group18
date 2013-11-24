@@ -1,6 +1,8 @@
 package controllers;
 
+import models.LocalAccount;
 import models.MongoLink;
+import models.UserModel;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.about;
@@ -22,7 +24,11 @@ public class Application extends Controller {
 		if (loggedIn()) {
 			String userName = Rest.getUsernameFromSession();
 			if(MongoLink.MONGO_LINK.isMember(userName, groupID)) {
-				return ok(feed.render(groupID, toggle, userName));
+				UserModel user = MongoLink.MONGO_LINK.getUserFromUsername(userName);
+				LocalAccount localAccount = user.getLocalAccount();
+				String displayName = localAccount.getName();
+				String photo_url = localAccount.getPhoto_url();
+				return ok(feed.render(groupID, toggle, userName, displayName, photo_url));
 			} else {
 				return redirect(controllers.routes.Application.profile());
 			}
@@ -73,7 +79,11 @@ public class Application extends Controller {
 	public static Result profile() {
 		if (loggedIn()) {
 			String userName = Rest.getUsernameFromSession();
-			return ok(profile.render(userName));
+			UserModel user = MongoLink.MONGO_LINK.getUserFromUsername(userName);
+			LocalAccount localAccount = user.getLocalAccount();
+			String displayName = localAccount.getName();
+			String photo_url = localAccount.getPhoto_url();
+			return ok(profile.render(userName, displayName, photo_url));
 		} else {
 			return redirect(controllers.routes.Application.login());
 		}

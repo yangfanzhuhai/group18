@@ -7,13 +7,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import models.ActivityModel;
 import models.ActorModel;
 import models.FBAccount;
 import models.FBImage;
 import models.GHAccount;
 import models.GitObject;
+import models.JenkinsActor;
 import models.JenkinsObject;
+import models.LocalAccount;
 import models.MongoLink;
 import models.ObjectModel;
 import models.PersonActor;
@@ -44,19 +48,20 @@ public class Rest extends Controller {
 		String activityJson = getValueFromRequest("activity");
 
 		try {
-			ActivityModel activity = ActivityModel.activityModelGson.fromJson(activityJson, ActivityModel.class);
+			ActivityModel activity = ActivityModel.activityModelGson.fromJson(
+					activityJson, ActivityModel.class);
 			activity.save(groupID);
 			return ok();
 		} catch (Exception e) {
 			return status(400);
 		}
 	}
-	
+
 	public static Result addProject() {
-		
+
 		try {
 			String Json = getValueFromRequest("activity");
-			
+
 			Gson gson = new Gson();
 			UserWithGroup project = gson.fromJson(Json, UserWithGroup.class);
 
@@ -66,12 +71,12 @@ public class Rest extends Controller {
 			return status(422);
 		}
 	}
-	
+
 	public static Result addUsersToProject() {
-		
+
 		try {
 			String Json = getValueFromRequest("activity");
-			
+
 			Gson gson = new Gson();
 			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
 
@@ -81,12 +86,12 @@ public class Rest extends Controller {
 			return status(422);
 		}
 	}
-	
+
 	public static Result leaveProject() {
 		try {
 			String Json = getValueFromRequest("activity");
 			String userName = getUsernameFromSession();
-			
+
 			Gson gson = new Gson();
 			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
 
@@ -96,11 +101,11 @@ public class Rest extends Controller {
 			return status(422);
 		}
 	}
-	
+
 	public static Result deleteProject() {
 		try {
 			String Json = getValueFromRequest("activity");
-			
+
 			Gson gson = new Gson();
 			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
 
@@ -118,58 +123,59 @@ public class Rest extends Controller {
 	public static String getUsernameFromSession() {
 		String token = session("token");
 		Session session;
-    try {
-      session = Session.findSessionFromToken(token);
-      return session.getUsername();
-    } catch (ParseException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-      return null;
-    }
+		try {
+			session = Session.findSessionFromToken(token);
+			return session.getUsername();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
-	
-	public static Result getGroups(){
+
+	public static Result getGroups() {
 		String userName = getUsernameFromSession();
 		return ok(MongoLink.MONGO_LINK.getGroups(userName).toString());
 	}
-	
+
 	public static Result parseGitHubData() {
 		JsonNode json = request().body().asJson();
 		System.out.println(json.toString());
-		
+
 		String gravatar_id = getStringValueFromJson(json, "gravatar_id");
 		String html_url = getStringValueFromJson(json, "html_url");
 		System.out.println(gravatar_id);
 		GHAccount ghAccount = new GHAccount(gravatar_id, html_url);
 		UserModel userModel = new UserModel(ghAccount);
-		
-		MongoLink.MONGO_LINK.registerOrLogin((DBObject) JSON.parse(userModel.toJSON()));
-		
-		
-		
+
+		MongoLink.MONGO_LINK.registerOrLogin((DBObject) JSON.parse(userModel
+				.toJSON()));
+
 		session("connected", "gitaccount");
-		
+
 		return ok();
 	}
-	
+
 	public static Result parseFBData() {
-		
+
 		String fbAccountJson = getValueFromRequest("credentials");
 		System.out.println(fbAccountJson);
 		Gson gson = new Gson();
 		FBAccount fbAccount = gson.fromJson(fbAccountJson, FBAccount.class);
 		UserModel userModel = new UserModel(fbAccount);
-		
-		MongoLink.MONGO_LINK.registerOrLogin((DBObject) JSON.parse(userModel.toJSON()));
-		
+
+		MongoLink.MONGO_LINK.registerOrLogin((DBObject) JSON.parse(userModel
+				.toJSON()));
+
 		session("connected", "fbaccount");
-		
+
 		return ok();
 	}
-	
+
 	public static Result addFBImage() {
 		Gson gson = new Gson();
-		FBImage url = gson.fromJson(getValueFromRequest("activity"), FBImage.class);
+		FBImage url = gson.fromJson(getValueFromRequest("activity"),
+				FBImage.class);
 		MongoLink.MONGO_LINK.addFBImage(session("connected"), url.fb_image);
 		return ok();
 	}
@@ -177,24 +183,28 @@ public class Rest extends Controller {
 	public static Result getActivities(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getNewsFeed(groupID).toString());
 	}
-	
+
 	public static Result getMoreActivities(String groupID, String last_post_id) {
-		return ok(MongoLink.MONGO_LINK.getNextNews(groupID, last_post_id).toString());
+		return ok(MongoLink.MONGO_LINK.getNextNews(groupID, last_post_id)
+				.toString());
 	}
-	
+
 	public static Result getNewActivities(String groupID, String newest_post_id) {
-		return ok(MongoLink.MONGO_LINK.getNewNews(groupID, newest_post_id).toString());
+		return ok(MongoLink.MONGO_LINK.getNewNews(groupID, newest_post_id)
+				.toString());
 	}
 
 	public static Result getTasks(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getTasks(groupID).toString());
 	}
-	
+
 	public static Result getTaskDetails(String groupID) {
 		try {
 			Gson gson = new Gson();
-			TaskID task = gson.fromJson(getValueFromRequest("activity"), TaskID.class);
-			return ok(MongoLink.MONGO_LINK.getTaskDetails(groupID, task.id).toString());
+			TaskID task = gson.fromJson(getValueFromRequest("activity"),
+					TaskID.class);
+			return ok(MongoLink.MONGO_LINK.getTaskDetails(groupID, task.id)
+					.toString());
 		} catch (JsonSyntaxException e) {
 			return status(422);
 		} catch (ParseException e) {
@@ -207,39 +217,50 @@ public class Rest extends Controller {
 	}
 
 	public static Result getMoreTasks(String groupID, String last_post_id) {
-		return ok(MongoLink.MONGO_LINK.getNextTasks(groupID, last_post_id).toString());
+		return ok(MongoLink.MONGO_LINK.getNextTasks(groupID, last_post_id)
+				.toString());
 	}
 
 	public static Result getTasksWithStatus(String groupID, String status) {
-		return ok(MongoLink.MONGO_LINK.getTasksWithStatus(groupID, status).toString());
+		return ok(MongoLink.MONGO_LINK.getTasksWithStatus(groupID, status)
+				.toString());
 	}
-	
+
 	public static Result getGits(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getGitCommits(groupID).toString());
 	}
 
 	public static Result getMoreGits(String groupID, String last_post_id) {
-		return ok(MongoLink.MONGO_LINK.getNextGitCommits(groupID, last_post_id).toString());
+		return ok(MongoLink.MONGO_LINK.getNextGitCommits(groupID, last_post_id)
+				.toString());
 	}
-	
+
 	public static Result getBuilds(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getJenkinsBuilds(groupID).toString());
 	}
 
 	public static Result getMoreBuilds(String groupID, String last_post_id) {
-		return ok(MongoLink.MONGO_LINK.getNextJenkinsBuilds(groupID, last_post_id).toString());
+		return ok(MongoLink.MONGO_LINK.getNextJenkinsBuilds(groupID,
+				last_post_id).toString());
 	}
 
 	public static Result registerUser() {
 		Gson gson = new Gson();
-		UserModel userModel = gson.fromJson(getValueFromRequest("credentials"), UserModel.class);
+		UserModel userModel = gson.fromJson(getValueFromRequest("credentials"),
+				UserModel.class);
+		LocalAccount localAccount = userModel.getLocalAccount();
+		String password = localAccount.getPassword();
+		localAccount.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
 		String credentialsJson = userModel.toJSON();
-		
 
 		try {
 			if (MongoLink.MONGO_LINK.registerOrLogin((DBObject) JSON
 					.parse(credentialsJson))) {
-				session("connected", userModel.getLocalAccount().getName());
+				String ipAddress = request().remoteAddress();
+				LoginAttempt attempt = new LoginAttempt(
+						userModel.getUsername(), password, ipAddress);
+				Session currentSession = attempt.getSession();
+				session("token", currentSession.getToken());
 				return ok();
 			} else {
 				return status(400);
@@ -259,7 +280,8 @@ public class Rest extends Controller {
 			String password = user.password;
 			String ipAddress = request().remoteAddress();
 
-			LoginAttempt attempt = new LoginAttempt(username, password, ipAddress);
+			LoginAttempt attempt = new LoginAttempt(username, password,
+					ipAddress);
 			Session currentSession = attempt.getSession();
 
 			session("token", currentSession.getToken());
@@ -269,7 +291,7 @@ public class Rest extends Controller {
 			return status(422);
 		}
 	}
-	
+
 	public static Result getAllUsers() {
 		return ok(MongoLink.MONGO_LINK.getUsers().toString());
 	}
@@ -282,42 +304,41 @@ public class Rest extends Controller {
 
 	}
 
-
 	public static Result parseJenkinsNotfication(String groupID) {
 		JsonNode json = request().body().asJson();
 		JsonNode build = json.findValue("build");
 		String phase = getStringValueFromJson(build, "phase");
-		if(phase.equals("FINISHED")){
-		ActivityModel activity = createActivityModelFromJenkinsNotification(
-				json, build);
-		activity.save(groupID);
+		if (phase.equals("FINISHED")) {
+			ActivityModel activity = createActivityModelFromJenkinsNotification(
+					json, build);
+			activity.save(groupID);
 		}
 		return ok();
 	}
-	
-	
+
 	public static Result updateStatusAndPriority(String groupID) {
 		try {
-			
-			MongoLink.MONGO_LINK.updateStatusOrPriority(groupID, (DBObject) JSON.parse(getValueFromRequest("activity")));
+
+			MongoLink.MONGO_LINK.updateStatusOrPriority(groupID,
+					(DBObject) JSON.parse(getValueFromRequest("activity")));
 			return ok();
-			
+
 		} catch (MongoException e) {
 			return status(422);
 		}
 	}
-	
+
 	public static Result deletePost(String groupID) {
-		
-		MongoLink.MONGO_LINK.deletePost(groupID, (DBObject) JSON.parse(getValueFromRequest("activity")));
+
+		MongoLink.MONGO_LINK.deletePost(groupID,
+				(DBObject) JSON.parse(getValueFromRequest("activity")));
 		return ok();
 	}
 
-	
 	private static ActivityModel createActivityModelFromJenkinsNotification(
 			JsonNode json, JsonNode build) {
 		String published = createDate();
-		ActorModel actor = new PersonActor("Jenkins");
+		ActorModel actor = new JenkinsActor();
 		String verb = "reported";
 		ObjectModel object = createJenkinsObject(json, build);
 		TargetModel target = new TargetModel("", new ArrayList<String>());
@@ -326,19 +347,20 @@ public class Rest extends Controller {
 		return activity;
 	}
 
-	private static JenkinsObject createJenkinsObject(JsonNode json, JsonNode build) {
+	private static JenkinsObject createJenkinsObject(JsonNode json,
+			JsonNode build) {
 		String name = getStringValueFromJson(json, "name");
 		int number = build.findValue("number").asInt();
 		String status = getStringValueFromJson(build, "status");
 		String url = getStringValueFromJson(build, "full_url");
 		return new JenkinsObject(name, number, status, url);
 	}
-	
+
 	private static ActivityModel createActivityModelFromGitHook(JsonNode json) {
 		String published = createDate();
 
 		ActorModel actor = new PersonActor(getStringValueFromJson(json,
-				"user_name"));
+				"user_name"), "", "");
 		String verb = "pushed";
 		ObjectModel object = createGitObject(json);
 		TargetModel target = new TargetModel("", new ArrayList<String>());
@@ -393,25 +415,27 @@ public class Rest extends Controller {
 	}
 
 	private static Commit createCommit(JsonNode commitNode) {
-		String message = replaceSpecialChars(getStringValueFromJson(commitNode, "message"));
+		String message = replaceSpecialChars(getStringValueFromJson(commitNode,
+				"message"));
 		String url = getStringValueFromJson(commitNode, "url");
 		JsonNode authorNode = commitNode.findValue("author");
 		String author = getStringValueFromJson(authorNode, "name");
 		Commit commit = new Commit(url, author, message);
 		return commit;
 	}
-	
+
 	private static String replaceSpecialChars(String msg) {
-		return msg.replace("\n", "\\\\n").replace("\t", "\\\\t").replace("\r", "\\\\r");
+		return msg.replace("\n", "\\\\n").replace("\t", "\\\\t")
+				.replace("\r", "\\\\r");
 	}
-	
+
 	private static String createDate() {
 		Calendar rightNow = Calendar.getInstance();
 		java.text.SimpleDateFormat df1 = new java.text.SimpleDateFormat(
 				"d/MM/yyyy 'at' HH:mm:ss");
 		return df1.format(rightNow.getTime());
 	}
-	
+
 	private static String getValueFromRequest(String value) {
 		final Map<String, String[]> values = request().body()
 				.asFormUrlEncoded();

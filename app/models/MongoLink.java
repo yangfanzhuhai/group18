@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
+import org.mindrot.jbcrypt.BCrypt;
 
 import com.google.gson.Gson;
 import com.mongodb.BasicDBList;
@@ -48,12 +49,7 @@ public class MongoLink {
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
 		
-		if(devMode){
-			users = db.getCollection("usertemp");
-		}
-		else {
-			users = db.getCollection("userAccounts");
-		}
+		users = db.getCollection("userAccountsV2");
 		groups = db.getCollection("groups");
 		sessions = db.getCollection("session");
 
@@ -447,13 +443,10 @@ public class MongoLink {
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
 	
-	public void linkAccount(String userID, DBObject obj) {
-		users.update(QueryBuilder.start("_id").is(new ObjectId(userID)).get(), new BasicDBObject("$set",obj));
-		//TODO check if merge needed on database side
-	}
 		
 	public boolean checkLoginWithUsername(String username, String password) {
-		return (users.findOne(QueryBuilder.start("username").is(username).and("localAccount.password").is(password).get()) != null);
+		DBObject user = users.findOne(QueryBuilder.start("username").is(username).get());
+		return checkCredentials(user, password);
 	}
 	
 	/** Checks the validity of the given email and password
@@ -463,7 +456,21 @@ public class MongoLink {
 	 * @return True if there is an entry in the database with that exact email and password, False otherwise
 	 */
 	public boolean checkLoginWithEmail(String email, String password) {
-		return (users.findOne(QueryBuilder.start("localAccount.email").is(email).and("localAccount.password").is(password).get()) != null);	
+		DBObject user = users.findOne(QueryBuilder.start("localAccount.email").is(email).get());
+		return checkCredentials(user, password);
+	}
+
+	private boolean checkCredentials(DBObject user, String password) {
+		if(user != null) {
+			String hashedPassword = ((DBObject) user.get("localAccount")).get("password").toString();
+			return BCrypt.checkpw(password, hashedPassword);
+		}
+		return false;
+	}
+	
+	public void linkAccount(String userID, DBObject obj) {
+		users.update(QueryBuilder.start("_id").is(new ObjectId(userID)).get(), new BasicDBObject("$set",obj));
+		//TODO check if merge needed on database side
 	}
 	
 	/** Retrieves the username that links to the email used for login
@@ -473,6 +480,12 @@ public class MongoLink {
 	 */
 	public String getUsernameFromEmail(String email) {
 		return (users.findOne(QueryBuilder.start("localAccount.email").is(email).get()).toString());
+	}
+	
+	public UserModel getUserFromUsername(String userName){
+		Gson gson = new Gson();
+		String userJson = (users.findOne(QueryBuilder.start("username").is(userName).get())).toString();
+		return gson.fromJson(userJson, UserModel.class);
 	}
 	
 	
