@@ -638,7 +638,14 @@
 
   		var published = stream_array[i][0]['published'];
 
-  		var publisher = stream_array[i][0]['actor']["displayName"];
+  		var publisher;
+  		var displayName = stream_array[i][0]['actor']["displayName"];
+  		var username = stream_array[i][0]['actor']["username"];
+  		if (displayName == "") {
+  		  publisher = username;
+  		} else {
+  		  publisher = displayName;
+  		}
   		
   		var publisherType = stream_array[i][0]['actor']["objectType"];
   	
