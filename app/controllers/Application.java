@@ -20,7 +20,7 @@ public class Application extends Controller {
 	 * 		   Else render login screen.
 	 */
 
-	public static Result feed(String groupID, Integer toggle) {
+	public static Result feed(String groupID, Integer toggle, String task) {
 		if (loggedIn()) {
 			String userName = Rest.getUsernameFromSession();
 			if(MongoLink.MONGO_LINK.isMember(userName, groupID)) {
@@ -28,7 +28,7 @@ public class Application extends Controller {
 				LocalAccount localAccount = user.getLocalAccount();
 				String displayName = localAccount.getName();
 				String photo_url = localAccount.getPhoto_url();
-				return ok(feed.render(groupID, toggle, userName, displayName, photo_url));
+				return ok(feed.render(groupID, toggle, userName, displayName, photo_url, task));
 			} else {
 				return redirect(controllers.routes.Application.profile());
 			}

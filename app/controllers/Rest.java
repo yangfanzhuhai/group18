@@ -251,6 +251,7 @@ public class Rest extends Controller {
 		LocalAccount localAccount = userModel.getLocalAccount();
 		String password = localAccount.getPassword();
 		localAccount.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+		//localAccount.setPassword(password);
 		String credentialsJson = userModel.toJSON();
 
 		try {

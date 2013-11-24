@@ -14,6 +14,7 @@ public class LocalAccount extends Account {
 	public LocalAccount(String email, String password){
 		this.email = email;
 		this.password =  BCrypt.hashpw(password, BCrypt.gensalt());
+		//this.password = password;
 	}
 	
 	
