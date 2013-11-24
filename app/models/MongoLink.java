@@ -833,6 +833,7 @@ public class MongoLink {
 	 * All replies corresponding to that object will also be deleted
 	 */
 	public void deletePost(String customID, DBObject obj) {
+		
 		deletePost(getGroupColl(customID), obj.get("id").toString());
 	}
 	
