@@ -1,4 +1,4 @@
-@(groupID: String, toggle: Integer, userName: String, displayName: String, photo_url: String)
+@(groupID: String, toggle: Integer, userName: String, displayName: String, photo_url: String, task: String)
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -25,29 +25,27 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="@routes.Application.feed(groupID,0)">Progress</a>
+        <a class="navbar-brand" href="@routes.Application.feed(groupID,0,"")">Progress</a>
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav" role="navigation">
-          <li id="newsfeed_nav" class = "active"><a href="@routes.Application.feed(groupID,0)">News Feed</a></li>
+          <li id="newsfeed_nav" class = "active"><a href="@routes.Application.feed(groupID,0,"")">News Feed</a></li>
          
-          
-          <!--<li id="tasklist_nav"><a href="@routes.Application.feed(groupID,1)">Task List</a></li>-->
-          
+
           <li id="tasklist_nav" class="dropdown">
-            <a href="@routes.Application.feed(groupID,1)" class="dropdown-toggle" data-toggle="dropdown">
+            <a href="@routes.Application.feed(groupID,1,"")" class="dropdown-toggle" data-toggle="dropdown">
               Task List 
               <b class="caret"></b></a>
             <ul id="taskDrop" class="dropdown-menu">
-              <li><a href="@routes.Application.feed(groupID,1)">All Tasks</a></li>
+              <li><a href="@routes.Application.feed(groupID,1,"")">All Tasks</a></li>
           	  <li onclick = "setTaskStatus(this.id)" id = "TO_DO"><a href="#">TO DO</a></li>
           	  <li onclick = "setTaskStatus(this.id)" id = "DOING"><a href="#">DOING</a></li>
           	  <li onclick = "setTaskStatus(this.id)" id = "DONE"><a href="#">DONE</a></li>
         	</ul>
       	  </li>
           
-          <li id="git_nav"><a href="@routes.Application.feed(groupID,2)">Git Commits</a></li>
-          <li id = "builds_nav"><a href="@routes.Application.feed(groupID,3)">Builds</a></li>
+          <li id="git_nav"><a href="@routes.Application.feed(groupID,2,"")">Git Commits</a></li>
+          <li id = "builds_nav"><a href="@routes.Application.feed(groupID,3,"")">Builds</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right" role="navigation">
           <li><a href="@routes.Application.profile">@userName</a></li>
@@ -58,7 +56,7 @@
     </div>
 
   <div class="container col-md-offset-2 col-md-8">
-    <a href="@routes.Application.feed(groupID,0)">
+    <a href="@routes.Application.feed(groupID,0,"")">
       <img src="@routes.Assets.at("images/title.jpg")" id ="title" alt="some_text"
     	width="200" >
       <img src="@routes.Assets.at("images/logo.jpg")" id = "logo"  alt="some_text"
@@ -284,7 +282,7 @@
         url: "/" + "@groupID" + "/rest/tasks/" + status,
         dataType: "json",
         success: function(data){
-        //window.location="@routes.Application.feed(groupID, 1)";
+
             generateFeed(data);
             
         }
@@ -1120,7 +1118,7 @@
       var linked_tag = document.createElement('a');
       var tag_without_hashes = tag[0].substring(1, tag[0].length -1).trim();
 
-     linked_tag.href = "@routes.Application.feed(groupID,1)";
+     lengthinked_tag.href = "http://www.google.com";
     
       linked_tag.innerHTML = tag;
 
