@@ -464,6 +464,7 @@ public class MongoLink {
 		if(user != null) {
 			String hashedPassword = ((DBObject) user.get("localAccount")).get("password").toString();
 			return BCrypt.checkpw(password, hashedPassword);
+			//return true;
 		}
 		return false;
 	}
@@ -832,6 +833,7 @@ public class MongoLink {
 	 * All replies corresponding to that object will also be deleted
 	 */
 	public void deletePost(String customID, DBObject obj) {
+		
 		deletePost(getGroupColl(customID), obj.get("id").toString());
 	}
 	
