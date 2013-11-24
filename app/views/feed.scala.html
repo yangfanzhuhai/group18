@@ -55,7 +55,7 @@
     </div>
     </div>
 
-  <div class="container col-md-offset-2 col-md-8">
+  <div class="container col-md-offset-2 col-md-8" id = "container">
     <a href="@routes.Application.feed(groupID,0,"")">
       <img src="@routes.Assets.at("images/title.jpg")" id ="title" alt="some_text"
     	width="200" >
@@ -101,10 +101,11 @@
 
               <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
 "AJAX loader" title="AJAX loader" align="center" /></div>
+
     
 
     <ul id = "stream" class = "media-list" ></ul>
-    <div align="center">
+    <div align="center" id = "seeMoreButton">
       <button id = "loadMoreButton"class = "btn btn-info" style = "margin: 10px" onclick = "loadMoreFeed()">See more...</button>
     </div>
     <div id="loader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
@@ -344,7 +345,7 @@
             dataType: "json",
             data: {"activity":task_json},
             success: function(data){   
-              alert(JSON.stringify(data));
+              
 
                 generateFeed(data);
           }});
@@ -370,18 +371,18 @@
 
   	for (var i=0; i < task_array.length; i++) {
   		var task_id = task_array[i]['id'];
-
   		var task_alias = task_name = task_array[i]['object']["alias"];
-  		task_aliases[i] = task_alias;
-  		var task_details = task_array[i]['object']["name"];
-  		var task_name;
+      var task_details = task_array[i]['object']["name"];
+      var task_name;
+
   		if(task_alias != "") {
   			task_name = task_alias;
   		} else {
   			task_name = task_details;
   		}
-     	task_names[i] = task_name;
-            task_ids[task_name] = task_id;
+
+      task_ids[task_name] = task_id;
+
       tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
       tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
@@ -563,6 +564,7 @@
   function addToFeed(stream_array) {
 
 
+
   	//document.getElementById("username").innerHTML="@userName";
 
     if (localToggle == 0) {
@@ -597,6 +599,23 @@
       document.getElementById("git_nav").setAttribute("class","");
       document.getElementById("post_options").style.display="none";
 
+      var task_title = document.createElement("h2");
+      task_title.style.marginBottom = "20px";
+      var stream = document.getElementById("stream");
+      document.getElementById("container").insertBefore(task_title, stream);
+
+      if (stream_array.length > 0) {
+
+        task_title.innerHTML = "References to task @task";
+                $('#seeMoreButton').hide();
+
+      } else {
+
+        task_title.innerHTML = "There are no references to task @task";
+        $('#seeMoreButton').hide();
+
+
+      }
     }
     
 
@@ -1155,14 +1174,11 @@
 
       var linked_tag = document.createElement('a');
 
-      var tag_without_hashes = tag[0].substring(1, tag[0].length -1).trim();
+      var tag_without_hashes = tag[0].substring(1, tag[0].length -1);
 
       var task_id = task_ids[tag_without_hashes];
 
-
-    //  alert(tag_without_hashes + " " + task_id);
-
-      linked_tag.href = "/@groupID/taskref?task=" + task_id;
+      linked_tag.href = "/@groupID/taskref?task=" + task_id +"";
     
       linked_tag.innerHTML = tag;
 
@@ -1175,30 +1191,19 @@
   }
 
 
-  function extractReferences(message) {
+  function getRefId(message) {
 
-      var result = message.split("#");
-
-      var i = 0;
-      
-      while (i < task_ids.length) {
-          if (task_names[i] == result[1]) {
-            return result[1];
-          }
-          i++;
-      }
-      return "";
-  }
-
-  function getRefId(reference) {
+    var result = message.split("#");
+    var reference = result[1];
 
     var i = 0;
-      while (i < task_ids.length) {
-          if (task_names[i] == reference) {
-            return task_ids[i];
-          }
-          i++;
-      }
+
+    if (task_ids[reference] != undefined) {
+
+      return task_ids[reference];
+
+    }
+
       return "";
 
   }
@@ -1220,8 +1225,7 @@
       
       if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
-        var reference = extractReferences(message_text);
-        var ref_id = getRefId(reference);
+        var ref_id = getRefId(message_text);
 
   	    var references = [];
 
@@ -1230,10 +1234,6 @@
       		references =  ["\"" + ref_id + "\""];
 
         }
-
-      //  message_text = message_text.replace("#".concat(reference).concat(, "");
-
-      	
 
       var message_object = generateMessageObject(message_text)    
 
