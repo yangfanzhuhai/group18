@@ -48,6 +48,8 @@ public class MongoLink {
 	//for testing
 	public static void main(String[] args) throws UnknownHostException {
 		MongoLink ml = new MongoLink(true);
+		
+		System.out.println(ml.getStatuses("newsFeed"));
 		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
 
 		//Prints last 20 items of newsFeed
@@ -470,6 +472,10 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getTasksWithStatus(String customID, String status) {
 		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit(getGroupColl(customID)));
+	}
+	
+	public ArrayList<String> getStatuses(String customID) {
+		return (ArrayList<String>) groups.findOne(QueryBuilder.start("customID").is(customID).get()).get("statuses");
 	}
 	
 	/**
