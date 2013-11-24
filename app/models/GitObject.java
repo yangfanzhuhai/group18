@@ -19,6 +19,7 @@ public class GitObject extends ObjectModel {
 		this.branch = branch;
 		this.commits = commits;
 		this.totalCommits = totalCommits;
+		this.objectType = ObjectType.GIT;
 	}
 
 	public Repository getRepository() {
