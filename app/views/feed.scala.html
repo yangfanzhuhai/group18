@@ -217,6 +217,7 @@
 
   function generateJSON(date_and_time_stamp, object, post_id, references) {
 
+
       $('#preloader').show();
 
       var actor = generatePersonActor();
@@ -647,7 +648,6 @@
   		  publisher = displayName;
   		}
 
-       addPhotoForUser(username, photo_url);
 
   		
   		var publisherType = stream_array[i][0]['actor']["objectType"];
@@ -726,7 +726,8 @@
       user_image.style.marginLeft = "10px";
       user_image.style.border = "3px solid white";
 
-      user_image.src= user_images[username];
+      addPhotoForUser(username, photo_url);
+      user_image.src = user_images[username];
 
       post.appendChild(user_image);
 
@@ -1000,6 +1001,8 @@
           var reply_displayName = stream_array[i][j]['actor']["displayName"];
           var reply_photo_url = stream_array[i][j]['actor']["photo_url"];
 
+          alert(reply_photo_url);
+
           reply_publisher.innerHTML = reply_username;
 
           if (reply_displayName != "") {
@@ -1026,8 +1029,7 @@
           reply_div_body.appendChild(reply_message_text);    
   			j++;
 
-  		}
-
+  		  }
 
   		}
 
@@ -1082,14 +1084,12 @@
   	var json = "{\"id\" : \"" + post_id + "\"}"
 
   	$.ajax({
-		type: "POST",
-		url: "/" + "@groupID" + "/rest/delete/post",
-		dataType: "json",
-		data: {"activity":json},
-		complete: refreshFeed
-	});    
-
-
+		  type: "POST",
+		  url: "/" + "@groupID" + "/rest/delete/post",
+		  dataType: "json",
+		  data: {"activity":json},
+		  complete: refreshFeed
+	   });    
   }
 
   function getTimeStamp() {
@@ -1124,33 +1124,17 @@
   		var date_and_time_stamp = getTimeStamp();
   		var references = [];
 
-      var reference = extractReferences(reply_message_text);
-        var ref_id = getRefId(reference);
+        var ref_id = getRefId(reply_message_text);
         var references = [];
         if (ref_id != "") {
           references =  ["\"" + ref_id + "\""];
         }
 
-  /*	var reply = generateJSON(date_and_time_stamp, reply_name_text, "MESSAGE",
-  							 reply_message_text, post_id, references); */
+  	var message_object = generateMessageObject(reply_message_text);
 
-      var reply = "{\"published\" : \""
-                + date_and_time_stamp
-                + "\", "
-                + "\"actor\" : "
-                + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-                + "\"" 
-                + reply_name_text
-                + "\"}, "
-                + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-                + " : \"MESSAGE\", \"message\" : " 
-                + "\"" 
-                + reply_message_text
-                + "\"}, \"target\" : { \"messageID\" : \"" 
-                + post_id
-  	      + "\", \"taskIDs\" : ["
-  	      + references
-                +  "]}} "; 
+    var actor = generatePersonActor();
+
+    var reply = generateJSON(date_and_time_stamp, message_object, post_id, references); 
 
       $.ajax({
       	type: "POST",
@@ -1163,6 +1147,7 @@
   	}
 
   }
+
 
   function changeReferencesToLinks(message) {
 
