@@ -325,8 +325,7 @@
 
         } 
 
-
-        if (@toggle==0 || @toggle == 4) {
+        if (@toggle==0 || @toggle == 4 || @toggle == 1) {
           $.ajax({
           type: "GET",
           url: "/" + "@groupID" + "/rest/alltasks",
@@ -754,8 +753,8 @@
 
         break;
       case "TASK":
-  		var task_name = stream_array[i][0]['object']["name"];
-		var task_alias = stream_array[i][0]['object']["alias"];
+  		  var task_name = stream_array[i][0]['object']["name"];
+		    var task_alias = stream_array[i][0]['object']["alias"];
         var task_heading = document.createElement("h4");
         task_heading.setAttribute("class", "media-heading");
 
