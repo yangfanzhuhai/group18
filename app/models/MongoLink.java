@@ -681,6 +681,7 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getTasks(String customID, int postLimit) {
 		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
+		
 	}
 
 	/**

@@ -1,4 +1,4 @@
-@(groupID: String, toggle: Integer, userName: String, displayName: String, photo_url: String, task: String)
+@(groupID: String, toggle: String, userName: String, displayName: String, photo_url: String)
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -17,46 +17,10 @@
   </head>
 
   <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="@routes.Application.feed(groupID,0,"")">Progress</a>
-      </div>
-      <div class="collapse navbar-collapse">
-        <ul class="nav navbar-nav" role="navigation">
-          <li id="newsfeed_nav" class = "active"><a href="@routes.Application.feed(groupID,0,"")">News Feed</a></li>
-         
+    @navbar(groupID, userName)
 
-          <li id="tasklist_nav" class="dropdown">
-            <a href="@routes.Application.feed(groupID,1,"")" class="dropdown-toggle" data-toggle="dropdown">
-              Task List 
-              <b class="caret"></b></a>
-            <ul id="taskDrop" class="dropdown-menu">
-              <li><a href="@routes.Application.feed(groupID,1,"")">All Tasks</a></li>
-          	  <li onclick = "setTaskStatus(this.id)" id = "TO_DO"><a href="#">TO DO</a></li>
-          	  <li onclick = "setTaskStatus(this.id)" id = "DOING"><a href="#">DOING</a></li>
-          	  <li onclick = "setTaskStatus(this.id)" id = "DONE"><a href="#">DONE</a></li>
-        	</ul>
-      	  </li>
-          
-          <li id="git_nav"><a href="@routes.Application.feed(groupID,2,"")">Git Commits</a></li>
-          <li id = "builds_nav"><a href="@routes.Application.feed(groupID,3,"")">Builds</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right" role="navigation">
-          <li><a href="@routes.Application.profile">@userName</a></li>
-          <li><a href="@routes.Application.login">Log Out</a></li>
-        </ul>
-      </div> <!--/.nav-collapse -->
-    </div>
-    </div>
-
-  <div class="container col-md-offset-2 col-md-8" id = "container">
-    <a href="@routes.Application.feed(groupID,0,"")">
+  <div class="container col-md-offset-2 col-md-8">
+    <a href="@routes.Application.feed(groupID,"feed")">
       <img src="@routes.Assets.at("images/title.jpg")" id ="title" alt="some_text"
     	width="200" >
       <img src="@routes.Assets.at("images/logo.jpg")" id = "logo"  alt="some_text"
@@ -114,7 +78,7 @@
 
 
   <script>
-  var localToggle = @toggle;
+  var localToggle = "@toggle";
   var msgTextLimit = 140;
   var aliasLimit = 8;
   var taskTextLimit = 64;
@@ -122,27 +86,50 @@
   charCountdown.value=msgTextLimit;
   limitedtextfield.maxlength=msgTextLimit;
   
-  function getGroupName() {
+  function getGroupAndStatuses() {
+  
   	$.ajax({
         type: "GET",
         url: "/rest/groups",
         dataType: "json",
         success: function(data){
-        
-        for (var i=0; i < data.length; i++) {
-        	var currGroupID = data[i]['customID'];
-  			var groupName = data[i]['name'];
-
-  			if(currGroupID == "@groupID"){
-  				document.getElementById("groupNameTitle").innerHTML=groupName;
+        	
+        	var statuses;
+        	
+        	//Set News Feed dropdown to display projects
+        	//set Title to selected project
+        	for (var i=0; i < data.length; i++) {
+        		var currGroupID = data[i]['customID'];
+  				var groupName = data[i]['name'];
+  				var li = document.createElement("li");
+  				var a = document.createElement("a");
+  				a.innerHTML=groupName;
+  				a.href="/" + currGroupID;
+  				li.appendChild(a);
+  				newsDrop.appendChild(li);
+  				if(currGroupID == "@groupID"){
+  					document.getElementById("groupNameTitle").innerHTML=groupName;
+  					statuses = data[i]['statuses'];
+  				}
   			}
-  		}	
+  			//set Tasks dropdown to display statuses
+  			for(var j=0; j<statuses.length; j++) {
+				var li = document.createElement("li");
+  				var a = document.createElement("a");
+  				a.innerHTML=statuses[j];
+  				a.href= "/" + "@groupID" + "/tasks/" + statuses[j].replace(" ", "_");
+  				li.appendChild(a);
+  				taskDrop.appendChild(li);
+  				
+  			}
+  			
+  			
         }
       });
-      	
+      
   }
   
-  getGroupName();
+  getGroupAndStatuses();
   
   $.fn.outerHTML = function(){
 
@@ -281,7 +268,7 @@
   }
 
   function setTaskStatus(status) {
-  localToggle=1;
+  localToggle="tasks";
     document.getElementById("stream").innerHTML = "";
     document.getElementById("task_status").innerHTML = status;
     $.ajax({
@@ -305,63 +292,45 @@
 
       var getUrl = "/" + "@groupID" + "/rest/";
 
-      switch(@toggle)
-        {
-        case 0:
-          getUrl += "feed";
-          break;
-        case 1:
-          getUrl += "tasks";
-          break;
-        case 2:
-          getUrl += "git";
-          break;
-        case 3:
-          getUrl += "builds";
-          break;
-        case 4:
-          getUrl += "taskdetails";
-          break;
+		getUrl += "@toggle";
 
-        } 
-
-        if (@toggle==0 || @toggle == 4 || @toggle == 1) {
+			//add all tasks to list for referencing
           $.ajax({
           type: "GET",
           url: "/" + "@groupID" + "/rest/alltasks",
           dataType: "json",
           success: function(data){   
-
               addTasks(data);
           }});
-        }    
+	
+		//if toggle is a reference, generate		
 
-        if (localToggle == 4) {
-
-          var task_json = "{\"id\": \"@task\"}";
           $.ajax({    
-            type: "POST",
-            url: getUrl,
+           type: "GET",
+           url: "/" + "@groupID" + "/rest/ref/" + "@toggle",
             dataType: "json",
-            data: {"activity":task_json},
-            success: function(data){   
-              
-
-                generateFeed(data);
-          }});
-
-
-        } else {
-
-          $.ajax({    
+            success: function(data){ 
+	
+			if(data == "") {
+			
+			$.ajax({    
            type: "GET",
            url: getUrl,
             dataType: "json",
             success: function(data){   
+              generateFeed(data);
+              
+             }}); 
+			
+			} else {
 
               generateFeed(data);
-          }});
-        }  
+          
+
+		}
+		}});
+		
+          
   }
 
   $(document).ready(refreshFeed);	
@@ -478,7 +447,8 @@
 
     /*$(window).scroll(function () {
       if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
-        if(@toggle==0) {
+        if(@toggle=="feed") {
+          //alert("feed page");
           $.ajax({
             type: "GET",
             url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
@@ -495,34 +465,33 @@
   var autoRefreshing;
   function autoRefresh() {    
     var getUrl = "/" + "@groupID" + "/rest/";
-    switch(@toggle)
+    switch("@toggle")
       {
-      case 0:
+      case "feed":
         getUrl += "newfeed/";
         break;
-    /*  case 1:
+      case "tasks":
         getUrl += "moretask/";
         break;
-      case 2:
+      case "gits":
         getUrl += "moregit/";
         break;
-      case 3:
+      case "builds":
         getUrl += "morebuild/";
-        break;*/
+        break;
       }
-      
-      //setInterval(function() {
-      //$.ajax({    
-      //type: "GET",
-      //url: getUrl + first_post_id,
-      //dataType: "json",
-      //success: function(data){   
-      //    autoRefreshing = true;
-      //    addToFeed(data);
-      //    autoRefreshing = false;
-      //}});
-    //}, 500);
-  } 
+    /*setInterval(function() {
+      $.ajax({    
+      type: "GET",
+      url: getUrl + first_post_id,
+      dataType: "json",
+      success: function(data){   
+          autoRefreshing = true;
+          addToFeed(data);
+          autoRefreshing = false;
+      }});
+    }, 500);*/
+  }
 
   function loadMoreFeed() {
     $('#loadMoreButton').hide();
@@ -531,18 +500,18 @@
     //final_post_id = $("ul#stream li").last().attr("id");
 
     var getUrl = "/" + "@groupID" + "/rest/";
-    switch(@toggle)
+    switch("@toggle")
       {
-      case 0:
+      case "feed":
         getUrl += "morefeed/";
         break;
-      case 1:
+      case "tasks":
         getUrl += "moretask/";
         break;
-      case 2:
+      case "gits":
         getUrl += "moregit/";
         break;
-      case 3:
+      case "builds":
         getUrl += "morebuild/";
         break;
       }
@@ -567,32 +536,32 @@
 
   	//document.getElementById("username").innerHTML="@userName";
 
-    if (localToggle == 0) {
+    if (localToggle == "feed") {
       document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("git_nav").setAttribute("class","");
       document.getElementById("builds_nav").setAttribute("class","");
-    } else if(localToggle == 1) {
-      document.title = "Task List"
+    } else if(localToggle == "tasks") {
+    	document.title = "Task List"
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","active");
       document.getElementById("git_nav").setAttribute("class","");
       document.getElementById("builds_nav").setAttribute("class","");
-    } else if(localToggle == 2) {
+    } else if(localToggle == "gits") {
       document.title = "Git Commits"
       document.getElementById("git_nav").setAttribute("class","active");
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("builds_nav").setAttribute("class","");
-    } else if(localToggle == 3) {
+    } else if(localToggle == "builds") {
       document.title = "Jenkins Builds"
       document.getElementById("builds_nav").setAttribute("class","active");
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("git_nav").setAttribute("class","");
-    } else if (localToggle == 4) {
-      document.title = "@task";
+    } else if (localToggle == "taskdetails") {
+      document.title = "@toggle";
       document.getElementById("builds_nav").setAttribute("class","");
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","");
@@ -606,16 +575,11 @@
 
       if (stream_array.length > 0) {
 
-        task_title.innerHTML = "References to task @task";
-                $('#seeMoreButton').hide();
-
+        task_title.innerHTML = "References to task @toggle";
       } else {
-
-        task_title.innerHTML = "There are no references to task @task";
-        $('#seeMoreButton').hide();
-
-
+        task_title.innerHTML = "There are no references to task @toggle";
       }
+      $('#seeMoreButton').hide();
     }
     
 
@@ -646,9 +610,6 @@
   		} else {
   		  publisher = displayName;
   		}
-
-
-  		
   		var publisherType = stream_array[i][0]['actor']["objectType"];
   	
   		var verb = stream_array[i][0]['verb'];
@@ -753,8 +714,8 @@
 
         break;
       case "TASK":
-  		  var task_name = stream_array[i][0]['object']["name"];
-		    var task_alias = stream_array[i][0]['object']["alias"];
+  		var task_name = stream_array[i][0]['object']["name"];
+		var task_alias = stream_array[i][0]['object']["alias"];
         var task_heading = document.createElement("h4");
         task_heading.setAttribute("class", "media-heading");
 
@@ -1160,12 +1121,14 @@
 
       var task_id = task_ids[tag_without_hashes];
 
-      linked_tag.href = "/@groupID/taskref?task=" + task_id +"";
+	if(task_id != undefined){
+      linked_tag.href = "/@groupID/ref/" + task_id;
     
       linked_tag.innerHTML = tag;
 
       return message.replace(tag, $(linked_tag).outerHTML());
-
+	}
+	
     }
 
     return message;
