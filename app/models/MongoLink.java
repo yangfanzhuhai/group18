@@ -59,6 +59,11 @@ public class MongoLink {
 	public static void main(String[] args) throws UnknownHostException, ParseException {
 		MongoLink ml = new MongoLink(true);
 		
+		ml.a();
+	//	ml.addFieldToAllGroupCollections("actor.objectType", "PERSON");
+		
+	//	ml.a();
+	//	ml.addFieldToAllGroupCollections("actor.username", "");
 	//	ml.removeFieldFromCollection(db.getCollection("TestingFields"), "simple");
 	//	groups = db.getCollection("DEVgroups");
 
@@ -202,6 +207,31 @@ public class MongoLink {
 //		}*/
 	}
 	
+	private void a() {
+		List<DBObject> groupList = groups.find().toArray();
+		
+		for(DBObject group : groupList)
+		{
+		//	DBCollection c = getGroupColl((String) group.get("customID"));
+			DBCollection c = getGroupColl("QuantumCheese");
+			List<DBObject> list = c.find(QueryBuilder.start("object.objectType").notEquals("JENKINS").get()).toArray();
+			for(DBObject o : list)
+			{				
+				o.put("actor", actor(((DBObject) o.get("actor")).get("username").toString(),((DBObject) o.get("actor")).get("photo_url").toString(),((DBObject) o.get("actor")).get("objectType").toString()));
+				c.save(o);
+			//	o.put("actor", jenkins());
+			//	c.save(o);
+			}
+		}
+	}
+	
+	private static DBObject jenkins() {
+		return new BasicDBObject("displayName", "Jenkins").append("objectType", "JENKINS");
+	}
+	
+	private static DBObject actor(String username, String photo_url, String objectType) {
+		return new BasicDBObject("displayName", username).append("objectType", objectType).append("username", username).append("photo_url", photo_url);
+	}
 	
 	private void addFieldToCollection(DBCollection coll, String fieldName, Object defaultValue) {
 		addFieldToCollection(coll, new BasicDBObject(), fieldName, defaultValue);
