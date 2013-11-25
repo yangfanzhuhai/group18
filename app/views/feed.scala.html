@@ -276,6 +276,7 @@
         url: "/" + "@groupID" + "/rest/tasks/" + status,
         dataType: "json",
         success: function(data){
+
             generateFeed(data);
             
         }
@@ -364,6 +365,7 @@
   }
 
   $(document).ready(refreshFeed);	
+
 
   function addTasks(task_array) {
 
@@ -554,14 +556,16 @@
   }
   
   function generateFeed(stream_array) {
+
     addToFeed(stream_array);
     autoRefresh();
   }
 
   function addToFeed(stream_array) {
 
+
+
   	//document.getElementById("username").innerHTML="@userName";
-    
 
     if (localToggle == "feed") {
       document.title = "News Feed";
@@ -685,7 +689,7 @@
 
   		var post_options = document.createElement("div");
 
-  		if (publisher == "@userName") {
+  		if (username == "@userName") {
   			var delete_button = document.createElement("button");
         delete_button.setAttribute("class", "btn btn-danger btn-xs");
   			delete_button.innerHTML = "Delete";
@@ -748,7 +752,13 @@
 		var task_alias = stream_array[i][0]['object']["alias"];
         var task_heading = document.createElement("h4");
         task_heading.setAttribute("class", "media-heading");
+
+        if (task_alias != "") {
         task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_alias + "#");
+      }
+      else {
+        task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_name + "#");
+      }
         
   		var task_data = document.createElement("p");
 
@@ -794,7 +804,7 @@
     		post_options.appendChild(priority_button);
     		post_options.appendChild(status_button);
 
-    		if (publisher == "@userName") {
+    		if (username == "@userName") {
     			var assign_button = document.createElement("button");
     			assign_button.innerHTML = "Assign members";
     			post_options.appendChild(assign_button);
@@ -815,9 +825,7 @@
         post.appendChild(post_body);
   			//post.appendChild(post_options);
 			break;
-			
   		case "JENKINS" :
-  		
   			var jenkins = document.createElement("h4");
         jenkins.setAttribute("class", "media-heading");
   			jenkins.innerHTML = publisher;
@@ -982,7 +990,6 @@
 
   				var reply_publisher = document.createElement("h4");
           reply_publisher.setAttribute("class", "media-heading");
-  				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"];
 
           var reply_username = stream_array[i][j]['actor']["username"];
           var reply_displayName = stream_array[i][j]['actor']["displayName"];
@@ -1033,6 +1040,7 @@
     $('#loadMoreButton').show();
   	
   }
+
 
   function post_new_task_details(value, id, post_id) {
 
@@ -1132,6 +1140,7 @@
 
   }
 
+
   function changeReferencesToLinks(message) {
 
 
@@ -1146,7 +1155,7 @@
 
       var task_id = task_ids[tag_without_hashes];
 
-      linked_tag.href = "/@groupID/tasks/" + task_id;
+      linked_tag.href = "/@groupID/taskref?task=" + task_id +"";
     
       linked_tag.innerHTML = tag;
 
@@ -1203,12 +1212,12 @@
 
         }
 
-      	
-
       var message_object = generateMessageObject(message_text)    
 
       var post = generateJSON(date_and_time_stamp, message_object,
       						"", references);
+
+     // alert(post);
 
         $.ajax({
             type: "POST",

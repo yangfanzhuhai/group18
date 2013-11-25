@@ -76,7 +76,7 @@
     function parseUserData(data) {
 
       for (var i = 0; i < data.length; i++) {
-		    var group_data = data[i][0];
+		var group_data = data[i];
         var group_div = document.createElement("div");
         group_div.className="post";
 
@@ -103,15 +103,14 @@
 
         var j = 0;
         while (j < members_array.length) {
-          group_members_div.innerHTML += "<br>" + members_array[j];
+          group_members_div.innerHTML += "<br>" + members_array[j]['username'];
           var user_image = document.createElement("image");
           user_image.style.height = "40px";
           user_image.style.width = "40px";
           user_image.style.borderRadius = "50px";
 
-          var default_img = "http://assets.eschools.co.uk/images/default_user_300x300.png";
 
-          user_image.src= default_img;
+          user_image.src= members_array[j]['photo_url'];
           group_images_div.appendChild(user_image);
 
           j++;
@@ -151,8 +150,8 @@
 
             if (checkValidUser(username)) {
 
-              var add_user_json = "{\"id\" : \"" + group_name + "\", \"users\" : [\""
-                                 + add_users_box.value + "\"]}";
+              var add_user_json = "{\"id\" : \"" + group_name + "\", \"user\" : \""
+                                 + add_users_box.value + "\"}";
 
               $.ajax({
                   type: "POST",
@@ -256,8 +255,12 @@
       var group_name = prompt("What is the name of your group?");
 
       if (group_name != "" && group_name != null) {
+    	  
+    	var creator = "{\"username\" : \"@userName\","
+    				  + "\"displayName\" : \"@displayName\","
+    				  + "\"photo_url\" : \"@photo_url\"}"
 
-        var create_group_json = "{\"name\" : \"" + group_name + "\", \"creator\" : @userName }";
+        var create_group_json = "{\"name\" : \"" + group_name + "\", \"creator\" : " + creator + "}";
 
         $.ajax({
             type: "POST",

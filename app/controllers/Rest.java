@@ -25,8 +25,8 @@ import models.TargetModel;
 import models.TaskID;
 import models.User;
 import models.UserModel;
-import models.UserWithGroup;
-import models.UsersWithGroup;
+import models.GroupWithCreator;
+import models.GroupWithUser;
 import models.authentication.LoginAttempt;
 import models.authentication.Session;
 import models.git.Branch;
@@ -63,7 +63,7 @@ public class Rest extends Controller {
 			String Json = getValueFromRequest("activity");
 
 			Gson gson = new Gson();
-			UserWithGroup project = gson.fromJson(Json, UserWithGroup.class);
+			GroupWithCreator project = gson.fromJson(Json, GroupWithCreator.class);
 
 			MongoLink.MONGO_LINK.addNewProject(project.name, project.creator);
 			return ok();
@@ -78,9 +78,9 @@ public class Rest extends Controller {
 			String Json = getValueFromRequest("activity");
 
 			Gson gson = new Gson();
-			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
+			GroupWithUser userGroup = gson.fromJson(Json, GroupWithUser.class);
 
-			MongoLink.MONGO_LINK.addUsersToProject(users.id, users.users);
+			MongoLink.MONGO_LINK.addUsersToProject(userGroup.id, userGroup.username);
 			return ok();
 		} catch (JsonSyntaxException e) {
 			return status(422);
@@ -93,7 +93,7 @@ public class Rest extends Controller {
 			String userName = getUsernameFromSession();
 
 			Gson gson = new Gson();
-			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
+			GroupWithUser users = gson.fromJson(Json, GroupWithUser.class);
 
 			MongoLink.MONGO_LINK.removeFromProject(users.id, userName);
 			return ok();
@@ -107,7 +107,7 @@ public class Rest extends Controller {
 			String Json = getValueFromRequest("activity");
 
 			Gson gson = new Gson();
-			UsersWithGroup users = gson.fromJson(Json, UsersWithGroup.class);
+			GroupWithUser users = gson.fromJson(Json, GroupWithUser.class);
 
 			MongoLink.MONGO_LINK.deleteProject(users.id);
 			return ok();
