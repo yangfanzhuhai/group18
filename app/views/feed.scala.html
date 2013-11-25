@@ -694,7 +694,7 @@
 
   		var post_options = document.createElement("div");
 
-  		if (publisher == "@userName") {
+  		if (username == "@userName") {
   			var delete_button = document.createElement("button");
         delete_button.setAttribute("class", "btn btn-danger btn-xs");
   			delete_button.innerHTML = "Delete";
@@ -809,7 +809,7 @@
     		post_options.appendChild(priority_button);
     		post_options.appendChild(status_button);
 
-    		if (publisher == "@userName") {
+    		if (username == "@userName") {
     			var assign_button = document.createElement("button");
     			assign_button.innerHTML = "Assign members";
     			post_options.appendChild(assign_button);
