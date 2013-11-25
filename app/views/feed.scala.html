@@ -55,7 +55,7 @@
     </div>
     </div>
 
-  <div class="container col-md-offset-2 col-md-8">
+  <div class="container col-md-offset-2 col-md-8" id = "container">
     <a href="@routes.Application.feed(groupID,0,"")">
       <img src="@routes.Assets.at("images/title.jpg")" id ="title" alt="some_text"
     	width="200" >
@@ -101,10 +101,11 @@
 
               <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
 "AJAX loader" title="AJAX loader" align="center" /></div>
+
     
 
     <ul id = "stream" class = "media-list" ></ul>
-    <div align="center">
+    <div align="center" id = "seeMoreButton">
       <button id = "loadMoreButton"class = "btn btn-info" style = "margin: 10px" onclick = "loadMoreFeed()">See more...</button>
     </div>
     <div id="loader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
@@ -215,6 +216,7 @@
 
 
   function generateJSON(date_and_time_stamp, object, post_id, references) {
+
 
       $('#preloader').show();
 
@@ -344,7 +346,7 @@
             dataType: "json",
             data: {"activity":task_json},
             success: function(data){   
-              alert(JSON.stringify(data));
+              
 
                 generateFeed(data);
           }});
@@ -370,18 +372,18 @@
 
   	for (var i=0; i < task_array.length; i++) {
   		var task_id = task_array[i]['id'];
-
   		var task_alias = task_name = task_array[i]['object']["alias"];
-  		task_aliases[i] = task_alias;
-  		var task_details = task_array[i]['object']["name"];
-  		var task_name;
+      var task_details = task_array[i]['object']["name"];
+      var task_name;
+
   		if(task_alias != "") {
   			task_name = task_alias;
   		} else {
   			task_name = task_details;
   		}
-     	task_names[i] = task_name;
-            task_ids[task_name] = task_id;
+
+      task_ids[task_name] = task_id;
+
       tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
       tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
@@ -563,6 +565,7 @@
   function addToFeed(stream_array) {
 
 
+
   	//document.getElementById("username").innerHTML="@userName";
 
     if (localToggle == 0) {
@@ -597,6 +600,23 @@
       document.getElementById("git_nav").setAttribute("class","");
       document.getElementById("post_options").style.display="none";
 
+      var task_title = document.createElement("h2");
+      task_title.style.marginBottom = "20px";
+      var stream = document.getElementById("stream");
+      document.getElementById("container").insertBefore(task_title, stream);
+
+      if (stream_array.length > 0) {
+
+        task_title.innerHTML = "References to task @task";
+                $('#seeMoreButton').hide();
+
+      } else {
+
+        task_title.innerHTML = "There are no references to task @task";
+        $('#seeMoreButton').hide();
+
+
+      }
     }
     
 
@@ -628,7 +648,6 @@
   		  publisher = displayName;
   		}
 
-       addPhotoForUser(username, photo_url);
 
   		
   		var publisherType = stream_array[i][0]['actor']["objectType"];
@@ -707,7 +726,8 @@
       user_image.style.marginLeft = "10px";
       user_image.style.border = "3px solid white";
 
-      user_image.src= user_images[username];
+      addPhotoForUser(username, photo_url);
+      user_image.src = user_images[username];
 
       post.appendChild(user_image);
 
@@ -981,6 +1001,8 @@
           var reply_displayName = stream_array[i][j]['actor']["displayName"];
           var reply_photo_url = stream_array[i][j]['actor']["photo_url"];
 
+          alert(reply_photo_url);
+
           reply_publisher.innerHTML = reply_username;
 
           if (reply_displayName != "") {
@@ -1007,8 +1029,7 @@
           reply_div_body.appendChild(reply_message_text);    
   			j++;
 
-  		}
-
+  		  }
 
   		}
 
@@ -1063,14 +1084,12 @@
   	var json = "{\"id\" : \"" + post_id + "\"}"
 
   	$.ajax({
-		type: "POST",
-		url: "/" + "@groupID" + "/rest/delete/post",
-		dataType: "json",
-		data: {"activity":json},
-		complete: refreshFeed
-	});    
-
-
+		  type: "POST",
+		  url: "/" + "@groupID" + "/rest/delete/post",
+		  dataType: "json",
+		  data: {"activity":json},
+		  complete: refreshFeed
+	   });    
   }
 
   function getTimeStamp() {
@@ -1105,33 +1124,17 @@
   		var date_and_time_stamp = getTimeStamp();
   		var references = [];
 
-      var reference = extractReferences(reply_message_text);
-        var ref_id = getRefId(reference);
+        var ref_id = getRefId(reply_message_text);
         var references = [];
         if (ref_id != "") {
           references =  ["\"" + ref_id + "\""];
         }
 
-  /*	var reply = generateJSON(date_and_time_stamp, reply_name_text, "MESSAGE",
-  							 reply_message_text, post_id, references); */
+  	var message_object = generateMessageObject(reply_message_text);
 
-      var reply = "{\"published\" : \""
-                + date_and_time_stamp
-                + "\", "
-                + "\"actor\" : "
-                + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-                + "\"" 
-                + reply_name_text
-                + "\"}, "
-                + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-                + " : \"MESSAGE\", \"message\" : " 
-                + "\"" 
-                + reply_message_text
-                + "\"}, \"target\" : { \"messageID\" : \"" 
-                + post_id
-  	      + "\", \"taskIDs\" : ["
-  	      + references
-                +  "]}} "; 
+    var actor = generatePersonActor();
+
+    var reply = generateJSON(date_and_time_stamp, message_object, post_id, references); 
 
       $.ajax({
       	type: "POST",
@@ -1145,6 +1148,7 @@
 
   }
 
+
   function changeReferencesToLinks(message) {
 
 
@@ -1155,14 +1159,11 @@
 
       var linked_tag = document.createElement('a');
 
-      var tag_without_hashes = tag[0].substring(1, tag[0].length -1).trim();
+      var tag_without_hashes = tag[0].substring(1, tag[0].length -1);
 
       var task_id = task_ids[tag_without_hashes];
 
-
-    //  alert(tag_without_hashes + " " + task_id);
-
-      linked_tag.href = "/@groupID/taskref?task=" + task_id;
+      linked_tag.href = "/@groupID/taskref?task=" + task_id +"";
     
       linked_tag.innerHTML = tag;
 
@@ -1175,30 +1176,19 @@
   }
 
 
-  function extractReferences(message) {
+  function getRefId(message) {
 
-      var result = message.split("#");
-
-      var i = 0;
-      
-      while (i < task_ids.length) {
-          if (task_names[i] == result[1]) {
-            return result[1];
-          }
-          i++;
-      }
-      return "";
-  }
-
-  function getRefId(reference) {
+    var result = message.split("#");
+    var reference = result[1];
 
     var i = 0;
-      while (i < task_ids.length) {
-          if (task_names[i] == reference) {
-            return task_ids[i];
-          }
-          i++;
-      }
+
+    if (task_ids[reference] != undefined) {
+
+      return task_ids[reference];
+
+    }
+
       return "";
 
   }
@@ -1220,8 +1210,7 @@
       
       if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
-        var reference = extractReferences(message_text);
-        var ref_id = getRefId(reference);
+        var ref_id = getRefId(message_text);
 
   	    var references = [];
 
@@ -1230,10 +1219,6 @@
       		references =  ["\"" + ref_id + "\""];
 
         }
-
-      //  message_text = message_text.replace("#".concat(reference).concat(, "");
-
-      	
 
       var message_object = generateMessageObject(message_text)    
 
