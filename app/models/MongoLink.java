@@ -216,18 +216,25 @@ public class MongoLink {
 		
 		for(DBObject group : groupList)
 		{
-			DBCollection c = getGroupColl((String) group.get("customID"));
-			List<DBObject> list = c.find(QueryBuilder.start("object.objectType").is("JENKINS").get()).toArray();
+		//	DBCollection c = getGroupColl((String) group.get("customID"));
+			DBCollection c = getGroupColl("QuantumCheese");
+			List<DBObject> list = c.find(QueryBuilder.start("object.objectType").notEquals("JENKINS").get()).toArray();
 			for(DBObject o : list)
-			{
-				o.put("actor", jenkins());
+			{				
+				o.put("actor", actor(((DBObject) o.get("actor")).get("username").toString(),((DBObject) o.get("actor")).get("photo_url").toString(),((DBObject) o.get("actor")).get("objectType").toString()));
 				c.save(o);
+			//	o.put("actor", jenkins());
+			//	c.save(o);
 			}
 		}
 	}
 	
 	private static DBObject jenkins() {
 		return new BasicDBObject("displayName", "Jenkins").append("objectType", "JENKINS");
+	}
+	
+	private static DBObject actor(String username, String photo_url, String objectType) {
+		return new BasicDBObject("displayName", username).append("objectType", objectType).append("username", username).append("photo_url", photo_url);
 	}
 	
 	private void addFieldToCollection(DBCollection coll, String fieldName, Object defaultValue) {
