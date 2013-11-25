@@ -317,9 +317,12 @@ public class MongoLink {
 	 * @param creator - Username of the person who created the project
 	 * @return True if added correctly, False otherwise
 	 */
-	public boolean addNewProject(String name, String creator) {
+	public boolean addNewProject(String name, GroupMember creator) {
+		Gson gson = new Gson();
+		String creatorJson = gson.toJson(creator);
+		BasicDBObject creatorObject = (BasicDBObject) JSON.parse(creatorJson);
 		
-		return addNewProject(createNewEmptyProject(generateCustomID(name), name, creator));
+		return addNewProject(createNewEmptyProject(generateCustomID(name), name, creatorObject));
 	}
 	
 	/** Adds any amount of users to a given project. Any user who is already a
@@ -328,10 +331,17 @@ public class MongoLink {
 	 * @param customID - ID of the project
 	 * @param users - String or String array of users to be added to the project
 	 */
-	public void addUsersToProject(String customID, String ... users) {
+	public void addUsersToProject(String customID, String username) {
 		
+		UserModel user = getUserFromUsername(username);
+		String displayName = user.getLocalAccount().getName();
+		String photo_url = user.getLocalAccount().getPhoto_url();
+		GroupMember groupMember = new GroupMember(username, displayName, photo_url);
+		Gson gson = new Gson();
+		String memberJson = gson.toJson(groupMember);
+		BasicDBObject memberObject = (BasicDBObject) JSON.parse(memberJson);
 		groups.update(QueryBuilder.start("customID").is(customID).get(),
-					new BasicDBObject("$addToSet", new BasicDBObject("members", new BasicDBObject("$each", users))));
+					new BasicDBObject("$addToSet", new BasicDBObject("members", memberObject)));
 	}
 	
 	/** Removes a user from the given project
@@ -524,17 +534,14 @@ public class MongoLink {
 	 * @param userID - ID of the current user
 	 * @return A list of groups which the member is part of
 	 */
-	public ArrayList<ArrayList<String>> getGroups(String username) {
-		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
-		List<DBObject> list = groups.find(QueryBuilder.start("members").in(new String[]{username}).get()).toArray();
+	public ArrayList<String> getGroups(String username) {
+		ArrayList<String> retList = new ArrayList<String>();
+		List<DBObject> list = groups.find(QueryBuilder.start("members.username").is(username).get()).toArray();
 	
-		for(int i = 0; i < list.size(); i++)
-		{
-			ArrayList<String> temp = getInfoAboutUsers(((BasicDBList) list.get(i).get("members")).toArray(new String[0]));
-			temp.add(0, list.get(i).toString());
-			retList.add(i, temp);
+		for(DBObject obj : list){
+			retList.add(obj.toString());
 		}
-	
+			
 		return retList;
 	}
 	
@@ -557,9 +564,13 @@ public class MongoLink {
 	 */
 	public boolean isMember(String username, String groupID) {
 		@SuppressWarnings("unchecked")
-		List<String> members = (List<String>) groups.findOne(queryForProject(groupID)).get("members");
+		List<DBObject> members = (List<DBObject>) groups.findOne(queryForProject(groupID)).get("members");
 		
-		return members.contains(username);
+		for(DBObject member : members){
+			if (member.get("username").equals(username)) return true;
+		}
+		
+		return false;
 	}
 	
 	public void addFBImage(String username, String url) {
@@ -1048,11 +1059,11 @@ public class MongoLink {
 	 * 
 	 * @param customID - ID of the project
 	 * @param name - name of the project
-	 * @param creator - creator/owner of the project
+	 * @param creatorObject - creator/owner of the project
 	 * @return DBObject containing the given parameters
 	 */
-	private DBObject createNewEmptyProject(String customID, String name, String creator) {
-		return new BasicDBObject("customID", customID).append("name", name).append("members", new String[]{creator});
+	private DBObject createNewEmptyProject(String customID, String name, BasicDBObject creatorObject) {
+		return new BasicDBObject("customID", customID).append("name", name).append("members", new BasicDBObject[]{creatorObject});
 	}
 	
 	/** Generates a unique customID for the project with the given name,
