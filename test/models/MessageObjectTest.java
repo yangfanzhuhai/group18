@@ -7,17 +7,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import com.google.gson.Gson;
+
 public class MessageObjectTest {
 
 	private static final String MESSAGE = "test message";
 
 	@Test
 	public void testToJson() throws JSONException {
+		Gson gson = new Gson();
 		MessageObject messageObject = new MessageObject(MESSAGE);
+		messageObject.setType();
 
-		String expectedJSON = "{\"objectType\" : \"MESSAGE\", \"message\" : \""
-				+ MESSAGE + "\"}";
-		String actualJSON = messageObject.toJSON();
+		String expectedJSON = "{\"message\":\""
+				+ MESSAGE + "\",\"objectType\":\"MESSAGE\"}";
+		String actualJSON = gson.toJson(messageObject);
 		assertEquals(expectedJSON, actualJSON);
 		try {
 			new JSONObject(actualJSON);

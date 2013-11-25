@@ -1,6 +1,8 @@
 package controllers;
 
+import models.LocalAccount;
 import models.MongoLink;
+import models.UserModel;
 import play.mvc.Controller;
 import play.mvc.Result;
 import scala.collection.mutable.Seq;
@@ -9,6 +11,7 @@ import views.html.feed;
 import views.html.login;
 import views.html.profile;
 import views.html.register;
+import views.html.profile;
 
 public class Application extends Controller {
 	
@@ -22,9 +25,13 @@ public class Application extends Controller {
 	public static Result feed(String groupID, String toggle) {
 		
 		if (loggedIn() && isValidToggle(toggle)) {
-			String userName = session("connected");
+			String userName = Rest.getUsernameFromSession();
 			if(MongoLink.MONGO_LINK.isMember(userName, groupID)) {
-				return ok(feed.render(groupID, toggle, userName));
+				UserModel user = MongoLink.MONGO_LINK.getUserFromUsername(userName);
+				LocalAccount localAccount = user.getLocalAccount();
+				String displayName = localAccount.getName();
+				String photo_url = localAccount.getPhoto_url();
+				return ok(feed.render(groupID, toggle, userName, displayName, photo_url));
 			} else {
 				return redirect(controllers.routes.Application.profile());
 			}
@@ -74,13 +81,17 @@ public class Application extends Controller {
 	 * 		   a session value
 	 */
 	private static boolean loggedIn(){
-		return session("connected") != null;
+		return Rest.getUsernameFromSession() != null;
 	}
 
 	public static Result profile() {
 		if (loggedIn()) {
-			String userName = session("connected");
-			return ok(profile.render(userName));
+			String userName = Rest.getUsernameFromSession();
+			UserModel user = MongoLink.MONGO_LINK.getUserFromUsername(userName);
+			LocalAccount localAccount = user.getLocalAccount();
+			String displayName = localAccount.getName();
+			String photo_url = localAccount.getPhoto_url();
+			return ok(profile.render(userName, displayName, photo_url));
 		} else {
 			return redirect(controllers.routes.Application.login());
 		}

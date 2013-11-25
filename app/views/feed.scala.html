@@ -1,4 +1,4 @@
-@(groupID: String, toggle: String, userName: String)
+@(groupID: String, toggle: String, userName: String, displayName: String, photo_url: String)
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -65,10 +65,11 @@
 
               <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
 "AJAX loader" title="AJAX loader" align="center" /></div>
+
     
 
     <ul id = "stream" class = "media-list" ></ul>
-    <div align="center">
+    <div align="center" id = "seeMoreButton">
       <button id = "loadMoreButton"class = "btn btn-info" style = "margin: 10px" onclick = "loadMoreFeed()">See more...</button>
     </div>
     <div id="loader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
@@ -185,8 +186,10 @@
   var task_ids = [];
   var tasks = [];
   var task_names = [];
+  var user_images = new Array();
   var final_post_id;
   var first_post_id;
+
 
   document.getElementById("title").style.marginTop = "20px";
   document.getElementById("title").style.marginBottom = "10px";
@@ -199,18 +202,17 @@
 
 
 
-  function generateJSON(date_and_time_stamp, person_name, object, post_id, references) {
+  function generateJSON(date_and_time_stamp, object, post_id, references) {
+
 
       $('#preloader').show();
+
+      var actor = generatePersonActor();
 
       return "{\"published\" : \""
                 + date_and_time_stamp
                 + "\", "
-                + "\"actor\" : "
-                + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-                + "\"" 
-                + person_name
-                + "\"}, "
+                + actor
                 + "\"verb\" : \"said\", \"object\" : " 
                 + object
                 + ", \"target\" : { \"messageID\" : \"" 
@@ -235,6 +237,13 @@
            + "\"message\" : \"" + message + "\"}";
   }
 
+  function generatePersonActor() {
+    return "\"actor\" : "
+            + "{\"objectType\" : \"PERSON\", \"username\" : \"@userName\","
+            + " \"photo_url\": \"@photo_url\", \"displayName\": \"@displayName\"}, ";
+
+  }
+
   function postTypeChange(option) {
   
   	limitedtextfield.cols = 30;
@@ -257,7 +266,7 @@
     }
 
   }
-  
+
   function setTaskStatus(status) {
   localToggle="tasks";
     document.getElementById("stream").innerHTML = "";
@@ -279,7 +288,6 @@
       $('#loadMoreButton').hide();
       first_post_id = "";
       autoRefreshing = false;
-      autoRefresh();
 
       var getUrl = "/" + "@groupID" + "/rest/";
 
@@ -297,19 +305,14 @@
         case "builds":
           getUrl += "builds";
           break;
-        }*/
-        getUrl += "@toggle"
+        case 4:
+          getUrl += "taskdetails";
+          break;
 
-        $.ajax({    
-          type: "GET",
-          url: getUrl,
-          dataType: "json",
-          success: function(data){   
+        } /*
+		getUrl += "@toggle";
 
-              generateFeed(data);
-          }});
-
-        if ("@toggle"=="feed") {
+        if ("@toggle"=="feed" || "@toggle" == "taskdetails") {
           $.ajax({
           type: "GET",
           url: "/" + "@groupID" + "/rest/alltasks",
@@ -318,7 +321,34 @@
 
               addTasks(data);
           }});
-        }      
+        }    
+
+        if (localToggle == "taskdetails") {
+
+          var task_json = "{\"id\": \"@toggle\"}";
+          $.ajax({    
+            type: "POST",
+            url: getUrl,
+            dataType: "json",
+            data: {"activity":task_json},
+            success: function(data){   
+              
+
+                generateFeed(data);
+          }});
+
+
+        } else {
+
+          $.ajax({    
+           type: "GET",
+           url: getUrl,
+            dataType: "json",
+            success: function(data){   
+
+              generateFeed(data);
+          }});
+        }  
   }
 
   $(document).ready(refreshFeed);	
@@ -327,21 +357,32 @@
 
   	for (var i=0; i < task_array.length; i++) {
   		var task_id = task_array[i]['id'];
-  		task_ids[i] = task_id;
   		var task_alias = task_name = task_array[i]['object']["alias"];
-  		task_aliases[i] = task_alias;
-  		var task_details = task_array[i]['object']["name"];
-  		var task_name;
+      var task_details = task_array[i]['object']["name"];
+      var task_name;
+
   		if(task_alias != "") {
   			task_name = task_alias;
   		} else {
   			task_name = task_details;
   		}
-     	task_names[i] = task_name;
-      	tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
-      	tasks[i] = jQuery.parseJSON(tasks[i]);
+
+      task_ids[task_name] = task_id;
+
+      tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
+      tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
   }
+
+  function addPhotoForUser(username, photo_url) {
+
+    if (user_images[username] == undefined) {
+
+        user_images[username] = photo_url;
+    } 
+  } 
+
+
 
   function autocomplete_setup() {
   $(function ()  {
@@ -502,6 +543,7 @@
   
   function generateFeed(stream_array) {
     addToFeed(stream_array);
+    autoRefresh();
   }
 
   function addToFeed(stream_array) {
@@ -509,9 +551,7 @@
   	//document.getElementById("username").innerHTML="@userName";
     
 
-  	for (var i=0; i < stream_array.length;i++) {
-
-		if (localToggle == "feed") {
+    if (localToggle == "feed") {
       document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
       document.getElementById("tasklist_nav").setAttribute("class","");
@@ -535,7 +575,35 @@
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("git_nav").setAttribute("class","");
+    } else if (localToggle == "taskdetails") {
+      document.title = "@toggle";
+      document.getElementById("builds_nav").setAttribute("class","");
+      document.getElementById("newsfeed_nav").setAttribute("class","");
+      document.getElementById("tasklist_nav").setAttribute("class","");
+      document.getElementById("git_nav").setAttribute("class","");
+      document.getElementById("post_options").style.display="none";
+
+      var task_title = document.createElement("h2");
+      task_title.style.marginBottom = "20px";
+      var stream = document.getElementById("stream");
+      document.getElementById("container").insertBefore(task_title, stream);
+
+      if (stream_array.length > 0) {
+
+        task_title.innerHTML = "References to task @toggle";
+                $('#seeMoreButton').hide();
+
+      } else {
+
+        task_title.innerHTML = "There are no references to task @toggle";
+        $('#seeMoreButton').hide();
+
+
+      }
     }
+    
+
+  	for (var i=0; i < stream_array.length;i++) {
 
   		var message_type = stream_array[i][0]['object']["objectType"];
 
@@ -552,7 +620,18 @@
 
   		var published = stream_array[i][0]['published'];
 
-  		var publisher = stream_array[i][0]['actor']["displayName"];
+  		var publisher;
+  		var displayName = stream_array[i][0]['actor']["displayName"];
+  		var username = stream_array[i][0]['actor']["username"];
+      var photo_url = stream_array[i][0]['actor']["photo_url"];
+
+  		if (displayName == "") {
+  		  publisher = username;
+  		} else {
+  		  publisher = displayName;
+  		}
+
+
   		
   		var publisherType = stream_array[i][0]['actor']["objectType"];
   	
@@ -630,7 +709,8 @@
       user_image.style.marginLeft = "10px";
       user_image.style.border = "3px solid white";
 
-      var email = "user" + String.fromCharCode(64) + "gmail.com";
+      addPhotoForUser(username, photo_url);
+      user_image.src = user_images[username];
 
       if (publisher == "Rob") {
 
@@ -906,17 +986,19 @@
           reply_publisher.setAttribute("class", "media-heading");
   				reply_publisher.innerHTML = stream_array[i][j]['actor']["displayName"];
 
-          var email = "user" + String.fromCharCode(64) + "gmail.com";
+          var reply_username = stream_array[i][j]['actor']["username"];
+          var reply_displayName = stream_array[i][j]['actor']["displayName"];
+          var reply_photo_url = stream_array[i][j]['actor']["photo_url"];
 
-          if (reply_publisher.innerHTML == "Rob") {
+          reply_publisher.innerHTML = reply_username;
 
-            email = "robert.david.cox" + String.fromCharCode(64) + "gmail.com";
-
+          if (reply_displayName != "") {
+              reply_publisher.innerHTML = reply_displayName;
           }
 
-          var default_img = encodeURIComponent("http://assets.eschools.co.uk/images/default_user_300x300.png");
+          addPhotoForUser(reply_displayName, reply_photo_url);
 
-          user_image.src= get_gravatar(email, 250) + "&d=" + default_img;
+          user_image.src= user_images[reply_displayName];
 
   				var reply_message_text = document.createElement("p");
   				reply_message_text.innerHTML = changeReferencesToLinks(stream_array[i][j]['object']["message"]);
@@ -934,8 +1016,7 @@
           reply_div_body.appendChild(reply_message_text);    
   			j++;
 
-  		}
-
+  		  }
 
   		}
 
@@ -1000,14 +1081,12 @@
   	var json = "{\"id\" : \"" + post_id + "\"}"
 
   	$.ajax({
-		type: "POST",
-		url: "/" + "@groupID" + "/rest/delete/post",
-		dataType: "json",
-		data: {"activity":json},
-		complete: refreshFeed
-	});    
-
-
+		  type: "POST",
+		  url: "/" + "@groupID" + "/rest/delete/post",
+		  dataType: "json",
+		  data: {"activity":json},
+		  complete: refreshFeed
+	   });    
   }
 
   function getTimeStamp() {
@@ -1042,33 +1121,17 @@
   		var date_and_time_stamp = getTimeStamp();
   		var references = [];
 
-      var reference = extractReferences(reply_message_text);
-        var ref_id = getRefId(reference);
+        var ref_id = getRefId(reply_message_text);
         var references = [];
         if (ref_id != "") {
           references =  ["\"" + ref_id + "\""];
         }
 
-  /*	var reply = generateJSON(date_and_time_stamp, reply_name_text, "MESSAGE",
-  							 reply_message_text, post_id, references); */
+  	var message_object = generateMessageObject(reply_message_text);
 
-      var reply = "{\"published\" : \""
-                + date_and_time_stamp
-                + "\", "
-                + "\"actor\" : "
-                + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-                + "\"" 
-                + reply_name_text
-                + "\"}, "
-                + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-                + " : \"MESSAGE\", \"message\" : " 
-                + "\"" 
-                + reply_message_text
-                + "\"}, \"target\" : { \"messageID\" : \"" 
-                + post_id
-  	      + "\", \"taskIDs\" : ["
-  	      + references
-                +  "]}} "; 
+    var actor = generatePersonActor();
+
+    var reply = generateJSON(date_and_time_stamp, message_object, post_id, references); 
 
       $.ajax({
       	type: "POST",
@@ -1088,38 +1151,40 @@
     var hashtagRegex = new RegExp("#[^#]*#");
     var tag = hashtagRegex.exec(message);
 
-    var linked_tag = document.createElement('a');
-    linked_tag.href = "http://www.google.com";
-    linked_tag.innerHTML = tag;
+    if (tag != null) {
 
-    return message.replace(tag, $(linked_tag).outerHTML());
+      var linked_tag = document.createElement('a');
+
+      var tag_without_hashes = tag[0].substring(1, tag[0].length -1);
+
+      var task_id = task_ids[tag_without_hashes];
+
+      linked_tag.href = "/@groupID/taskref?task=" + task_id +"";
+    
+      linked_tag.innerHTML = tag;
+
+      return message.replace(tag, $(linked_tag).outerHTML());
+
+    }
+
+    return message;
 
   }
 
-  function extractReferences(message) {
 
-      var result = message.split("#");
+  function getRefId(message) {
 
-      var i = 0;
-      
-      while (i < task_ids.length) {
-          if (task_names[i] == result[1]) {
-            return result[1];
-          }
-          i++;
-      }
-      return "";
-  }
-
-  function getRefId(reference) {
+    var result = message.split("#");
+    var reference = result[1];
 
     var i = 0;
-      while (i < task_ids.length) {
-          if (task_names[i] == reference) {
-            return task_ids[i];
-          }
-          i++;
-      }
+
+    if (task_ids[reference] != undefined) {
+
+      return task_ids[reference];
+
+    }
+
       return "";
 
   }
@@ -1141,8 +1206,7 @@
       
       if (name_text != "" && message_text != "" && dropdown_value == "text_post") {
 
-        var reference = extractReferences(message_text);
-        var ref_id = getRefId(reference);
+        var ref_id = getRefId(message_text);
 
   	    var references = [];
 
@@ -1152,13 +1216,11 @@
 
         }
 
-      //  message_text = message_text.replace("#".concat(reference).concat(, "");
-
       	
 
       var message_object = generateMessageObject(message_text)    
 
-      var post = generateJSON(date_and_time_stamp, name_text, message_object,
+      var post = generateJSON(date_and_time_stamp, message_object,
       						"", references);
 
         $.ajax({
@@ -1175,9 +1237,9 @@
 		  
 		  var alias = document.getElementById("taskAliasText").value;
 		  
-          var task_object = generateTaskObject(message_text, "TO_DO", "1", alias)
+          var task_object = generateTaskObject(message_text, "TO_DO", "1", alias);
           
-          var post = generateJSON(date_and_time_stamp, name_text, task_object, "", references);
+          var post = generateJSON(date_and_time_stamp, task_object, "", references);
 
          $.ajax({
             type: "POST",

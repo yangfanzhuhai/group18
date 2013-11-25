@@ -2,8 +2,13 @@ package models;
 
 public abstract class ObjectModel {
 	
-	public abstract ObjectType getType();
+	protected ObjectType objectType; 
 	
-	public abstract String toJSON();
+	public ObjectType getType() {
+		return this.objectType;
+	}
+	
+	public abstract void setType();
+	
 
 }
