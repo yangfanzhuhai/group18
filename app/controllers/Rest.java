@@ -198,12 +198,12 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getTasks(groupID).toString());
 	}
 
-	public static Result getTaskDetails(String groupID) {
+	public static Result getTaskDetails(String groupID, String ref) {
 		try {
-			Gson gson = new Gson();
+			/*Gson gson = new Gson();
 			TaskID task = gson.fromJson(getValueFromRequest("activity"),
-					TaskID.class);
-			return ok(MongoLink.MONGO_LINK.getTaskDetails(groupID, task.id)
+					TaskID.class);*/
+			return ok(MongoLink.MONGO_LINK.getTaskDetails(groupID, ref)
 					.toString());
 		} catch (JsonSyntaxException e) {
 			return status(422);
