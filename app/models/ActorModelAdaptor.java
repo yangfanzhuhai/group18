@@ -22,6 +22,10 @@ public class ActorModelAdaptor implements JsonDeserializer<ActorModel>{
 	    switch (ActorType.valueOf(objectType)) {
 		case PERSON:
 			klass = PersonActor.class;
+			break;
+	    case JENKINS:
+	    	klass = JenkinsActor.class;
+	    	break;
 		}
 	    return context.deserialize(jsonObject, klass);
 	}

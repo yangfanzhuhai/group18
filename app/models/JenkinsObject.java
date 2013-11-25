@@ -12,6 +12,7 @@ public class JenkinsObject extends ObjectModel {
 		this.number = number;
 		this.status = status;
 		this.url = url;
+		this.objectType = ObjectType.JENKINS;
 	}
 
 	public String getName() {

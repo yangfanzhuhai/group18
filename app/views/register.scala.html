@@ -44,10 +44,10 @@
 
       <div id = "login_box" class = "login_box">
     	  <form>
+    	  	  <input type="text" id="username" placeholder="Username" onKeyDown="pressEnter()" class="form-control">
     	  	  <input type="text" id="email" placeholder="Email Address" onKeyDown="pressEnter()" class="form-control">
     		  <input type="password" id="password" placeholder="Password" onKeyDown="pressEnter()" class="form-control">
     		  <input type="password" id="password_reenter" placeholder="Re-enter Password" onKeyDown="pressEnter()" class="form-control">
-              <input type="text" id="name" placeholder="Display Name" onKeyDown="pressEnter()" class="form-control">
     	  </form>
         <br>
         <button name="register_button" id="register_button" type="submit" class = "btn btn-success" onclick = "register()" >
@@ -66,55 +66,36 @@
       }
       function register() {
 
-    	  //var first_name = document.getElementById("first_name").value;
-    	  //var last_name = document.getElementById("last_name").value;
-    	  var name = document.getElementById("name").value;
+
+    	  var username = document.getElementById("username").value;
+    	  var email = document.getElementById("email").value;
     	  var password = document.getElementById("password").value;
     	  var password_reenter = document.getElementById("password_reenter").value;
-        var email = document.getElementById("email").value;
     	
-    	  /*if (first_name == "") {
-
-    		  alert("Please enter your first name");
-    	
-    	  } else if (last_name == "") {
-
-    		  alert("Please enter your second name");
-
-    	  } else */if (email == "") {
-
-    		  alert("Please enter your email address");
-
-    	  } else if (password == "") {
-    		
-    		  alert("Please enter a password");
-
-    	  } else if (password_reenter == "") {
-
-    		  alert("Please re-enter your password");
-
-    	  } else if (password != password_reenter) {
-
-    		  alert("Passwords do not match");
-
-        } else if (name == "") {
-
+    	  if (username == "") {
         	alert("Please enter a display name");
-
+		  } else if (email == "") {
+    		  alert("Please enter your email address");
+    	  } else if (password == "") {
+    		  alert("Please enter a password");
+    	  } else if (password_reenter == "") {
+    		  alert("Please re-enter your password");
+    	  } else if (password != password_reenter) {
+    		  alert("Passwords do not match");
     	  } else {
 
           var emailHash = get_gravatar(email, 250);
 
 
-          var credentials = "{\"localAccount\": {"
+          var credentials = "{\"username\":\""
+          	  + username + "\","
+          	  + "\"localAccount\": {"
               + "\"password\": \"" + password + "\","
               + "\"email\": \"" + email + "\","
-              + "\"name\": \"" + username + "\"},"
+              + "\"name\": \"\"},"
           	  + "\"fbAccount\": {},"
           	  +	"\"ghAccount\": {}}"
 
-              alert(credentials);
-          
           $.ajax({
               type: "POST",
               url: "/rest/register",

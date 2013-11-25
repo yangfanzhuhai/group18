@@ -1,11 +1,21 @@
 package models;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import models.utils.MD5Util;
 
 public class LocalAccount extends Account {
 	
 	private String password;
 	private String email;
+	
+	public LocalAccount(){}
+	
+	public LocalAccount(String email, String password){
+		this.email = email;
+		this.password =  BCrypt.hashpw(password, BCrypt.gensalt());
+		//this.password = password;
+	}
 	
 	
 	public String getPassword() {

@@ -30,8 +30,8 @@ public class UserModel extends Model {
 	@Override
 	public String toJSON() {
 		Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-		return "{" + super.toJSON() + "\"username\" : " + username 
-									+ ",\"localAccount\" : " + gson.toJson(localAccount.updatePhotoUrl())
+		return "{" + super.toJSON() + "\"username\" : \"" + username 
+									+ "\",\"localAccount\" : " + gson.toJson(localAccount.updatePhotoUrl())
 							  		+ ",\"fbAccount\" : " + gson.toJson(fbAccount.updatePhotoUrl())
 							  		+ ",\"ghAccount\" : " + gson.toJson(ghAccount.updatePhotoUrl())
 							  		+ "}";
