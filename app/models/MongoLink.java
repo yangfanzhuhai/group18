@@ -883,6 +883,17 @@ public class MongoLink {
 		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
 		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) coll.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(reverseSort).toArray();
 		
+		DBObject task = coll.findOne(QueryBuilder.start("_id").is(new ObjectId(id)).get());
+		
+		
+		ActivityModel am = ActivityModel.activityModelGson.fromJson(task.toString(), ActivityModel.class);
+		
+		// TODO This sort of thing should not be needed once activity model is refactored
+		am.setID(id);
+		ArrayList<String> temp = new ArrayList<String>();
+		temp.add(am.toJSON());
+		retList.add(temp);
+		
 		for(DBObject r : referencingItems)
 		{
 			retList.add(getEntireTopic(coll, r));
