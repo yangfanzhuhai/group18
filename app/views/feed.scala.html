@@ -17,7 +17,7 @@
   </head>
 
   <body>
-    @navbar(groupID, userName);
+    @navbar(groupID, userName)
 
   <div class="container col-md-offset-2 col-md-8">
     <a href="@routes.Application.feed(groupID,"feed")">
@@ -292,74 +292,45 @@
 
       var getUrl = "/" + "@groupID" + "/rest/";
 
-      /*switch("@toggle")
-        {
-        case "feed":
-          getUrl += "feed";
-          break;
-        case "tasks":
-          getUrl += "tasks";
-          break;
-        case "gits":
-          getUrl += "gits";
-          break;
-        case "builds":
-          getUrl += "builds";
-          break;
-        case 4:
-          getUrl += "taskdetails";
-          break;
-
-        } */
 		getUrl += "@toggle";
 
-        if ("@toggle" != "gits" && "@toggle" != "builds") {
+			//add all tasks to list for referencing
           $.ajax({
           type: "GET",
           url: "/" + "@groupID" + "/rest/alltasks",
           dataType: "json",
           success: function(data){   
-
               addTasks(data);
           }});
-        }    
+	
+		//if toggle is a reference, generate		
 
-        if ("@toggle" != "feed" && "@toggle" != "tasks" && "@toggle" != "gits" && "@toggle" != "builds") {
-
-          /*var task_json = "{\"id\": \"@toggle\"}";
-          $.ajax({    
-            type: "POST",
-            url: getUrl,
-            dataType: "json",
-            data: {"activity":task_json},
-            success: function(data){   
-              
-
-                generateFeed(data);
-          }});*/
-          
           $.ajax({    
            type: "GET",
-           url: "/" + "@groupID" + "/rest/tasks/" + "@toggle",
+           url: "/" + "@groupID" + "/rest/ref/" + "@toggle",
             dataType: "json",
             success: function(data){ 
-
-              generateFeed(data);
-          }});
-        
-
-
-        } else {
-
-          $.ajax({    
+	
+			if(data == "") {
+			
+			$.ajax({    
            type: "GET",
            url: getUrl,
             dataType: "json",
             success: function(data){   
+              generateFeed(data);
+              
+             }}); 
+			
+			} else {
 
               generateFeed(data);
-          }});
-        }  
+          
+
+		}
+		}});
+		
+          
   }
 
   $(document).ready(refreshFeed);	
@@ -639,9 +610,6 @@
   		} else {
   		  publisher = displayName;
   		}
-
-
-  		
   		var publisherType = stream_array[i][0]['actor']["objectType"];
   	
   		var verb = stream_array[i][0]['verb'];
@@ -1153,12 +1121,14 @@
 
       var task_id = task_ids[tag_without_hashes];
 
-      linked_tag.href = "/@groupID/taskref?task=" + task_id +"";
+	if(task_id != undefined){
+      linked_tag.href = "/@groupID/ref/" + task_id;
     
       linked_tag.innerHTML = tag;
 
       return message.replace(tag, $(linked_tag).outerHTML());
-
+	}
+	
     }
 
     return message;
