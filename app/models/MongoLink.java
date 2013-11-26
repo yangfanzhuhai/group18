@@ -59,7 +59,7 @@ public class MongoLink {
 	public static void main(String[] args) throws UnknownHostException, ParseException {
 		MongoLink ml = new MongoLink(true);
 		
-		ml.a();
+	//	ml.a();
 	//	ml.addFieldToAllGroupCollections("actor.objectType", "PERSON");
 		
 	//	ml.a();
@@ -104,12 +104,8 @@ public class MongoLink {
 				System.out.println(y);
 			}
 		}
-	
-	/*	for(ArrayList<String> o: ml.getGroups("Piotr"))
-		{
-			System.out.println(o);
-		}
-		
+	*/
+	/*	
 		long startTime = System.currentTimeMillis();
 		for(int i = 0; i < 100; i++)
 		{
@@ -136,20 +132,17 @@ public class MongoLink {
 			System.out.println("PArse exception");
 		}*/
 		
-	//	long totalTime = 0;
+	/*	float totalTime = 0;
 		
-	/*	System.out.println(ml.getGroups("Matt"));
-		System.out.println(ml.isMember("Matt", "Progress"));
-		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
-	//	list = ml.getNewsFeed();
-	//	for(int i = 0; i < 100; i++) {
-	//		long startTime = System.currentTimeMillis();
-	//		list = ml.getNewsFeed(20);
-	//		totalTime += System.currentTimeMillis() - startTime;
-	//	}
+		for(int i = 0; i < 100; i++) {
+			long startTime = System.currentTimeMillis();
+			ml.getNewsFeed("newsFeed");
+			totalTime += System.currentTimeMillis() - startTime;
+		}
 		
-	//	float avgTime = totalTime / 100000;
-
+		float avgTime = totalTime / 100000;
+		System.out.println("Total time taken : " + totalTime/1000 + " (average: " + avgTime + ")");
+/*
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
@@ -184,7 +177,7 @@ public class MongoLink {
 		long startTime = System.currentTimeMillis();
 		for(int i = 0; i < 200; i++)
 		{
-			ml.addNewProject("test Hello spaces", "Piotr");
+			ml.addNewProject("test Hello spaces", new GroupMember("Piotr", "Piotr", "www.dot.com"));
 		}
 		float totalTime = System.currentTimeMillis() - startTime;
 		System.out.println("Total time taken : " + totalTime/1000 + " (average: " + totalTime/200000 + ")");
