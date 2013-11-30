@@ -31,6 +31,7 @@ public class Application extends Controller {
 				LocalAccount localAccount = user.getLocalAccount();
 				String displayName = localAccount.getName();
 				String photo_url = localAccount.getPhoto_url();
+				session("groupid", groupID);
 				return ok(feed.render(groupID, toggle, userName, displayName, photo_url));
 			} else {
 				return redirect(controllers.routes.Application.profile());

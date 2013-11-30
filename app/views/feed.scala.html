@@ -17,8 +17,8 @@
   </head>
 
   <body>
+  
     @navbar(groupID, userName)
-
   <div class="container col-md-offset-2 col-md-8">
     <a href="@routes.Application.feed(groupID,"feed")">
       <img src="@routes.Assets.at("images/title.jpg")" id ="title" alt="some_text"
@@ -38,7 +38,7 @@
 
     <div id = "post_options" align="center">
     		
-      <form name="myform" role="form">
+      <form id ="post_form" name="myform" role="form">
         <textarea name="limitedtextarea" type="text" id="limitedtextfield" rows="5" cols="30"
         onKeyUp="postFormOnKeyDown()" class="form-control" 
         placeholder="What's on your mind?" style="resize: none"></textarea>
@@ -47,12 +47,12 @@
         You have <input readonly type="text" id="charCountdown" name="countdown" size="3" > characters left.</small>
 
       </form>
-
    
     <div class="container col-md-offset-2 col-md-4">
     <select id="post_type" onchange="postTypeChange(this.value)" align = "center" style = "width: 50%" class="form-inline form-control">
       <option value="text_post">Text Post</option>
       <option value="task">Task</option>
+      <option value"upload">File Upload</option>
     </select>
   </div>
      		
@@ -250,19 +250,22 @@
   	limitedtextfield.value = "";
   	
   	if (option == "text_post") {
-  	
+  		document.getElementById("post_form").style.display="inline";
   		limitedtextfield.rows = 5
   		limitedtextfield.maxlength=msgTextLimit;
   		charCountdown.value = msgTextLimit;
         limitedtextfield.placeholder="What's on you mind?";
         taskAliasForm.style.display="none";
-
-  	} else {
+  	} else if (option == "task") {
+  		document.getElementById("post_form").style.display="inline";
   		limitedtextfield.rows = 1;
   		limitedtextfield.maxlength=taskTextLimit;
         charCountdown.value = taskTextLimit;
         limitedtextfield.placeholder="Your Task";
 	    taskAliasForm.style.display="inline";
+    } else {
+    	document.getElementById("post_form").style.display="none";
+    	taskAliasForm.style.display="none";
     }
 
   }
@@ -828,7 +831,7 @@
   			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			break;
-  			
+	
   		case "GIT":
   		
   			var repo = stream_array[i][0]['object']['repository'];
@@ -902,6 +905,24 @@
   			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
   			break;
+  			
+  		case "IMAGE":
+  			var user = document.createElement("h4");
+  	        user.setAttribute("class", "media-heading");
+  	  			user.innerHTML = publisher;
+  	  		
+  	  		var upload_image = document.createElement("image");
+  			upload_image.style.height = "400px";
+  			upload_image.style.width = "400px";
+  			upload_image.src= stream_array[i][0]['object']['web_preview_url'];
+  	  			
+  	  	    post_body.appendChild(user);
+  	  		  post_body.appendChild(upload_image);
+  	        post_body.appendChild(date_and_time);
+  	  		  post_body.appendChild(reply_message_div);
+  	  		  post_body.appendChild(reply_button);
+  	        post.appendChild(post_body);
+  	        break;
   		}
 
   		 reply_button.onclick = (function(post_id, reply_message) {
