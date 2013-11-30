@@ -1,4 +1,4 @@
-@(groupID: String, toggle: Integer, userName: String, displayName: String, photo_url: String, task: String)
+@(groupID: String, toggle: String, userName: String, displayName: String, photo_url: String)
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -17,46 +17,10 @@
   </head>
 
   <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="@routes.Application.feed(groupID,0,"")">Progress</a>
-      </div>
-      <div class="collapse navbar-collapse">
-        <ul class="nav navbar-nav" role="navigation">
-          <li id="newsfeed_nav" class = "active"><a href="@routes.Application.feed(groupID,0,"")">News Feed</a></li>
-         
-
-          <li id="tasklist_nav" class="dropdown">
-            <a href="@routes.Application.feed(groupID,1,"")" class="dropdown-toggle" data-toggle="dropdown">
-              Task List 
-              <b class="caret"></b></a>
-            <ul id="taskDrop" class="dropdown-menu">
-              <li><a href="@routes.Application.feed(groupID,1,"")">All Tasks</a></li>
-          	  <li onclick = "setTaskStatus(this.id)" id = "TO_DO"><a href="#">TO DO</a></li>
-          	  <li onclick = "setTaskStatus(this.id)" id = "DOING"><a href="#">DOING</a></li>
-          	  <li onclick = "setTaskStatus(this.id)" id = "DONE"><a href="#">DONE</a></li>
-        	</ul>
-      	  </li>
-          
-          <li id="git_nav"><a href="@routes.Application.feed(groupID,2,"")">Git Commits</a></li>
-          <li id = "builds_nav"><a href="@routes.Application.feed(groupID,3,"")">Builds</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right" role="navigation">
-          <li><a href="@routes.Application.profile">@userName</a></li>
-          <li><a href="@routes.Application.login">Log Out</a></li>
-        </ul>
-      </div> <!--/.nav-collapse -->
-    </div>
-    </div>
-
-  <div class="container col-md-offset-2 col-md-8" id = "container">
-    <a href="@routes.Application.feed(groupID,0,"")">
+  
+    @navbar(groupID, userName)
+  <div class="container col-md-offset-2 col-md-8">
+    <a href="@routes.Application.feed(groupID,"feed")">
       <img src="@routes.Assets.at("images/title.jpg")" id ="title" alt="some_text"
     	width="200" >
       <img src="@routes.Assets.at("images/logo.jpg")" id = "logo"  alt="some_text"
@@ -74,7 +38,7 @@
 
     <div id = "post_options" align="center">
     		
-      <form name="myform" role="form">
+      <form id ="post_form" name="myform" role="form">
         <textarea name="limitedtextarea" type="text" id="limitedtextfield" rows="5" cols="30"
         onKeyUp="postFormOnKeyDown()" class="form-control" 
         placeholder="What's on your mind?" style="resize: none"></textarea>
@@ -83,12 +47,12 @@
         You have <input readonly type="text" id="charCountdown" name="countdown" size="3" > characters left.</small>
 
       </form>
-
    
     <div class="container col-md-offset-2 col-md-4">
     <select id="post_type" onchange="postTypeChange(this.value)" align = "center" style = "width: 50%" class="form-inline form-control">
       <option value="text_post">Text Post</option>
       <option value="task">Task</option>
+      <option value"upload">File Upload</option>
     </select>
   </div>
      		
@@ -105,16 +69,16 @@
     
 
     <ul id = "stream" class = "media-list" ></ul>
-    <div align="center" id = "seeMoreButton">
+    <div align="center" display = "none" id = "seeMoreButton">
       <button id = "loadMoreButton"class = "btn btn-info" style = "margin: 10px" onclick = "loadMoreFeed()">See more...</button>
     </div>
-    <div id="loader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
+    <div id="loader" align="center" display = "none"><img src="@routes.Assets.at("images/482.GIF")" alt=
         "AJAX loader" title="AJAX loader"  /></div>
   </div> <!-- /container -->  
 
 
   <script>
-  var localToggle = @toggle;
+  var localToggle = "@toggle";
   var msgTextLimit = 140;
   var aliasLimit = 8;
   var taskTextLimit = 64;
@@ -122,27 +86,50 @@
   charCountdown.value=msgTextLimit;
   limitedtextfield.maxlength=msgTextLimit;
   
-  function getGroupName() {
+  function getGroupAndStatuses() {
+  
   	$.ajax({
         type: "GET",
         url: "/rest/groups",
         dataType: "json",
         success: function(data){
-        
-        for (var i=0; i < data.length; i++) {
-        	var currGroupID = data[i]['customID'];
-  			var groupName = data[i]['name'];
-
-  			if(currGroupID == "@groupID"){
-  				document.getElementById("groupNameTitle").innerHTML=groupName;
+        	
+        	var statuses;
+        	
+        	//Set News Feed dropdown to display projects
+        	//set Title to selected project
+        	for (var i=0; i < data.length; i++) {
+        		var currGroupID = data[i]['customID'];
+  				var groupName = data[i]['name'];
+  				var li = document.createElement("li");
+  				var a = document.createElement("a");
+  				a.innerHTML=groupName;
+  				a.href="/" + currGroupID;
+  				li.appendChild(a);
+  				newsDrop.appendChild(li);
+  				if(currGroupID == "@groupID"){
+  					document.getElementById("groupNameTitle").innerHTML=groupName;
+  					statuses = data[i]['statuses'];
+  				}
   			}
-  		}	
+  			//set Tasks dropdown to display statuses
+  			for(var j=0; j<statuses.length; j++) {
+				var li = document.createElement("li");
+  				var a = document.createElement("a");
+  				a.innerHTML=statuses[j];
+  				a.href= "/" + "@groupID" + "/tasks/" + statuses[j].replace(" ", "_");
+  				li.appendChild(a);
+  				taskDrop.appendChild(li);
+  				
+  			}
+  			
+  			
         }
       });
-      	
+      
   }
   
-  getGroupName();
+  getGroupAndStatuses();
   
   $.fn.outerHTML = function(){
 
@@ -263,25 +250,28 @@
   	limitedtextfield.value = "";
   	
   	if (option == "text_post") {
-  	
+  		document.getElementById("post_form").style.display="inline";
   		limitedtextfield.rows = 5
   		limitedtextfield.maxlength=msgTextLimit;
   		charCountdown.value = msgTextLimit;
         limitedtextfield.placeholder="What's on you mind?";
         taskAliasForm.style.display="none";
-
-  	} else {
+  	} else if (option == "task") {
+  		document.getElementById("post_form").style.display="inline";
   		limitedtextfield.rows = 1;
   		limitedtextfield.maxlength=taskTextLimit;
         charCountdown.value = taskTextLimit;
         limitedtextfield.placeholder="Your Task";
 	    taskAliasForm.style.display="inline";
+    } else {
+    	document.getElementById("post_form").style.display="none";
+    	taskAliasForm.style.display="none";
     }
 
   }
 
   function setTaskStatus(status) {
-  localToggle=1;
+  localToggle="tasks";
     document.getElementById("stream").innerHTML = "";
     document.getElementById("task_status").innerHTML = status;
     $.ajax({
@@ -305,64 +295,45 @@
 
       var getUrl = "/" + "@groupID" + "/rest/";
 
-      switch(@toggle)
-        {
-        case 0:
-          getUrl += "feed";
-          break;
-        case 1:
-          getUrl += "tasks";
-          break;
-        case 2:
-          getUrl += "git";
-          break;
-        case 3:
-          getUrl += "builds";
-          break;
-        case 4:
-          getUrl += "taskdetails";
-          break;
+		getUrl += "@toggle";
 
-        } 
-
-
-        if (@toggle==0 || @toggle == 4) {
+			//add all tasks to list for referencing
           $.ajax({
           type: "GET",
           url: "/" + "@groupID" + "/rest/alltasks",
           dataType: "json",
           success: function(data){   
-
               addTasks(data);
           }});
-        }    
+	
+		//if toggle is a reference, generate		
 
-        if (localToggle == 4) {
-
-          var task_json = "{\"id\": \"@task\"}";
           $.ajax({    
-            type: "POST",
-            url: getUrl,
+           type: "GET",
+           url: "/" + "@groupID" + "/rest/ref/" + "@toggle",
             dataType: "json",
-            data: {"activity":task_json},
-            success: function(data){   
-              
-
-                generateFeed(data);
-          }});
-
-
-        } else {
-
-          $.ajax({    
+            success: function(data){ 
+	
+			if(data == "") {
+			
+			$.ajax({    
            type: "GET",
            url: getUrl,
             dataType: "json",
             success: function(data){   
+              generateFeed(data);
+              
+             }}); 
+			
+			} else {
 
               generateFeed(data);
-          }});
-        }  
+          
+
+		}
+		}});
+		
+          
   }
 
   $(document).ready(refreshFeed);	
@@ -479,7 +450,8 @@
 
     /*$(window).scroll(function () {
       if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
-        if(@toggle==0) {
+        if(@toggle=="feed") {
+          //alert("feed page");
           $.ajax({
             type: "GET",
             url: "/" + "@groupID" + "/rest/morefeed/" + final_post_id,
@@ -496,34 +468,33 @@
   var autoRefreshing;
   function autoRefresh() {    
     var getUrl = "/" + "@groupID" + "/rest/";
-    switch(@toggle)
+    switch("@toggle")
       {
-      case 0:
+      case "feed":
         getUrl += "newfeed/";
         break;
-    /*  case 1:
+      case "tasks":
         getUrl += "moretask/";
         break;
-      case 2:
+      case "gits":
         getUrl += "moregit/";
         break;
-      case 3:
+      case "builds":
         getUrl += "morebuild/";
-        break;*/
+        break;
       }
-      
-      //setInterval(function() {
-      //$.ajax({    
-      //type: "GET",
-      //url: getUrl + first_post_id,
-      //dataType: "json",
-      //success: function(data){   
-      //    autoRefreshing = true;
-      //    addToFeed(data);
-      //    autoRefreshing = false;
-      //}});
-    //}, 500);
-  } 
+    /*setInterval(function() {
+      $.ajax({    
+      type: "GET",
+      url: getUrl + first_post_id,
+      dataType: "json",
+      success: function(data){   
+          autoRefreshing = true;
+          addToFeed(data);
+          autoRefreshing = false;
+      }});
+    }, 500);*/
+  }
 
   function loadMoreFeed() {
     $('#loadMoreButton').hide();
@@ -532,18 +503,18 @@
     //final_post_id = $("ul#stream li").last().attr("id");
 
     var getUrl = "/" + "@groupID" + "/rest/";
-    switch(@toggle)
+    switch("@toggle")
       {
-      case 0:
+      case "feed":
         getUrl += "morefeed/";
         break;
-      case 1:
+      case "tasks":
         getUrl += "moretask/";
         break;
-      case 2:
+      case "gits":
         getUrl += "moregit/";
         break;
-      case 3:
+      case "builds":
         getUrl += "morebuild/";
         break;
       }
@@ -568,32 +539,32 @@
 
   	//document.getElementById("username").innerHTML="@userName";
 
-    if (localToggle == 0) {
+    if (localToggle == "feed") {
       document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("git_nav").setAttribute("class","");
       document.getElementById("builds_nav").setAttribute("class","");
-    } else if(localToggle == 1) {
-      document.title = "Task List"
+    } else if(localToggle == "tasks") {
+    	document.title = "Task List"
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","active");
       document.getElementById("git_nav").setAttribute("class","");
       document.getElementById("builds_nav").setAttribute("class","");
-    } else if(localToggle == 2) {
+    } else if(localToggle == "gits") {
       document.title = "Git Commits"
       document.getElementById("git_nav").setAttribute("class","active");
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("builds_nav").setAttribute("class","");
-    } else if(localToggle == 3) {
+    } else if(localToggle == "builds") {
       document.title = "Jenkins Builds"
       document.getElementById("builds_nav").setAttribute("class","active");
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","");
       document.getElementById("git_nav").setAttribute("class","");
-    } else if (localToggle == 4) {
-      document.title = "@task";
+    } else if (localToggle == "taskdetails") {
+      document.title = "@toggle";
       document.getElementById("builds_nav").setAttribute("class","");
       document.getElementById("newsfeed_nav").setAttribute("class","");
       document.getElementById("tasklist_nav").setAttribute("class","");
@@ -607,16 +578,11 @@
 
       if (stream_array.length > 0) {
 
-        task_title.innerHTML = "References to task @task";
-                $('#seeMoreButton').hide();
-
+        task_title.innerHTML = "References to task @toggle";
       } else {
-
-        task_title.innerHTML = "There are no references to task @task";
-        $('#seeMoreButton').hide();
-
-
+        task_title.innerHTML = "There are no references to task @toggle";
       }
+      $('#seeMoreButton').hide();
     }
     
 
@@ -647,9 +613,6 @@
   		} else {
   		  publisher = displayName;
   		}
-
-
-  		
   		var publisherType = stream_array[i][0]['actor']["objectType"];
   	
   		var verb = stream_array[i][0]['verb'];
@@ -868,7 +831,7 @@
   			post_body.appendChild(reply_button);
         post.appendChild(post_body);
   			break;
-  			
+	
   		case "GIT":
   		
   			var repo = stream_array[i][0]['object']['repository'];
@@ -942,6 +905,24 @@
   			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
   			break;
+  			
+  		case "IMAGE":
+  			var user = document.createElement("h4");
+  	        user.setAttribute("class", "media-heading");
+  	  			user.innerHTML = publisher;
+  	  		
+  	  		var upload_image = document.createElement("image");
+  			upload_image.style.height = "400px";
+  			upload_image.style.width = "400px";
+  			upload_image.src= stream_array[i][0]['object']['web_preview_url'];
+  	  			
+  	  	    post_body.appendChild(user);
+  	  		  post_body.appendChild(upload_image);
+  	        post_body.appendChild(date_and_time);
+  	  		  post_body.appendChild(reply_message_div);
+  	  		  post_body.appendChild(reply_button);
+  	        post.appendChild(post_body);
+  	        break;
   		}
 
   		 reply_button.onclick = (function(post_id, reply_message) {
@@ -1000,8 +981,6 @@
           var reply_username = stream_array[i][j]['actor']["username"];
           var reply_displayName = stream_array[i][j]['actor']["displayName"];
           var reply_photo_url = stream_array[i][j]['actor']["photo_url"];
-
-          alert(reply_photo_url);
 
           reply_publisher.innerHTML = reply_username;
 
@@ -1163,12 +1142,14 @@
 
       var task_id = task_ids[tag_without_hashes];
 
-      linked_tag.href = "/@groupID/taskref?task=" + task_id +"";
+	if(task_id != undefined){
+      linked_tag.href = "/@groupID/ref/" + task_id;
     
       linked_tag.innerHTML = tag;
 
       return message.replace(tag, $(linked_tag).outerHTML());
-
+	}
+	
     }
 
     return message;
@@ -1263,10 +1244,20 @@
   }
 
   </script>
+  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-16869805-2', 'group18-progress.herokuapp.com');
+  ga('send', 'pageview');
+
+</script>
       <!-- Bootstrap core JavaScript
       ================================================== -->
       <!-- Placed at the end of the document so the pages load faster -->
       <script src="@routes.Assets.at("javascripts/bootstrap.min.js")"></script>
   </body>
 </html>
-

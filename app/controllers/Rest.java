@@ -15,6 +15,7 @@ import models.FBAccount;
 import models.FBImage;
 import models.GHAccount;
 import models.GitObject;
+import models.ImageObject;
 import models.JenkinsActor;
 import models.JenkinsObject;
 import models.LocalAccount;
@@ -63,7 +64,8 @@ public class Rest extends Controller {
 			String Json = getValueFromRequest("activity");
 
 			Gson gson = new Gson();
-			GroupWithCreator project = gson.fromJson(Json, GroupWithCreator.class);
+			GroupWithCreator project = gson.fromJson(Json,
+					GroupWithCreator.class);
 
 			MongoLink.MONGO_LINK.addNewProject(project.name, project.creator);
 			return ok();
@@ -80,7 +82,8 @@ public class Rest extends Controller {
 			Gson gson = new Gson();
 			GroupWithUser userGroup = gson.fromJson(Json, GroupWithUser.class);
 
-			MongoLink.MONGO_LINK.addUsersToProject(userGroup.id, userGroup.username);
+			MongoLink.MONGO_LINK.addUsersToProject(userGroup.id,
+					userGroup.username);
 			return ok();
 		} catch (JsonSyntaxException e) {
 			return status(422);
@@ -198,12 +201,13 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getTasks(groupID).toString());
 	}
 
-	public static Result getTaskDetails(String groupID) {
+	public static Result getTaskDetails(String groupID, String ref) {
 		try {
-			Gson gson = new Gson();
-			TaskID task = gson.fromJson(getValueFromRequest("activity"),
-					TaskID.class);
-			return ok(MongoLink.MONGO_LINK.getTaskDetails(groupID, task.id)
+			/*
+			 * Gson gson = new Gson(); TaskID task =
+			 * gson.fromJson(getValueFromRequest("activity"), TaskID.class);
+			 */
+			return ok(MongoLink.MONGO_LINK.getTaskDetails(groupID, ref)
 					.toString());
 		} catch (JsonSyntaxException e) {
 			return status(422);
@@ -251,7 +255,7 @@ public class Rest extends Controller {
 		LocalAccount localAccount = userModel.getLocalAccount();
 		String password = localAccount.getPassword();
 		localAccount.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-		//localAccount.setPassword(password);
+		// localAccount.setPassword(password);
 		String credentialsJson = userModel.toJSON();
 
 		try {
@@ -295,6 +299,56 @@ public class Rest extends Controller {
 
 	public static Result getAllUsers() {
 		return ok(MongoLink.MONGO_LINK.getUsers().toString());
+	}
+
+	public static Result handleUserUpload() {
+		System.out.println("Upload handled");
+		JsonNode json = request().body().asJson();
+		String event = getStringValueFromJson(json, "event");
+		if (event.equals("file-processed")) {
+			ActivityModel activity = createActvityModelFromImageUpload(json);
+			activity.save("ImageTestingGroup");
+		}
+		return ok();
+	}
+
+	private static ActivityModel createActvityModelFromImageUpload(JsonNode json) {
+		String published = createDate();
+		ActorModel actor = createPersonActorFromSessionUser();
+		String verb = "uploaded";
+		ObjectModel object = createImageObject(json);
+		TargetModel target = new TargetModel("", new ArrayList<String>());
+		ActivityModel activity = new ActivityModel(published, actor, verb,
+				object, target);
+		return activity;
+	}
+
+	private static ActorModel createPersonActorFromSessionUser() {
+		UserModel user = MongoLink.MONGO_LINK
+				.getUserFromUsername("Luke");
+		LocalAccount local_user = user.getLocalAccount();
+
+		ActorModel actor = new PersonActor(local_user.getName(),
+				user.getUsername(), local_user.getPhoto_url());
+		return actor;
+	}
+	
+	private static ObjectModel createImageObject(JsonNode json) {
+		JsonNode derivatives = json.findValue("derivatives");
+		String conversions_root = getStringValueFromJson(derivatives,
+				"conversions_root");
+		String web_preview = getStringValueFromJson(derivatives,
+				"WEB_PREVIEW");
+		String web_preview_url = createS3URL(conversions_root, web_preview);
+		String original_root = getStringValueFromJson(json, "original_root");
+		String original = getStringValueFromJson(json, "original");
+		String original_url = createS3URL(original_root, original);
+		ObjectModel object = new ImageObject(original_url, web_preview_url);
+		return object;
+	}
+
+	private static String createS3URL(String root, String path) {
+		return "http://" + root + ".s3.amazonaws.com" + path;
 	}
 
 	public static Result parseGitHook(String groupID) {

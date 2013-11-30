@@ -20,30 +20,8 @@
   </head>
 
   <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a id="progress_nav" class="navbar-brand" href="@routes.Application.login()">Progress</a>
-      </div>
-      <div class="collapse navbar-collapse">
-        <ul class="nav navbar-nav" role="navigation">
-          <li id="newsfeed_nav"><a id="newsLink" href="@routes.Application.login()">News Feed</a></li>
-          <li id="tasklist_nav"><a id="taskLink" href="@routes.Application.profile()">Task List</a></li>
-          <li id="git_nav"><a id="gitLink" href="@routes.Application.profile()">Git Commits</a></li>
-          <li id = "builds_nav"><a id="buildLink" href="@routes.Application.profile()">Builds</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right" role="navigation">
-          <li class = "active" ><a href="@routes.Application.profile">@userName</a></li>
-          <li><a href="@routes.Application.login">Log Out</a></li>
-        </ul>
-      </div> <!--/.nav-collapse -->
-    </div>
-    </div>
+    
+    @navbar("", userName);
 
     <div class="container">
       <div id = "title" align = "center" class ="title" >
@@ -64,7 +42,7 @@
     </div>  <!-- /container --> 
 
     <script>
-
+    
     var users = [];
     var usersJSON = [];
 
@@ -109,6 +87,14 @@
 
         var group_name = group_data['customID'];
         var group_display_name = group_data['name'];
+        
+        var li = document.createElement("li");
+  		var a = document.createElement("a");
+  		a.innerHTML=group_display_name;
+  		a.href="/" + group_name;
+  		li.appendChild(a);
+  		newsDrop.appendChild(li);
+        
         var members_array = group_data['members'];
         
 
@@ -130,7 +116,7 @@
           j++;
         }
 
-        var a = document.createElement("a");
+       	var a = document.createElement("a");
         var ref = "/../" + group_name;
         a.href = ref;
         var all_groups_div = document.getElementById("groups");
@@ -140,16 +126,15 @@
         var git_webhook = window.location.origin + "/" +  group_name + "/rest/git";
 		    git_webhook_div.innerHTML = "Git Web Hook: ".bold() +  git_webhook;
         git_webhook_div.style.marginTop = "10px";
-		    var jenkins_webhook_div = document.createElement("div");
+		   var jenkins_webhook_div = document.createElement("div");
         var jenkins_webhook = window.location.origin + "/" +  group_name + "/rest/jenkins";
 		    jenkins_webhook_div.innerHTML = "Jenkins Web Hook: ".bold() +  jenkins_webhook;
         jenkins_webhook_div.style.marginTop = "10px";
         
+        	allTaskLink.href=ref + "/tasks";
         	progress_nav.href= ref;
-		    newsLink.href = ref;
-        	taskLink.href = ref + "/tasks";
 		    gitLink.href = ref + "/gits";
-		    buildLink.href = ref + "/builds";
+		    buildsLink.href = ref + "/builds";
 
         var add_users_box = document.createElement("input");
         add_users_box.type = "text";
@@ -378,6 +363,17 @@
    });}
 
     </script>
+    
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-16869805-2', 'group18-progress.herokuapp.com');
+  ga('send', 'pageview');
+
+</script>
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->

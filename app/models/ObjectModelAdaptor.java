@@ -32,6 +32,9 @@ public class ObjectModelAdaptor implements JsonDeserializer<ObjectModel>{
 		case JENKINS:
 			klass = JenkinsObject.class;
 			break;
+		case IMAGE:
+			klass = ImageObject.class;
+			break;
 		}
 
 	    return context.deserialize(jsonObject, klass);

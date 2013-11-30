@@ -5,9 +5,11 @@ import models.MongoLink;
 import models.UserModel;
 import play.mvc.Controller;
 import play.mvc.Result;
+import scala.collection.mutable.Seq;
 import views.html.about;
 import views.html.feed;
 import views.html.login;
+import views.html.profile;
 import views.html.register;
 import views.html.profile;
 
@@ -20,15 +22,17 @@ public class Application extends Controller {
 	 * 		   Else render login screen.
 	 */
 
-	public static Result feed(String groupID, Integer toggle, String task) {
-		if (loggedIn()) {
+	public static Result feed(String groupID, String toggle) {
+		
+		if (loggedIn() && isValidToggle(toggle)) {
 			String userName = Rest.getUsernameFromSession();
 			if(MongoLink.MONGO_LINK.isMember(userName, groupID)) {
 				UserModel user = MongoLink.MONGO_LINK.getUserFromUsername(userName);
 				LocalAccount localAccount = user.getLocalAccount();
 				String displayName = localAccount.getName();
 				String photo_url = localAccount.getPhoto_url();
-				return ok(feed.render(groupID, toggle, userName, displayName, photo_url, task));
+				session("groupid", groupID);
+				return ok(feed.render(groupID, toggle, userName, displayName, photo_url));
 			} else {
 				return redirect(controllers.routes.Application.profile());
 			}
@@ -36,6 +40,11 @@ public class Application extends Controller {
 		} else {
 			return redirect(controllers.routes.Application.login());
 		}
+	}
+	
+	private static boolean isValidToggle(String toggle) {
+		//waiting on db methods to implment
+		return true;
 	}
 
 	/**
