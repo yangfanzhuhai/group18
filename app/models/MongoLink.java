@@ -394,26 +394,14 @@ public class MongoLink {
 		getGroupColl(customID).drop();
 	}
 	
-	/**
-	 * Adds new user to the database, only if their username is not already
-	 * in the database
-	 * TODO DELETE
+	/** Expects information about the user registering or logging in with GitHub or Facebook
+	 * 	If the user is registering, makes sure the email is unique and then puts entry in database
+	 * 	If the user is logging in with Facebook or GitHub, checks if they have ever logged in using one of those,
+	 * 	if not, enters the details into the database. Returns true in both cases.
 	 * 
-	 * @param obj - Object containing new user's data
-	 * @return true if user was added, false if not
+	 * @param obj - Object representing register/login details
+	 * @return True if user has been registered in the database and logged in correctly, False otherwise
 	 */
-	public boolean registerNewUser(DBObject obj) {
-		
-		int oldCount = (int) users.getCount();
-		
-		if(users.findOne(QueryBuilder.start("username").is(obj.get("username")).get()) != null)
-			return false;
-		
-		users.insert(obj);
-		
-		return (int) users.getCount() == oldCount + 1;
-	}
-	
 	public boolean registerOrLogin(DBObject obj) {
 		
 		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString().replaceAll("\\s+",""))) {
@@ -455,18 +443,14 @@ public class MongoLink {
 		}
 	}
 	
-	/** Checks whether the username and password supplied in 'obj' match an
-	 * entry in the database
+	/** Checks entered credentials of user.
 	 * 
-	 * @param obj - Object containing username and password
-	 * @return true if parameters match some entry in the database, false if not
+	 * @param userIdentification - Username or Email of user
+	 * @param password - Password entered
+	 * @return True if credentials are correct, False otherwise
 	 */
-	public boolean checkLogin(DBObject obj) {
-		return checkLogin(obj.get("username").toString() ,((DBObject) obj.get("localAccount")).get("password").toString());
-	}
-	
-	public boolean checkLogin(String username, String password) {
-		return checkLoginWithUsername(username, password) || checkLoginWithEmail(username, password);
+	public boolean checkLogin(String userIdentification, String password) {
+		return checkLoginWithUsername(userIdentification, password) || checkLoginWithEmail(userIdentification, password);
 	}
 	
 	/** Checks the validity of the given username and password
@@ -475,8 +459,6 @@ public class MongoLink {
 	 * @param password - Password entered by user
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
-	
-		
 	public boolean checkLoginWithUsername(String username, String password) {
 		DBObject user = users.findOne(QueryBuilder.start("username").is(username).get());
 		return checkCredentials(user, password);
