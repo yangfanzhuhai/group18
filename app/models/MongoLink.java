@@ -505,9 +505,10 @@ public class MongoLink {
 	}
 	
 	
-	/*
-	* Creates a new session entry
-	*/ 
+	/**
+	 * @param session - new session
+	 * @return True if session was entered into the database correctly, False otherwise
+	 */
 	public boolean createNewSession(Session session) {
 
 		int oldCount = (int) sessions.getCount();
@@ -522,11 +523,12 @@ public class MongoLink {
 		
 		return (int) sessions.getCount() == oldCount + 1;
 	}
-
-
-	/*
-	* Returns a session with the given token
-	*/ 
+	
+	/**
+	 * @param Session token
+	 * @return A session with the given token
+	 * @throws ParseException
+	 */
 	public Session getSession(String token) throws ParseException {
 		ObjectId tokenID = new ObjectId(token);
 		DBObject query = QueryBuilder.start("_id").is(tokenID).get();
@@ -641,15 +643,36 @@ public class MongoLink {
 		return getNextNews(customID, lastID, 20);
 	}
 	
+	/**
+	 * 
+	 * @param customID - ID of current group/project
+	 * @param newestID - ID of the newest post on news feed
+	 * @param postLimit - Maximum number of posts to fetch
+	 * @return - An Array of posts (and their replies) that are newer than the post with 'newestID' 
+	 */
 	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID, int postLimit) {
 		return dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get(), reverseSort, postLimit);
 	}
 	
+	/**
+	 * @param customID - ID of current group/project
+	 * @param newestID - ID of the newest post on news feed
+	 * @return - An Array of at most 20 posts (and their replies) that are newer than the post with 'newestID' 
+	 */
 	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID) {
 		return getNewNews(customID, newestID, 20);
 	}
+	
+	/**
+	 * @param customID - ID of current group/project
+	 * @param newestID - ID of the newest post on news feed
+	 * @return - An Array of ALL the posts (and their replies) that are newer than the post with 'newestID' 
+	 */
+	public ArrayList<ArrayList<String>> getNewNewsAll(String customID, String newestID) {
+		return getNewNews(customID, newestID, noLimit(customID));
+	}
 
-	 /** 
+	/** 
 	 * @param customID - ID of collection to be used
 	 * @param postLimit - Maximum number of items to be fetched
 	 * @return List of the last 'postLimit' items from given collection with replies and references
@@ -879,7 +902,7 @@ public class MongoLink {
 		return getItemsWithoutReferences(coll, QueryBuilder.start("_id").in(taskIDObjs).get(), null);
 	}
 	
-	public ArrayList<String> getReferencedBy(String groupID, String id) throws ParseException {
+	private ArrayList<String> getReferencedBy(String groupID, String id) throws ParseException {
 		
 		return getReferencedBy(getGroupColl(groupID), id);
 	}
@@ -1040,8 +1063,25 @@ public class MongoLink {
 		collection.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), updateWith);
 	}
 
+	/** Shortcut method to pass as a parameter to database methods,
+	 * 	indicating that you want to fetch all posts satisfying a given query
+	 * 
+	 * @param collection - Collection being used
+	 * @return Size of the collection
+	 */
 	private int noLimit(DBCollection collection) {
 		return (int) collection.getCount();
+	}
+	
+	
+	/** Shortcut method to pass as a parameter to database methods,
+	 * 	indicating that you want to fetch all posts satisfying a given query
+	 * 
+	 * @param customID - ID of group collection to be used
+	 * @return Size of the collection
+	 */
+	private int noLimit(String customID) {
+		return noLimit(getGroupColl(customID));
 	}
 	
 	/**
@@ -1092,7 +1132,6 @@ public class MongoLink {
 	}
 	
 	private String removeBlanks(String input) {
-		
 		return input.replaceAll("\\s+","");
 	}
 }
