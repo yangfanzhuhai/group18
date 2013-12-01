@@ -931,7 +931,13 @@ public class MongoLink {
 		return new ArrayList<ArrayList<String>>(retList);
 	}
 	
-	private ArrayList<String> getEntireTopic(DBCollection coll, DBObject referencingPost) throws ParseException {
+	/**
+	 * @param collection - Collection to use
+	 * @param referencingPost - Post to get entire topic of.
+	 * @return Array of posts and their replies (topics) that contain the given post, which is either a post or a reply
+	 * @throws ParseException
+	 */
+	private ArrayList<String> getEntireTopic(DBCollection collection, DBObject referencingPost) throws ParseException {
 		
 		ArrayList<String> retList = new ArrayList<String>();
 		
@@ -944,16 +950,13 @@ public class MongoLink {
 		}
 		else
 		{
-			tempPost = coll.findOne(QueryBuilder.start("_id").is(new ObjectId(targetPost)).get());
+			tempPost = collection.findOne(QueryBuilder.start("_id").is(new ObjectId(targetPost)).get());
 		}
 		
 		String id = tempPost.get("_id").toString();
-		ActivityModel am = ActivityModel.activityModelGson.fromJson(tempPost.toString(), ActivityModel.class);
 		
-		// TODO This sort of thing should not be needed once activity model is refactored
-		am.setID(id);
-		retList.add(am.toJSON());
-		retList.addAll(getReplies(coll, id));
+		retList.add(ActivityModel.activityModelGson.fromJson(tempPost.toString(), ActivityModel.class).toJSON());
+		retList.addAll(getReplies(collection, id));
 		
 		return retList;
 	}
