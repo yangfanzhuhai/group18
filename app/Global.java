@@ -1,6 +1,6 @@
 import java.net.UnknownHostException;
 
-import models.MongoLink;
+import models.db.MongoLink;
 import play.Application;
 import play.GlobalSettings;
 import play.api.Play;

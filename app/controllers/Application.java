@@ -1,8 +1,8 @@
 package controllers;
 
 import models.LocalAccount;
-import models.MongoLink;
 import models.UserModel;
+import models.db.MongoLink;
 import play.mvc.Controller;
 import play.mvc.Result;
 import scala.collection.mutable.Seq;
