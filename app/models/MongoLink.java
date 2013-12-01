@@ -552,18 +552,6 @@ public class MongoLink {
 		return retList;
 	}
 	
-	public ArrayList<String> getInfoAboutUsers(String ... usernames) {
-		List<DBObject> list = users.find(QueryBuilder.start("username").in(usernames).get()).toArray();	
-		ArrayList<String> retList = new ArrayList<String>();
-		
-		for(DBObject o : list)
-		{
-			retList.add(o.toString());
-		}
-	
-		return retList;
-	}
-
 	/**
 	 * @param username - Username of the current user
 	 * @param groupID - GroupID to check against
@@ -847,6 +835,10 @@ public class MongoLink {
 		return retList;
 	}
 	
+	/**
+	 * @param id - ID of user
+	 * @return The user's appropriate display name
+	 */
 	public String getDisplayName(String id) {
 		
 		String ret = null;
@@ -877,6 +869,12 @@ public class MongoLink {
 		deletePost(getGroupColl(customID), obj.get("id").toString());
 	}
 	
+	/**
+	 * @param groupID - ID of group/project
+	 * @param id - ID of task
+	 * @return Array of posts and their replies which reference the task with the given id
+	 * @throws ParseException
+	 */
 	public ArrayList<ArrayList<String>> getTaskDetails(String groupID, String id) throws ParseException {
 		return getTaskDetails(getGroupColl(groupID), id);
 	}
@@ -918,14 +916,21 @@ public class MongoLink {
 		return getItemsWithoutReferences(coll, QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), reverseSort);
 	}
 	
-	private ArrayList<ArrayList<String>> getTaskDetails(DBCollection coll, String id) throws ParseException {
+	/**
+	 * 
+	 * @param collection - Collection of news feed items
+	 * @param id - ID of task concerned
+	 * @return Array of posts and their replies which reference the task with the given id
+	 * @throws ParseException
+	 */
+	private ArrayList<ArrayList<String>> getTaskDetails(DBCollection collection, String id) throws ParseException {
 		
 		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
-		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) coll.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(reverseSort).toArray();
+		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) collection.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(reverseSort).toArray();
 		
 		for(DBObject r : referencingItems)
 		{
-			retList.add(getEntireTopic(coll, r));
+			retList.add(getEntireTopic(collection, r));
 		}
 		
 		return new ArrayList<ArrayList<String>>(retList);
@@ -1134,6 +1139,10 @@ public class MongoLink {
 		return temp;
 	}
 	
+	/** 
+	 * @param input - String with spaces
+	 * @return The given String without whitespaces
+	 */
 	private String removeBlanks(String input) {
 		return input.replaceAll("\\s+","");
 	}
