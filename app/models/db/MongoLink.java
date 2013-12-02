@@ -12,7 +12,6 @@ import models.UserModel;
 import models.authentication.Session;
 
 import org.bson.types.ObjectId;
-import org.mindrot.jbcrypt.BCrypt;
 
 import com.google.gson.Gson;
 import com.mongodb.BasicDBObject;
@@ -40,9 +39,12 @@ public class MongoLink {
 	private static DBCollection groups;
 	private static DBCollection sessions;
 	
-	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 	
-	/**Class linking from Java to the MongoDB**/
+	/**
+	 * MongoLink constructor.
+	 * Initialises connection with database, and gets the core collections.
+	 * @throws UnknownHostException
+	 */
 	public MongoLink() throws UnknownHostException {
 		
 		mongoClient = new MongoClient( DBURL );
@@ -52,220 +54,6 @@ public class MongoLink {
 		groups = db.getCollection("groups");
 		sessions = db.getCollection("session");
 
-	}
-
-	//for testing
-	public static void main(String[] args) throws UnknownHostException, ParseException {
-		MongoLink ml = new MongoLink();
-		
-		
-	//	ml.a();
-	//	ml.addFieldToAllGroupCollections("actor.objectType", "PERSON");
-		
-	//	ml.a();
-	//	ml.addFieldToAllGroupCollections("actor.username", "");
-	//	ml.removeFieldFromCollection(db.getCollection("TestingFields"), "simple");
-	//	groups = db.getCollection("DEVgroups");
-
-	//	ml.removeFieldFromAllGroupCollections("alias");
-	//	ml.addFieldToAllGroupCollections(QueryBuilder.start("object.objectType").is("TASK").get(),"object.alias", "");
-		
-		//String json = "{ \"localAccount\": { \"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"password\": \"pass\" } ," +
-			//	"\"fbAccount\": {\"name\": \"Luke\", \"photo_url\" : \"\", \"profile_id\" : \"f123\" }, " +
-				//"\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
-		
-	//	String json = "{ \"localAccount\": {}," +
-	//			"\"fbAccount\": {\"name\": \"Piotr\", \"photo_url\" : \"\", \"profile_id\" : \"654123\"}, " +
-	//			"\"ghAccount\" : {}}";
-		
-	//	String fbccount = "{\"fbAccount\": {\"name\": \"Piotr\", \"photo_url\" : \"\", \"profile_id\" : \"654123\"}}";
-	//	ml.linkAccount("5287aacfb7606861f8bc37f2", (DBObject) JSON.parse(fbccount));
-		
-	/*	String json = "{\"ghAccount\" : {\"name\": \"Luke\", \"photo_url\" : \"\", \"email\" : \"abc\" , \"gravatar_id\": \"g321\", \"html_url\": \"www.git.com\"}}";
-		
-		Gson gson = new Gson();
-		UserModel model = gson.fromJson(json, UserModel.class);
-			System.out.println(model.toJSON());
-
-		
-		System.out.println(((DBObject) JSON.parse(model.toJSON())).toString());
-		
-		if(ml.registerOrLogin((DBObject) JSON.parse(model.toJSON())))
-			System.out.println("Registered/Logged in");
-		
-	/*	ArrayList<ArrayList<String>> a = ml.getTaskDetails("QuantumCheese", "528002a5e4b0e00e6f371e80");
-		
-		for(ArrayList<String> x : a)
-		{
-			System.out.println();
-			System.out.println();
-			for(String y : x)
-			{
-				System.out.println(y);
-			}
-		}
-	*/
-	/*	
-		long startTime = System.currentTimeMillis();
-		for(int i = 0; i < 100; i++)
-		{
-			ml.getGroups("Piotr");
-		}
-		float totalTime = System.currentTimeMillis() - startTime;
-		System.out.println("Total time taken : " + totalTime/1000 + " (average: " + totalTime/100000 + ")");
-		
-		//boolean auth = db.authenticate(DBUSER, DBPASS.toCharArray());
-
-		//Prints last 20 items of newsFeed
-		
-	/*	try {
-			System.out.println(new ActivityModel("{\"published\" : \""
-			          + "234/324/423"
-			          + "\", "
-			          + "\"actor\" : "
-			          + "{\"objectType\" : \"PERSON\", \"displayName\" : "
-			          + "\"" + "abc" + "\"}, "
-			          + "\"verb\" : \"said\", \"object\" : {\"objectType\""
-			          + " : \"MESSAGE\" , \"message\" : " 
-			          + "\"" + "Hello" + "\"}, \"target\" : \"\"} ").toJSON());
-		} catch (ParseException e) {
-			System.out.println("PArse exception");
-		}*/
-		
-	/*	float totalTime = 0;
-		
-		for(int i = 0; i < 100; i++) {
-			long startTime = System.currentTimeMillis();
-			ml.getNewsFeed("newsFeed");
-			totalTime += System.currentTimeMillis() - startTime;
-		}
-		
-		float avgTime = totalTime / 100000;
-		System.out.println("Total time taken : " + totalTime/1000 + " (average: " + avgTime + ")");
-/*
-		for(ArrayList<String> a : list) {
-			for(String o : a) {
-				System.out.println(o);
-			}
-		}
-		
-		System.out.println("SELECTING NEXT NEWS");
-		
-	//	list = ml.getNextNews("5273d01c646021e813bcd12a");
-		
-		for(ArrayList<String> a : list) {
-			for(String o : a) {
-				System.out.println(o);
-			}
-		}
-		
-		System.out.println("GETTING TASKS WITH STATUS TO_DO");
-		
-	//	list = ml.getTasksWithStatus("TO_DO");
-		for(ArrayList<String> a : list) {
-			for(String o : a) {
-				System.out.println(o);
-			}
-		}
-		
-		if(ml.checkLogin(new BasicDBObject("username", "Piotr").append("password","pass")))
-			System.out.println("Success");
-		
-		System.out.println("Adding new project");
-		*/
-	/*	groups = db.createCollection("temp", null);
-		long startTime = System.currentTimeMillis();
-		for(int i = 0; i < 200; i++)
-		{
-			ml.addNewProject("test Hello spaces", new GroupMember("Piotr", "Piotr", "www.dot.com"));
-		}
-		float totalTime = System.currentTimeMillis() - startTime;
-		System.out.println("Total time taken : " + totalTime/1000 + " (average: " + totalTime/200000 + ")");
-		groups.drop();
-	//	ml.registerNewUser(new BasicDBObject("username", "Rob").append("password", "pass2"));
-		
-	//	if(ml.checkLogin("Rob", "pass2"))
-	//		System.out.println("Success2");
-		
-		//Checks inserting into newsFeed and prints new latest 20
-	//	System.out.println(ml.insertNews(ml.dbFormat("Today", "PERSON", "Luke", "whispered", "MESSAGE", "What is up", "")));
-//		if(insertSuccess) {
-//			System.out.println("\n Insert Success");
-//			list = ml.getNewsFeed(20);
-//			for(DBObject o : list) {
-//				System.out.println(o);
-//			}
-//		} else {
-//			System.out.println("insert failed");
-//		}*/
-	}
-	
-	private void a() {
-		List<DBObject> groupList = groups.find().toArray();
-		
-		for(DBObject group : groupList)
-		{
-		//	DBCollection c = getGroupColl((String) group.get("customID"));
-			DBCollection c = getGroupColl("QuantumCheese");
-			List<DBObject> list = c.find(QueryBuilder.start("object.objectType").notEquals("JENKINS").get()).toArray();
-			for(DBObject o : list)
-			{				
-				o.put("actor", actor(((DBObject) o.get("actor")).get("username").toString(),((DBObject) o.get("actor")).get("photo_url").toString(),((DBObject) o.get("actor")).get("objectType").toString()));
-				c.save(o);
-			//	o.put("actor", jenkins());
-			//	c.save(o);
-			}
-		}
-	}
-	
-	private static DBObject jenkins() {
-		return new BasicDBObject("displayName", "Jenkins").append("objectType", "JENKINS");
-	}
-	
-	private static DBObject actor(String username, String photo_url, String objectType) {
-		return new BasicDBObject("displayName", username).append("objectType", objectType).append("username", username).append("photo_url", photo_url);
-	}
-	
-	private void addFieldToCollection(DBCollection coll, String fieldName, Object defaultValue) {
-		addFieldToCollection(coll, new BasicDBObject(), fieldName, defaultValue);
-	}
-	
-	private void addFieldToCollection(DBCollection coll, DBObject query, String fieldName, Object defaultValue) {
-		coll.update(query, new BasicDBObject("$set", new BasicDBObject(fieldName, defaultValue)), false, true);
-	}
-	
-	private void addFieldToAllGroupCollections(String fieldName, Object defaultValue) {
-		addFieldToAllGroupCollections(new BasicDBObject(), fieldName, defaultValue);	
-	}
-	
-	private void addFieldToAllGroupCollections(DBObject query, String fieldName, Object defaultValue) {
-		List<DBObject> groupList = groups.find().toArray();
-		
-		for(DBObject group : groupList)
-		{
-			addFieldToCollection(getGroupColl((String) group.get("customID")), query, fieldName, defaultValue);
-		}
-	}
-	
-	private void removeFieldFromCollection(DBCollection coll, String fieldName) {
-		removeFieldFromCollection(coll, new BasicDBObject(), fieldName);
-	}
-	
-	private void removeFieldFromCollection(DBCollection coll, DBObject query, String fieldName) {
-		coll.update(query, new BasicDBObject("$unset", new BasicDBObject(fieldName, "")), false, true);
-	}
-	
-	private void removeFieldFromAllGroupCollections(String fieldName) {
-		removeFieldFromAllGroupCollections(new BasicDBObject(), fieldName);	
-	}
-	
-	private void removeFieldFromAllGroupCollections(DBObject query, String fieldName) {
-		List<DBObject> groupList = groups.find().toArray();
-		
-		for(DBObject group : groupList)
-		{
-			removeFieldFromCollection(getGroupColl((String) group.get("customID")), query, fieldName);
-		}
 	}
 	
 	/** Inserts given object into appropriate collection
@@ -424,7 +212,7 @@ public class MongoLink {
 	 * @param password - Password entered by user
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
-	public boolean checkLoginWithUsername(String username, String password) {
+	private boolean checkLoginWithUsername(String username, String password) {
 		DBObject user = users.findOne(QueryBuilder.start("username").is(username).get());
 		return MongoUtils.checkCredentials(user, password);
 	}
@@ -435,7 +223,7 @@ public class MongoLink {
 	 * @param password - Password entered by user
 	 * @return True if there is an entry in the database with that exact email and password, False otherwise
 	 */
-	public boolean checkLoginWithEmail(String email, String password) {
+	private boolean checkLoginWithEmail(String email, String password) {
 		DBObject user = users.findOne(QueryBuilder.start("localAccount.email").is(email).get());
 		return MongoUtils.checkCredentials(user, password);
 	}
@@ -554,7 +342,7 @@ public class MongoLink {
 	 * @return List of the last 'postLimit' items from given collection with replies and references
 	 */
 	public ArrayList<ArrayList<String>> getNewsFeed(String customID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").get(), MongoUtils.reverseSort, postLimit);
 		
 	}
 
@@ -574,7 +362,7 @@ public class MongoLink {
 	 * 			that were posted after the post with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextNews(String customID, String lastID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").lessThan(new ObjectId(lastID)).get(), MongoUtils.reverseSort, postLimit);
 	}
 	
 	/**
@@ -595,7 +383,7 @@ public class MongoLink {
 	 * @return - An Array of posts (and their replies) that are newer than the post with 'newestID' 
 	 */
 	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get(), MongoUtils.reverseSort, postLimit);
 	}
 	
 	/**
@@ -622,7 +410,7 @@ public class MongoLink {
 	 * @return List of the last 'postLimit' items from given collection with replies and references
 	 */
 	public ArrayList<ArrayList<String>> getTasks(String customID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), MongoUtils.reverseSort, postLimit);
 		
 	}
 
@@ -642,7 +430,7 @@ public class MongoLink {
 	 * 			that were posted after the task with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextTasks(String customID, String lastID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("_id").lessThan(new ObjectId(lastID)).get(), MongoUtils.reverseSort, postLimit);
 	}
 	
 	/**
@@ -662,7 +450,7 @@ public class MongoLink {
 	 *  in order from newest to oldest 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies(String customID) throws ParseException{
-		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort);
+		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), MongoUtils.reverseSort);
 	}
 	
 	/**
@@ -698,7 +486,7 @@ public class MongoLink {
 	 * @return List of all the tasks with the given status, sorted from newest to oldest, with replies and associated objects
 	 */
 	public ArrayList<ArrayList<String>> getTasksWithStatus(String customID, String status) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit(customID));
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), MongoUtils.reverseSort, noLimit(customID));
 	}
 	
 	/**
@@ -707,7 +495,7 @@ public class MongoLink {
 	 * @return List of git commits (with replies and associated objects) sorted from newest to oldest
 	 */
 	public ArrayList<ArrayList<String>> getGitCommits(String customID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").get(), MongoUtils.reverseSort, postLimit);
 	}
 	
 	/**
@@ -726,7 +514,7 @@ public class MongoLink {
 	 * 			that were posted after the commit with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextGitCommits(String customID, String lastID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").and("_id").lessThan(new ObjectId(lastID)).get(), MongoUtils.reverseSort, postLimit);
 	}
 	
 	/**
@@ -745,7 +533,7 @@ public class MongoLink {
 	 * @return List of Jenkins builds (with replies and associated objects) sorted from newest to oldest
 	 */
 	public ArrayList<ArrayList<String>> getJenkinsBuilds(String customID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").get(), MongoUtils.reverseSort, postLimit);
 	}
 	
 	/**
@@ -764,7 +552,7 @@ public class MongoLink {
 	 * 			that were posted after the build with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextJenkinsBuilds(String customID, String lastID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").and("_id").lessThan(new ObjectId(lastID)).get(), MongoUtils.reverseSort, postLimit);
 	}
 	
 	/**
@@ -822,7 +610,7 @@ public class MongoLink {
 	 */
 	public void deletePost(String customID, DBObject obj) {
 		
-		deletePost(getGroupColl(customID), obj.get("id").toString());
+		MongoMethods.deletePost(getGroupColl(customID), obj.get("id").toString());
 	}
 	
 	/**
@@ -835,22 +623,6 @@ public class MongoLink {
 		return getTaskDetails(getGroupColl(groupID), id);
 	}
 	
-	private ArrayList<String> getReferencedBy(String groupID, String id) throws ParseException {
-		
-		return getReferencedBy(getGroupColl(groupID), id);
-	}
-	
-	/**
-	 * @param coll - Collection to be used
-	 * @param id - ID string of the task
-	 * @return ArrayList of all the news feed items that reference the given task
-	 * @throws ParseException
-	 */
-	private ArrayList<String> getReferencedBy(DBCollection coll, String id) throws ParseException {
-		
-		return MongoMethods.getItemsWithoutReferences(coll, QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), reverseSort);
-	}
-	
 	/**
 	 * 
 	 * @param collection - Collection of news feed items
@@ -861,7 +633,7 @@ public class MongoLink {
 	private ArrayList<ArrayList<String>> getTaskDetails(DBCollection collection, String id) throws ParseException {
 		
 		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
-		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) collection.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(reverseSort).toArray();
+		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) collection.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(MongoUtils.reverseSort).toArray();
 		
 		for(DBObject r : referencingItems)
 		{
@@ -869,23 +641,6 @@ public class MongoLink {
 		}
 		
 		return new ArrayList<ArrayList<String>>(retList);
-	}
-	
-	/**
-	 * @param coll - Collection be used
-	 * @param id - ID of the object to be deleted, along with all its replies
-	 */
-	private void deletePost(DBCollection coll, String id) {
-		deleteReplies(coll, id);
-		coll.remove(new BasicDBObject("_id", new ObjectId(id)));
-	}
-
-	/**
-	 * @param coll - Collection be used
-	 * @param id - ID of the object which will have its replies deleted
-	 */
-	private void deleteReplies(DBCollection coll, String id) {
-		coll.remove(QueryBuilder.start("target.messageID").is(id).get());
 	}
 	
 	/** Updates the status of the task with ID id

@@ -11,6 +11,7 @@ import com.mongodb.QueryBuilder;
 
 class MongoUtils {
 	
+	static DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 
 	/**
 	 * @param user - Object representing user
@@ -77,8 +78,6 @@ class MongoUtils {
 	 */
 	private static String removeBlanks(String input) {
 		return input.replaceAll("\\s+","");
-	}
-	
-	
+	}	
 
 }
