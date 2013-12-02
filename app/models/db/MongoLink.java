@@ -5,10 +5,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
-import models.ActivityModel;
 import models.GroupMember;
 import models.UserModel;
 import models.authentication.Session;
@@ -17,7 +15,6 @@ import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
 
 import com.google.gson.Gson;
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -46,7 +43,7 @@ public class MongoLink {
 	private DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 	
 	/**Class linking from Java to the MongoDB**/
-	public MongoLink(boolean devMode) throws UnknownHostException {
+	public MongoLink() throws UnknownHostException {
 		
 		mongoClient = new MongoClient( DBURL );
 		db = mongoClient.getDB( DBURL.getDatabase() );
@@ -59,7 +56,7 @@ public class MongoLink {
 
 	//for testing
 	public static void main(String[] args) throws UnknownHostException, ParseException {
-		MongoLink ml = new MongoLink(true);
+		MongoLink ml = new MongoLink();
 		
 		
 	//	ml.a();
@@ -429,7 +426,7 @@ public class MongoLink {
 	 */
 	public boolean checkLoginWithUsername(String username, String password) {
 		DBObject user = users.findOne(QueryBuilder.start("username").is(username).get());
-		return checkCredentials(user, password);
+		return MongoUtils.checkCredentials(user, password);
 	}
 	
 	/** Checks the validity of the given email and password
@@ -440,16 +437,7 @@ public class MongoLink {
 	 */
 	public boolean checkLoginWithEmail(String email, String password) {
 		DBObject user = users.findOne(QueryBuilder.start("localAccount.email").is(email).get());
-		return checkCredentials(user, password);
-	}
-
-	private boolean checkCredentials(DBObject user, String password) {
-		if(user != null) {
-			String hashedPassword = ((DBObject) user.get("localAccount")).get("password").toString();
-			return BCrypt.checkpw(password, hashedPassword);
-			//return true;
-		}
-		return false;
+		return MongoUtils.checkCredentials(user, password);
 	}
 	
 	public void linkAccount(String userID, DBObject obj) {
@@ -710,7 +698,7 @@ public class MongoLink {
 	 * @return List of all the tasks with the given status, sorted from newest to oldest, with replies and associated objects
 	 */
 	public ArrayList<ArrayList<String>> getTasksWithStatus(String customID, String status) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit(getGroupColl(customID)));
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit(customID));
 	}
 	
 	/**
@@ -906,7 +894,7 @@ public class MongoLink {
 	 * @param status - New status value to be set
 	 */
 	private void updateStatus(DBCollection coll, String id, String status) {
-		updateObject(coll, id, new BasicDBObject("$set", new BasicDBObject("object.status", status)));
+		MongoUtils.updateObject(coll, id, new BasicDBObject("$set", new BasicDBObject("object.status", status)));
 	}
 
 	/** Updates the priority of the task with ID id
@@ -915,29 +903,9 @@ public class MongoLink {
 	 * @param priority - New priority value to be set
 	 */
 	private void updatePriority(DBCollection coll, String id, int priority) {
-		updateObject(coll, id, new BasicDBObject("$set", new BasicDBObject("object.priority", priority)));
+		MongoUtils.updateObject(coll, id, new BasicDBObject("$set", new BasicDBObject("object.priority", priority)));
 	}
 
-	/** Generic method which updates object with ID 'id' using the parameters in 'updateWith'
-	 * @param collection - Collection be used
-	 * @param id - ID of object to be updated
-	 * @param updateWith - Information on what the update should change
-	 */
-	private void updateObject(DBCollection collection, String id, DBObject updateWith) {
-		collection.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), updateWith);
-	}
-
-	/** Shortcut method to pass as a parameter to database methods,
-	 * 	indicating that you want to fetch all posts satisfying a given query
-	 * 
-	 * @param collection - Collection being used
-	 * @return Size of the collection
-	 */
-	private int noLimit(DBCollection collection) {
-		return (int) collection.getCount();
-	}
-	
-	
 	/** Shortcut method to pass as a parameter to database methods,
 	 * 	indicating that you want to fetch all posts satisfying a given query
 	 * 
@@ -945,7 +913,7 @@ public class MongoLink {
 	 * @return Size of the collection
 	 */
 	private int noLimit(String customID) {
-		return noLimit(getGroupColl(customID));
+		return MongoUtils.noLimit(getGroupColl(customID));
 	}
 	
 	/**
