@@ -61,6 +61,7 @@ public class MongoLink {
 	public static void main(String[] args) throws UnknownHostException, ParseException {
 		MongoLink ml = new MongoLink(true);
 		
+		
 	//	ml.a();
 	//	ml.addFieldToAllGroupCollections("actor.objectType", "PERSON");
 		

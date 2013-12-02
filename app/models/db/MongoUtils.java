@@ -104,10 +104,7 @@ class MongoUtils {
 		
 		for(DBObject o : list) {
 			
-			ActivityModel am = ActivityModel.activityModelGson.fromJson(o.toString(), ActivityModel.class);
-			am.setID(o.get("_id").toString());
-			
-			retList.add(am.toJSON());
+			retList.add(ActivityModel.activityModelGson.fromJson(o.toString(), ActivityModel.class).toJSON());
 			retList.addAll(getReferences(collection, o));
 		}
 		
