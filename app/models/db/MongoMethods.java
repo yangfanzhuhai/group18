@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 import models.ActivityModel;
 
 import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
@@ -88,6 +89,7 @@ class MongoMethods {
 		return retList;
 	}
 	
+	//TODO DELETE?
 	/** Generic method to find list of objects that satisfy the given query
 	 * and any task they reference
 	 * @param collection - Collection to be used
@@ -109,6 +111,34 @@ class MongoMethods {
 		}
 		
 		return retList;
+	}
+	// TODO DELETE?
+	/**
+	 * @param coll - Collection to be used
+	 * @param id - ID string of the task
+	 * @return ArrayList of all the news feed items that reference the given task
+	 * @throws ParseException
+	 */
+	private ArrayList<String> getReferencedBy(DBCollection coll, String id) throws ParseException {
+		
+		return getItemsWithoutReferences(coll, QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), MongoUtils.reverseSort);
+	}
+
+	/**
+	 * @param coll - Collection be used
+	 * @param id - ID of the object to be deleted, along with all its replies
+	 */
+	static void deletePost(DBCollection coll, String id) {
+		deleteReplies(coll, id);
+		coll.remove(new BasicDBObject("_id", new ObjectId(id)));
+	}
+
+	/**
+	 * @param coll - Collection be used
+	 * @param id - ID of the object which will have its replies deleted
+	 */
+	static void deleteReplies(DBCollection coll, String id) {
+		coll.remove(QueryBuilder.start("target.messageID").is(id).get());
 	}
 
 	/** Generic method to find list of objects that satisfy the given query
