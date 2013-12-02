@@ -21,7 +21,6 @@ public class Application extends Controller {
 	 * @return News Feed/Task View if logged in.
 	 * 		   Else render login screen.
 	 */
-
 	public static Result feed(String groupID, String toggle) {
 		
 		if (loggedIn() && isValidToggle(toggle)) {
