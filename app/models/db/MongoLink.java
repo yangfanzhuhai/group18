@@ -1,6 +1,4 @@
-package models;
-
-import models.authentication.*;
+package models.db;
 
 import java.net.UnknownHostException;
 import java.text.ParseException;
@@ -10,7 +8,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.bson.types.BasicBSONList;
+import models.ActivityModel;
+import models.GroupMember;
+import models.UserModel;
+import models.authentication.Session;
+
 import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -59,7 +61,8 @@ public class MongoLink {
 	public static void main(String[] args) throws UnknownHostException, ParseException {
 		MongoLink ml = new MongoLink(true);
 		
-		ml.a();
+		
+	//	ml.a();
 	//	ml.addFieldToAllGroupCollections("actor.objectType", "PERSON");
 		
 	//	ml.a();
@@ -104,12 +107,8 @@ public class MongoLink {
 				System.out.println(y);
 			}
 		}
-	
-	/*	for(ArrayList<String> o: ml.getGroups("Piotr"))
-		{
-			System.out.println(o);
-		}
-		
+	*/
+	/*	
 		long startTime = System.currentTimeMillis();
 		for(int i = 0; i < 100; i++)
 		{
@@ -136,20 +135,17 @@ public class MongoLink {
 			System.out.println("PArse exception");
 		}*/
 		
-	//	long totalTime = 0;
+	/*	float totalTime = 0;
 		
-	/*	System.out.println(ml.getGroups("Matt"));
-		System.out.println(ml.isMember("Matt", "Progress"));
-		ArrayList<ArrayList<String>> list = new ArrayList<ArrayList<String>>();
-	//	list = ml.getNewsFeed();
-	//	for(int i = 0; i < 100; i++) {
-	//		long startTime = System.currentTimeMillis();
-	//		list = ml.getNewsFeed(20);
-	//		totalTime += System.currentTimeMillis() - startTime;
-	//	}
+		for(int i = 0; i < 100; i++) {
+			long startTime = System.currentTimeMillis();
+			ml.getNewsFeed("newsFeed");
+			totalTime += System.currentTimeMillis() - startTime;
+		}
 		
-	//	float avgTime = totalTime / 100000;
-
+		float avgTime = totalTime / 100000;
+		System.out.println("Total time taken : " + totalTime/1000 + " (average: " + avgTime + ")");
+/*
 		for(ArrayList<String> a : list) {
 			for(String o : a) {
 				System.out.println(o);
@@ -184,7 +180,7 @@ public class MongoLink {
 		long startTime = System.currentTimeMillis();
 		for(int i = 0; i < 200; i++)
 		{
-			ml.addNewProject("test Hello spaces", "Piotr");
+			ml.addNewProject("test Hello spaces", new GroupMember("Piotr", "Piotr", "www.dot.com"));
 		}
 		float totalTime = System.currentTimeMillis() - startTime;
 		System.out.println("Total time taken : " + totalTime/1000 + " (average: " + totalTime/200000 + ")");
@@ -275,41 +271,6 @@ public class MongoLink {
 		}
 	}
 	
-	/**
-	 * @param newsFeed Collection from which to fetch data
-	 * @param searchCriteria - Criteria to use for search
-	 * @param sortCriteria - Criteria by which to sort results
-	 * @param postLimit - Maximum number of items to fetch
-	 * @return List of Lists containing news feed posts, with their replies and references
-	 */
-	private ArrayList<ArrayList<String>> dbFetch(DBCollection newsFeed, DBObject searchCriteria, DBObject sortCriteria, int postLimit) {
-		
-		ArrayList<DBObject> posts = (ArrayList<DBObject>) newsFeed.find(searchCriteria).sort(sortCriteria).limit(postLimit).toArray();
-		ArrayList<ArrayList<String>> retList = new ArrayList<ArrayList<String>>();
-		
-		try {
-			int i = 0;
-			while(i < posts.size())
-			{
-				ArrayList<String> tempList = getReplies(newsFeed, posts.get(i).get("_id").toString());
-				ActivityModel post = ActivityModel.activityModelGson.fromJson(posts.get(i).toString(), ActivityModel.class);
-				post.setID(posts.get(i).get("_id").toString());
-				
-				tempList.add(0, post.toJSON());
-				tempList.addAll(1, getReferences(newsFeed, posts.get(i)));
-				retList.add(i, tempList);
-				
-				i++;
-			}
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return retList;
-	}
-	
-	
 	/** Inserts given object into appropriate collection
 	 * 
 	 * @param customID - ID of group collection
@@ -352,7 +313,7 @@ public class MongoLink {
 		String creatorJson = gson.toJson(creator);
 		BasicDBObject creatorObject = (BasicDBObject) JSON.parse(creatorJson);
 		
-		return addNewProject(createNewEmptyProject(generateCustomID(name), name, creatorObject));
+		return addNewProject(createNewEmptyProject(MongoUtils.generateCustomID(groups, name), name, creatorObject));
 	}
 	
 	/** Adds any amount of users to a given project. Any user who is already a
@@ -380,7 +341,7 @@ public class MongoLink {
 	 * @param users - User to be removed
 	 */
 	public void removeFromProject(String customID, String ... users) {
-		groups.update(queryForProject(customID), new BasicDBObject("$pullAll", new BasicDBObject("members", users)));
+		groups.update(MongoUtils.queryForProject(customID), new BasicDBObject("$pullAll", new BasicDBObject("members", users)));
 	}
 	
 	/** Changes the project's display name
@@ -389,7 +350,7 @@ public class MongoLink {
 	 * @param name - The new display name
 	 */
 	public void changeProjectName(String customID, String name) {
-		groups.update(queryForProject(customID), new BasicDBObject("name", name));
+		groups.update(MongoUtils.queryForProject(customID), new BasicDBObject("name", name));
 	}
 	
 	/** Deletes the entire project from the database.
@@ -397,30 +358,18 @@ public class MongoLink {
 	 * @param customID - ID of the project to be removed
 	 */
 	public void deleteProject(String customID) {
-		groups.remove(queryForProject(customID));
+		groups.remove(MongoUtils.queryForProject(customID));
 		getGroupColl(customID).drop();
 	}
 	
-	/**
-	 * Adds new user to the database, only if their username is not already
-	 * in the database
-	 * TODO DELETE
+	/** Expects information about the user registering or logging in with GitHub or Facebook
+	 * 	If the user is registering, makes sure the email is unique and then puts entry in database
+	 * 	If the user is logging in with Facebook or GitHub, checks if they have ever logged in using one of those,
+	 * 	if not, enters the details into the database. Returns true in both cases.
 	 * 
-	 * @param obj - Object containing new user's data
-	 * @return true if user was added, false if not
+	 * @param obj - Object representing register/login details
+	 * @return True if user has been registered in the database and logged in correctly, False otherwise
 	 */
-	public boolean registerNewUser(DBObject obj) {
-		
-		int oldCount = (int) users.getCount();
-		
-		if(users.findOne(QueryBuilder.start("username").is(obj.get("username")).get()) != null)
-			return false;
-		
-		users.insert(obj);
-		
-		return (int) users.getCount() == oldCount + 1;
-	}
-	
 	public boolean registerOrLogin(DBObject obj) {
 		
 		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString().replaceAll("\\s+",""))) {
@@ -462,18 +411,14 @@ public class MongoLink {
 		}
 	}
 	
-	/** Checks whether the username and password supplied in 'obj' match an
-	 * entry in the database
+	/** Checks entered credentials of user.
 	 * 
-	 * @param obj - Object containing username and password
-	 * @return true if parameters match some entry in the database, false if not
+	 * @param userIdentification - Username or Email of user
+	 * @param password - Password entered
+	 * @return True if credentials are correct, False otherwise
 	 */
-	public boolean checkLogin(DBObject obj) {
-		return checkLogin(obj.get("username").toString() ,((DBObject) obj.get("localAccount")).get("password").toString());
-	}
-	
-	public boolean checkLogin(String username, String password) {
-		return checkLoginWithUsername(username, password) || checkLoginWithEmail(username, password);
+	public boolean checkLogin(String userIdentification, String password) {
+		return checkLoginWithUsername(userIdentification, password) || checkLoginWithEmail(userIdentification, password);
 	}
 	
 	/** Checks the validity of the given username and password
@@ -482,8 +427,6 @@ public class MongoLink {
 	 * @param password - Password entered by user
 	 * @return True if there is an entry in the database with that exact username and password, False otherwise
 	 */
-	
-		
 	public boolean checkLoginWithUsername(String username, String password) {
 		DBObject user = users.findOne(QueryBuilder.start("username").is(username).get());
 		return checkCredentials(user, password);
@@ -530,9 +473,10 @@ public class MongoLink {
 	}
 	
 	
-	/*
-	* Creates a new session entry
-	*/ 
+	/**
+	 * @param session - new session
+	 * @return True if session was entered into the database correctly, False otherwise
+	 */
 	public boolean createNewSession(Session session) {
 
 		int oldCount = (int) sessions.getCount();
@@ -547,11 +491,12 @@ public class MongoLink {
 		
 		return (int) sessions.getCount() == oldCount + 1;
 	}
-
-
-	/*
-	* Returns a session with the given token
-	*/ 
+	
+	/**
+	 * @param Session token
+	 * @return A session with the given token
+	 * @throws ParseException
+	 */
 	public Session getSession(String token) throws ParseException {
 		ObjectId tokenID = new ObjectId(token);
 		DBObject query = QueryBuilder.start("_id").is(tokenID).get();
@@ -575,18 +520,6 @@ public class MongoLink {
 		return retList;
 	}
 	
-	public ArrayList<String> getInfoAboutUsers(String ... usernames) {
-		List<DBObject> list = users.find(QueryBuilder.start("username").in(usernames).get()).toArray();	
-		ArrayList<String> retList = new ArrayList<String>();
-		
-		for(DBObject o : list)
-		{
-			retList.add(o.toString());
-		}
-	
-		return retList;
-	}
-
 	/**
 	 * @param username - Username of the current user
 	 * @param groupID - GroupID to check against
@@ -594,7 +527,7 @@ public class MongoLink {
 	 */
 	public boolean isMember(String username, String groupID) {
 		@SuppressWarnings("unchecked")
-		List<DBObject> members = (List<DBObject>) groups.findOne(queryForProject(groupID)).get("members");
+		List<DBObject> members = (List<DBObject>) groups.findOne(MongoUtils.queryForProject(groupID)).get("members");
 		
 		for(DBObject member : members){
 			if (member.get("username").equals(username)) return true;
@@ -633,7 +566,7 @@ public class MongoLink {
 	 * @return List of the last 'postLimit' items from given collection with replies and references
 	 */
 	public ArrayList<ArrayList<String>> getNewsFeed(String customID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").get(), reverseSort, postLimit);
 		
 	}
 
@@ -653,7 +586,7 @@ public class MongoLink {
 	 * 			that were posted after the post with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextNews(String customID, String lastID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
 	}
 	
 	/**
@@ -666,21 +599,42 @@ public class MongoLink {
 		return getNextNews(customID, lastID, 20);
 	}
 	
+	/**
+	 * 
+	 * @param customID - ID of current group/project
+	 * @param newestID - ID of the newest post on news feed
+	 * @param postLimit - Maximum number of posts to fetch
+	 * @return - An Array of posts (and their replies) that are newer than the post with 'newestID' 
+	 */
 	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get(), reverseSort, postLimit);
 	}
 	
+	/**
+	 * @param customID - ID of current group/project
+	 * @param newestID - ID of the newest post on news feed
+	 * @return - An Array of at most 20 posts (and their replies) that are newer than the post with 'newestID' 
+	 */
 	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID) {
 		return getNewNews(customID, newestID, 20);
 	}
+	
+	/**
+	 * @param customID - ID of current group/project
+	 * @param newestID - ID of the newest post on news feed
+	 * @return - An Array of ALL the posts (and their replies) that are newer than the post with 'newestID' 
+	 */
+	public ArrayList<ArrayList<String>> getNewNewsAll(String customID, String newestID) {
+		return getNewNews(customID, newestID, noLimit(customID));
+	}
 
-	 /** 
+	/** 
 	 * @param customID - ID of collection to be used
 	 * @param postLimit - Maximum number of items to be fetched
 	 * @return List of the last 'postLimit' items from given collection with replies and references
 	 */
 	public ArrayList<ArrayList<String>> getTasks(String customID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort, postLimit);
 		
 	}
 
@@ -700,7 +654,7 @@ public class MongoLink {
 	 * 			that were posted after the task with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextTasks(String customID, String lastID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
 	}
 	
 	/**
@@ -720,7 +674,7 @@ public class MongoLink {
 	 *  in order from newest to oldest 
 	 * @throws ParseException **/
 	public ArrayList<String> getAllTasksWithoutReplies(String customID) throws ParseException{
-		return getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort);
+		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), reverseSort);
 	}
 	
 	/**
@@ -730,7 +684,7 @@ public class MongoLink {
 	 * @throws ParseException
 	 */
 	public ArrayList<String> getAllTasksByName(String customID) throws ParseException {
-		return getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.name").is(1).get());
+		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.name").is(1).get());
 	}
 	
 	/**
@@ -739,7 +693,7 @@ public class MongoLink {
 	 * @return List of tasks (with replies and associated objects) sorted by priority in descending order
 	 */
 	public ArrayList<ArrayList<String>> getTasksByPriority(String customID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(-1).get(), postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(-1).get(), postLimit);
 	}
 	
 	/**
@@ -756,7 +710,7 @@ public class MongoLink {
 	 * @return List of all the tasks with the given status, sorted from newest to oldest, with replies and associated objects
 	 */
 	public ArrayList<ArrayList<String>> getTasksWithStatus(String customID, String status) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit(getGroupColl(customID)));
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), reverseSort, noLimit(getGroupColl(customID)));
 	}
 	
 	/**
@@ -765,7 +719,7 @@ public class MongoLink {
 	 * @return List of git commits (with replies and associated objects) sorted from newest to oldest
 	 */
 	public ArrayList<ArrayList<String>> getGitCommits(String customID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").get(), reverseSort, postLimit);
 	}
 	
 	/**
@@ -784,7 +738,7 @@ public class MongoLink {
 	 * 			that were posted after the commit with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextGitCommits(String customID, String lastID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
 	}
 	
 	/**
@@ -803,7 +757,7 @@ public class MongoLink {
 	 * @return List of Jenkins builds (with replies and associated objects) sorted from newest to oldest
 	 */
 	public ArrayList<ArrayList<String>> getJenkinsBuilds(String customID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").get(), reverseSort, postLimit);
 	}
 	
 	/**
@@ -822,7 +776,7 @@ public class MongoLink {
 	 * 			that were posted after the build with the given ID
 	 */
 	public ArrayList<ArrayList<String>> getNextJenkinsBuilds(String customID, String lastID, int postLimit) {
-		return dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").and("_id").lessThan(new ObjectId(lastID)).get(), reverseSort, postLimit);
 	}
 	
 	/**
@@ -849,6 +803,10 @@ public class MongoLink {
 		return retList;
 	}
 	
+	/**
+	 * @param id - ID of user
+	 * @return The user's appropriate display name
+	 */
 	public String getDisplayName(String id) {
 		
 		String ret = null;
@@ -879,32 +837,17 @@ public class MongoLink {
 		deletePost(getGroupColl(customID), obj.get("id").toString());
 	}
 	
+	/**
+	 * @param groupID - ID of group/project
+	 * @param id - ID of task
+	 * @return Array of posts and their replies which reference the task with the given id
+	 * @throws ParseException
+	 */
 	public ArrayList<ArrayList<String>> getTaskDetails(String groupID, String id) throws ParseException {
 		return getTaskDetails(getGroupColl(groupID), id);
 	}
 	
-	/** 
-	 * @param coll - Collection to be used
-	 * @param obj - News Feed object
-	 * @return ArrayList representing all the tasks that are referenced by the given object
-	 * @throws ParseException
-	 */
-	private ArrayList<String> getReferences(DBCollection coll, DBObject obj) throws ParseException {
-		
-		BasicDBList taskIDs = (BasicDBList) ((DBObject)obj.get("target")).get("taskIDs");
-		
-		if(taskIDs.isEmpty()) return new ArrayList<String>();
-		
-		ObjectId[] taskIDObjs = new ObjectId[taskIDs.size()];
-		for(int i = 0; i < taskIDObjs.length; i++)
-		{
-			taskIDObjs[i] = new ObjectId(taskIDs.get(i).toString());
-		}
-		
-		return getItemsWithoutReferences(coll, QueryBuilder.start("_id").in(taskIDObjs).get(), null);
-	}
-	
-	public ArrayList<String> getReferencedBy(String groupID, String id) throws ParseException {
+	private ArrayList<String> getReferencedBy(String groupID, String id) throws ParseException {
 		
 		return getReferencedBy(getGroupColl(groupID), id);
 	}
@@ -917,108 +860,27 @@ public class MongoLink {
 	 */
 	private ArrayList<String> getReferencedBy(DBCollection coll, String id) throws ParseException {
 		
-		return getItemsWithoutReferences(coll, QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), reverseSort);
-	}
-	
-	private ArrayList<ArrayList<String>> getTaskDetails(DBCollection coll, String id) throws ParseException {
-		
-		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
-		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) coll.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(reverseSort).toArray();
-		
-		for(DBObject r : referencingItems)
-		{
-			retList.add(getEntireTopic(coll, r));
-		}
-		
-		return new ArrayList<ArrayList<String>>(retList);
-	}
-	
-	private ArrayList<String> getEntireTopic(DBCollection coll, DBObject referencingPost) throws ParseException {
-		
-		ArrayList<String> retList = new ArrayList<String>();
-		
-		String targetPost = ((DBObject) referencingPost.get("target")).get("messageID").toString();
-		DBObject tempPost;
-		
-		if("".equals(targetPost))
-		{
-			tempPost = referencingPost;
-		}
-		else
-		{
-			tempPost = coll.findOne(QueryBuilder.start("_id").is(new ObjectId(targetPost)).get());
-		}
-		
-		String id = tempPost.get("_id").toString();
-		ActivityModel am = ActivityModel.activityModelGson.fromJson(tempPost.toString(), ActivityModel.class);
-		
-		// TODO This sort of thing should not be needed once activity model is refactored
-		am.setID(id);
-		retList.add(am.toJSON());
-		retList.addAll(getReplies(coll, id));
-		
-		return retList;
+		return MongoMethods.getItemsWithoutReferences(coll, QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), reverseSort);
 	}
 	
 	/**
-	 * @param coll - Collection to be used
-	 * @param id - ID string of the news feed post
-	 * @return ArrayList of all the replies to that post
-	 * @throws ParseException
-	 */
-	private ArrayList<String> getReplies(DBCollection coll, String id) throws ParseException {
-		
-		return getItemsWithoutReferences(coll, QueryBuilder.start("target.messageID").is(id).get(), null);
-	}
-	
-	/** Generic method to find list of objects that satisfy the given query
-	 * and any task they reference
-	 * @param collection - Collection to be used
-	 * @param query - DBObject containing the information about the query
 	 * 
-	 * @return ArrayList of objects
+	 * @param collection - Collection of news feed items
+	 * @param id - ID of task concerned
+	 * @return Array of posts and their replies which reference the task with the given id
 	 * @throws ParseException
 	 */
-	private ArrayList<String> getItemsWithReferences(DBCollection collection, DBObject query) throws ParseException {
+	private ArrayList<ArrayList<String>> getTaskDetails(DBCollection collection, String id) throws ParseException {
 		
-		ArrayList<DBObject> list = (ArrayList<DBObject>) collection.find(query).toArray();
-		ArrayList<String> retList = new ArrayList<String>();		
+		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
+		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) collection.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(reverseSort).toArray();
 		
-		
-		for(DBObject o : list) {
-			
-			ActivityModel am = ActivityModel.activityModelGson.fromJson(o.toString(), ActivityModel.class);
-			am.setID(o.get("_id").toString());
-			
-			retList.add(am.toJSON());
-			retList.addAll(getReferences(collection, o));
+		for(DBObject r : referencingItems)
+		{
+			retList.add(MongoMethods.getEntireTopic(collection, r));
 		}
 		
-		return retList;
-	}
-	
-	/** Generic method to find list of objects that satisfy the given query
-	 * @param collection - Collection to be used
-	 * @param query - DBObject containing the information about the query
-	 * 
-	 * @return ArrayList of objects
-	 * @throws ParseException
-	 */
-	private ArrayList<String> getItemsWithoutReferences(DBCollection collection, DBObject query, DBObject sortKey) throws ParseException {
-		
-		ArrayList<DBObject> list = (ArrayList<DBObject>) collection.find(query).sort(sortKey).toArray();
-		ArrayList<String> retList = new ArrayList<String>();		
-		
-		
-		for(DBObject o : list) {
-			
-			ActivityModel am = ActivityModel.activityModelGson.fromJson(o.toString(), ActivityModel.class);
-			am.setID(o.get("_id").toString());
-			
-			retList.add(am.toJSON());
-		}
-		
-		return retList;
+		return new ArrayList<ArrayList<String>>(retList);
 	}
 	
 	/**
@@ -1065,8 +927,25 @@ public class MongoLink {
 		collection.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), updateWith);
 	}
 
+	/** Shortcut method to pass as a parameter to database methods,
+	 * 	indicating that you want to fetch all posts satisfying a given query
+	 * 
+	 * @param collection - Collection being used
+	 * @return Size of the collection
+	 */
 	private int noLimit(DBCollection collection) {
 		return (int) collection.getCount();
+	}
+	
+	
+	/** Shortcut method to pass as a parameter to database methods,
+	 * 	indicating that you want to fetch all posts satisfying a given query
+	 * 
+	 * @param customID - ID of group collection to be used
+	 * @return Size of the collection
+	 */
+	private int noLimit(String customID) {
+		return noLimit(getGroupColl(customID));
 	}
 	
 	/**
@@ -1075,15 +954,6 @@ public class MongoLink {
 	 */
 	private DBCollection getGroupColl(String customID) {
 		return db.getCollection(customID);
-	}
-	
-	/**
-	 * 
-	 * @param customID - ID of the current project/group
-	 * @return DBObject to be used for querying this project/groups
-	 */
-	private DBObject queryForProject(String customID) {
-		return QueryBuilder.start("customID").is(customID).get();
 	}
 	
 	/** Generates a DBObject representing a project with the given parameters
@@ -1096,28 +966,7 @@ public class MongoLink {
 	private DBObject createNewEmptyProject(String customID, String name, BasicDBObject creatorObject) {
 		return new BasicDBObject("customID", customID).append("name", name).append("members", new BasicDBObject[]{creatorObject});
 	}
+
 	
-	/** Generates a unique customID for the project with the given name,
-	 * using the name as a basis for the customID
-	 * 
-	 * @param name - Display name of the project
-	 * @return A unique customID for the project
-	 */
-	private String generateCustomID(String name) {
-		
-		name = removeBlanks(name);
-		String temp = name;
-		Random random = new Random();
-		
-		while(groups.findOne(queryForProject(temp)) != null)
-		{
-			temp = name + Math.round(random.nextFloat() * 1000);
-		}
-		return temp;
-	}
-	
-	private String removeBlanks(String input) {
-		
-		return input.replaceAll("\\s+","");
-	}
+
 }

@@ -3,7 +3,7 @@ package models.authentication;
 import play.api.libs.json.JsValue;
 import play.api.libs.json.Json;
 import models.ActivityModel;
-import models.MongoLink;
+import models.db.MongoLink;
 
 public class LoginAttempt {
 

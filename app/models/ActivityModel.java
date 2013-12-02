@@ -1,11 +1,15 @@
 package models;
 
+import models.db.MongoLink;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
 public class ActivityModel extends Model {
+	
+	//TODO Piotr: "I don't think this should be inside here ???"
 
 	public static Gson activityModelGson = new GsonBuilder()
 			.registerTypeAdapter(ActorModel.class, new ActorModelAdaptor())

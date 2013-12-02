@@ -1,8 +1,8 @@
 package controllers;
 
 import models.LocalAccount;
-import models.MongoLink;
 import models.UserModel;
+import models.db.MongoLink;
 import play.mvc.Controller;
 import play.mvc.Result;
 import scala.collection.mutable.Seq;
@@ -21,7 +21,6 @@ public class Application extends Controller {
 	 * @return News Feed/Task View if logged in.
 	 * 		   Else render login screen.
 	 */
-
 	public static Result feed(String groupID, String toggle) {
 		
 		if (loggedIn() && isValidToggle(toggle)) {
