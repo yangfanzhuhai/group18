@@ -223,7 +223,7 @@ public class MongoLink {
 	 * @param password - Password entered by user
 	 * @return True if there is an entry in the database with that exact email and password, False otherwise
 	 */
-	private boolean checkLoginWithEmail(String email, String password) {
+	public boolean checkLoginWithEmail(String email, String password) {
 		DBObject user = users.findOne(QueryBuilder.start("localAccount.email").is(email).get());
 		return MongoUtils.checkCredentials(user, password);
 	}
