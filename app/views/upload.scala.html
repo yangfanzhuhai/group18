@@ -1,3 +1,4 @@
+@(groupID : String, userName : String)
 <!DOCTYPE HTML>
 <!-- NOTE: You can remove html, head, body tags while deploying the Widget. More help is at https://filespin.io/docs/ -->
 <html>
@@ -19,6 +20,8 @@ data-allowed_filetypes=".*"
 data-server="app.filespin.io"  data-widget_webhook="" 
 data-cors_redirect="http://http://group18-progress.herokuapp.com//result.html?%s"
 data-contact_msg="Please contact Support at http://group18-progress.herokuapp.com/ to resolve this problem!" >
+<input name="username" value="@userName" type="hidden">
+<input name="projectname" value="@groupID"  type="hidden">
 <div class="control-group">
 <label class="control-label label label-default label-large" style="font-size: 15px; margin-top: 10px;">Step 1<br>Add tags (optional)</label>
 <div class="controls">
