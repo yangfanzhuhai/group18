@@ -304,11 +304,12 @@ public class Rest extends Controller {
 	public static Result handleUserUpload() {
 		System.out.println("Upload handled");
 		JsonNode json = request().body().asJson();
-		String event = getStringValueFromJson(json, "event");
+		System.out.println(json.toString());
+		/*String event = getStringValueFromJson(json, "event");
 		if (event.equals("file-processed")) {
 			ActivityModel activity = createActvityModelFromImageUpload(json);
 			activity.save("ImageTestingGroup");
-		}
+		}*/
 		return ok();
 	}
 

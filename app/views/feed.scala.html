@@ -19,6 +19,7 @@
   <body>
   
     @navbar(groupID, userName)
+    @upload(groupID, userName)
   <div class="container col-md-offset-2 col-md-8">
     <a href="@routes.Application.feed(groupID,"feed")">
       <img src="@routes.Assets.at("images/title.jpg")" id ="title" alt="some_text"
@@ -256,6 +257,7 @@
   		charCountdown.value = msgTextLimit;
         limitedtextfield.placeholder="What's on you mind?";
         taskAliasForm.style.display="none";
+        document.getElementById("upload-widget").style.display="none";
   	} else if (option == "task") {
   		document.getElementById("post_form").style.display="inline";
   		limitedtextfield.rows = 1;
@@ -263,9 +265,12 @@
         charCountdown.value = taskTextLimit;
         limitedtextfield.placeholder="Your Task";
 	    taskAliasForm.style.display="inline";
+	    document.getElementById("upload-widget").style.display="none";
     } else {
     	document.getElementById("post_form").style.display="none";
     	taskAliasForm.style.display="none";
+    	document.getElementById("upload-widget").style.display="inline";
+    	
     }
 
   }
