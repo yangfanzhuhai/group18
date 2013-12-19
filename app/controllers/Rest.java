@@ -302,20 +302,19 @@ public class Rest extends Controller {
 	}
 
 	public static Result handleUserUpload() {
-		System.out.println("Upload handled");
 		JsonNode json = request().body().asJson();
-		System.out.println(json.toString());
-		/*String event = getStringValueFromJson(json, "event");
+		String event = getStringValueFromJson(json, "event");
 		if (event.equals("file-processed")) {
-			ActivityModel activity = createActvityModelFromImageUpload(json);
-			activity.save("ImageTestingGroup");
-		}*/
+			JsonNode userData = json.findValue("data");
+			ActivityModel activity = createActvityModelFromImageUpload(json, userData);
+			activity.save(getStringValueFromJson(userData, "groupID"));
+		}
 		return ok();
 	}
 
-	private static ActivityModel createActvityModelFromImageUpload(JsonNode json) {
+	private static ActivityModel createActvityModelFromImageUpload(JsonNode json, JsonNode userData) {
 		String published = createDate();
-		ActorModel actor = createPersonActorFromSessionUser();
+		ActorModel actor = createPersonActorFromUser(getStringValueFromJson(userData, "username"));
 		String verb = "uploaded";
 		ObjectModel object = createImageObject(json);
 		TargetModel target = new TargetModel("", new ArrayList<String>());
@@ -324,9 +323,9 @@ public class Rest extends Controller {
 		return activity;
 	}
 
-	private static ActorModel createPersonActorFromSessionUser() {
+	private static ActorModel createPersonActorFromUser(String username) {
 		UserModel user = MongoLink.MONGO_LINK
-				.getUserFromUsername("Luke");
+				.getUserFromUsername(username);
 		LocalAccount local_user = user.getLocalAccount();
 
 		ActorModel actor = new PersonActor(local_user.getName(),
