@@ -38,6 +38,7 @@ GET		/:groupID/rest/morebuild/:fid	controllers.Rest.getMoreBuilds(groupID, fid)
 GET     /:groupID/rest/:status    		controllers.Rest.getTasksWithStatus(groupID, status)
 
 
+POST	/rest/fileio					controllers.Rest.handleUserUpload()
 POST	/rest/github					controllers.Rest.parseGitHubData()
 POST	/rest/facebook					controllers.Rest.parseFBData()
 POST	/rest/addfbimage				controllers.Rest.addFBImage()
