@@ -200,8 +200,7 @@ class MongoTestingUtils {
 			
 			for(DBObject reply : list)
 			{
-				String postID = ((DBObject) reply.get("target")).get("messageID").toString();
-				if(c.findOne(QueryBuilder.start("_id").is(new ObjectId(postID)).get()) == null) {
+				if(c.findOne(MongoUtils.queryID(((DBObject)reply.get("target")).get("messageID").toString())) == null) {
 					c.remove(reply);
 				}
 			}

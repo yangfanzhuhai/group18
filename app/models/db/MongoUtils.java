@@ -5,6 +5,7 @@ import java.util.Random;
 import org.bson.types.ObjectId;
 import org.mindrot.jbcrypt.BCrypt;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
@@ -52,15 +53,6 @@ class MongoUtils {
 	static DBObject queryForProject(String customID) {
 		return QueryBuilder.start("customID").is(customID).get();
 	}
-	
-	/** Generic method which updates object with ID 'id' using the parameters in 'updateWith'
-	 * @param collection - Collection be used
-	 * @param id - ID of object to be updated
-	 * @param updateWith - Information on what the update should change
-	 */
-	static void updateObject(DBCollection collection, String id, DBObject updateWith) {
-		collection.update(QueryBuilder.start("_id").is(new ObjectId(id)).get(), updateWith);
-	}
 
 	/** Shortcut method to pass as a parameter to database methods,
 	 * 	indicating that you want to fetch all posts satisfying a given query
@@ -72,12 +64,31 @@ class MongoUtils {
 		return (int) collection.getCount();
 	}
 	
+	/** Generates a DBObject representing a project with the given parameters
+	 * 
+	 * @param customID - ID of the project
+	 * @param name - name of the project
+	 * @param creatorObject - creator/owner of the project
+	 * @return DBObject containing the given parameters
+	 */
+	static DBObject createNewEmptyProject(String customID, String name, BasicDBObject creatorObject) {
+		return new BasicDBObject("customID", customID).append("name", name).append("members", new BasicDBObject[]{creatorObject});
+	}
+	
+	static DBObject queryID(String ID) {
+		return QueryBuilder.start("_id").is(new ObjectId(ID)).get();
+	}
+	
+	static DBObject queryEmail(String email) {
+		return QueryBuilder.start("localAccount.email").is(email).get();
+	}
+
 	/** 
 	 * @param input - String with spaces
 	 * @return The given String without white-spaces
 	 */
 	private static String removeBlanks(String input) {
 		return input.replaceAll("\\s+","");
-	}	
+	}
 
 }
