@@ -26,6 +26,7 @@ import com.mongodb.util.JSON;
 
 public class MongoLink {
 	
+	/** Public singleton instance of the MongoLink class*/
 	public static MongoLink MONGO_LINK;
 	
 	private final static String DBUSER = "testUser";
@@ -341,7 +342,7 @@ public class MongoLink {
 	 * @return List of the last 'postLimit' items from given collection with replies and references
 	 */
 	public ArrayList<ArrayList<String>> getNewsFeed(String customID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").get(), MongoUtils.reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), MongoUtils.queryReply(""), MongoUtils.reverseSort, postLimit);
 		
 	}
 

@@ -12,6 +12,7 @@ import com.mongodb.QueryBuilder;
 
 class MongoUtils {
 	
+	/** DBObject which specifies that objects are to be returned in reverse chronological order */
 	static DBObject reverseSort = QueryBuilder.start("_id").is(-1).get();
 
 	/**
@@ -75,12 +76,28 @@ class MongoUtils {
 		return new BasicDBObject("customID", customID).append("name", name).append("members", new BasicDBObject[]{creatorObject});
 	}
 	
+	/**
+	 * @param ID - String ID to query for
+	 * @return DBObject representing a query for the given ID
+	 */
 	static DBObject queryID(String ID) {
 		return QueryBuilder.start("_id").is(new ObjectId(ID)).get();
 	}
 	
+	/**
+	 * @param email - String email to query for
+	 * @return DBObject representing a query for the given email
+	 */
 	static DBObject queryEmail(String email) {
 		return QueryBuilder.start("localAccount.email").is(email).get();
+	}
+	
+	/**
+	 * @param id - String id of post to query replies for
+	 * @return DBObject representing a query for all the replies to a given post
+	 */
+	static DBObject queryReply(String id) {
+		return QueryBuilder.start("target.messageID").is(id).get();
 	}
 
 	/** 

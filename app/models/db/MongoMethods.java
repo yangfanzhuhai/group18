@@ -55,7 +55,7 @@ class MongoMethods {
 	 * @throws ParseException
 	 */
 	private static ArrayList<String> getReplies(DBCollection coll, String id) throws ParseException {
-		return getItemsWithoutReferences(coll, QueryBuilder.start("target.messageID").is(id).get(), null);
+		return getItemsWithoutReferences(coll, MongoUtils.queryReply(id), null);
 	}
 	
 	
@@ -138,7 +138,7 @@ class MongoMethods {
 	 * @param id - ID of the object which will have its replies deleted
 	 */
 	static void deleteReplies(DBCollection coll, String id) {
-		coll.remove(QueryBuilder.start("target.messageID").is(id).get());
+		coll.remove(MongoUtils.queryReply(id));
 	}
 
 	/** Generic method to find list of objects that satisfy the given query
