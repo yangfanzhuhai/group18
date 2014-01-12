@@ -28,7 +28,6 @@ import models.GroupWithCreator;
 import models.GroupWithUser;
 import models.authentication.LoginAttempt;
 import models.authentication.Session;
-import models.db.MongoLink;
 import models.git.Branch;
 import models.git.Commit;
 import models.git.Repository;
@@ -41,6 +40,8 @@ import com.google.gson.JsonSyntaxException;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
+
+import controllers.db.MongoLink;
 
 public class Rest extends Controller {
 

@@ -1,9 +1,9 @@
 package models.authentication;
 
+import controllers.db.MongoLink;
 import play.api.libs.json.JsValue;
 import play.api.libs.json.Json;
 import models.ActivityModel;
-import models.db.MongoLink;
 
 public class LoginAttempt {
 

@@ -1,4 +1,4 @@
-package models.db;
+package controllers.db;
 
 import java.util.Random;
 
