@@ -320,6 +320,8 @@
             success: function(data){ 
 	
 			if(data == "") {
+
+        //alert(JSON.stringify(data));
 			
 			$.ajax({    
            type: "GET",
@@ -331,6 +333,7 @@
              }}); 
 			
 			} else {
+              //  alert(JSON.stringify(data));
 
               generateFeed(data);
           
@@ -540,8 +543,6 @@
 
   function addToFeed(stream_array) {
 
-
-
   	//document.getElementById("username").innerHTML="@userName";
 
     if (localToggle == "feed") {
@@ -695,7 +696,12 @@
       user_image.style.border = "3px solid white";
 
       addPhotoForUser(username, photo_url);
-      user_image.src = user_images[username];
+      if (user_images[username] != undefined) {
+        user_image.src = user_images[username];
+      } else {
+        user_image.src = reply_photo_url;
+      }
+
 
       post.appendChild(user_image);
 
@@ -993,9 +999,15 @@
               reply_publisher.innerHTML = reply_displayName;
           }
 
-          addPhotoForUser(reply_displayName, reply_photo_url);
+          addPhotoForUser(reply_username, reply_photo_url);
 
-          user_image.src= user_images[reply_displayName];
+          if (user_images[reply_username] != undefined) {
+            user_image.src= user_images[reply_username];
+          } else {
+            user_image.src = reply_photo_url;
+          }
+
+
 
   				var reply_message_text = document.createElement("p");
   				reply_message_text.innerHTML = changeReferencesToLinks(stream_array[i][j]['object']["message"]);
