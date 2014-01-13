@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import models.ActivityModel;
 import models.GroupMember;
 import models.UserModel;
 import models.authentication.Session;
@@ -634,6 +635,9 @@ public class MongoLink {
 		
 		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
 		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) collection.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(MongoUtils.reverseSort).toArray();
+		
+		
+		retList.add(MongoMethods.getEntireTopic(collection, collection.findOne(MongoUtils.queryID(id))));
 		
 		for(DBObject r : referencingItems)
 		{
