@@ -42,7 +42,7 @@
       <form id ="post_form" name="myform" role="form">
         <textarea name="limitedtextarea" type="text" id="limitedtextfield" rows="5" cols="30"
         onKeyUp="postFormOnKeyDown()" class="form-control" 
-        placeholder="What's on your mind?" style="resize: none"></textarea>
+        placeholder="Press the hash key to reference a task" style="resize: none"></textarea>
         <br>
         <small align="right"> <!--(Maximum characters: 140)-->
         You have <input readonly type="text" id="charCountdown" name="countdown" size="3" > characters left.</small>
@@ -313,35 +313,33 @@
 	
 		//if toggle is a reference, generate		
 
-          $.ajax({    
+    var id = "@toggle";
+          alert(id + " has length " + id.length);
+    if (id.length == 24) {
+
+
+
+            $.ajax({    
            type: "GET",
            url: "/" + "@groupID" + "/rest/ref/" + "@toggle",
             dataType: "json",
             success: function(data){ 
-	
-			if(data == "") {
-
-        //alert(JSON.stringify(data));
-			
-			$.ajax({    
-           type: "GET",
-           url: getUrl,
-            dataType: "json",
-            success: function(data){   
-              generateFeed(data);
-              
-             }}); 
-			
-			} else {
-              //  alert(JSON.stringify(data));
 
               generateFeed(data);
-          
+          }});
+      
 
-		}
-		}});
-		
-          
+      
+      } else {
+          $.ajax({    
+            type: "GET",
+             url: getUrl,
+             dataType: "json",
+             success: function(data){   
+              generateFeed(data);
+               
+             }});
+    }
   }
 
   $(document).ready(refreshFeed);	

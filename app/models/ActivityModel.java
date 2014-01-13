@@ -1,11 +1,12 @@
 package models;
 
-import models.db.MongoLink;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
+
+import controllers.db.MongoLink;
 
 public class ActivityModel extends Model {
 	

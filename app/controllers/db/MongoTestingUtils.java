@@ -1,8 +1,10 @@
-package models.db;
+package controllers.db;
 
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.List;
+
+import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -179,6 +181,31 @@ class MongoTestingUtils {
 //		} else {
 //			System.out.println("insert failed");
 //		}*/
+	}
+	
+	/** TODO TEST
+	 * 
+	 *  Deletes any replies that are in the database, but the post to which they reply has been deleted
+	 *  This is a bug that can occur because of two people replying and deleting at the same time
+	 *  I imagine this will be run quite rarely as a part of a scheduled clean-up of DB
+	 */
+	private void deleteFloatingReplies()
+	{
+		List<DBObject> groupList = groups.find().toArray();
+		
+		for(DBObject group : groupList)
+		{
+			DBCollection c = getGroupColl((String) group.get("customID"));
+			List<DBObject> list = c.find(QueryBuilder.start("target.messageID").notEquals("").get()).toArray();
+			
+			for(DBObject reply : list)
+			{
+				if(c.findOne(MongoUtils.queryID(((DBObject)reply.get("target")).get("messageID").toString())) == null) {
+					c.remove(reply);
+				}
+			}
+			
+		}
 	}
 	
 	private static DBObject jenkins() {

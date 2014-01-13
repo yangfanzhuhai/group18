@@ -1,4 +1,4 @@
-package models.db;
+package controllers.db;
 
 import java.net.UnknownHostException;
 import java.text.ParseException;
@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import models.ActivityModel;
 import models.GroupMember;
 import models.UserModel;
 import models.authentication.Session;
@@ -26,6 +27,7 @@ import com.mongodb.util.JSON;
 
 public class MongoLink {
 	
+	/** Public singleton instance of the MongoLink class*/
 	public static MongoLink MONGO_LINK;
 	
 	private final static String DBUSER = "testUser";
@@ -98,7 +100,7 @@ public class MongoLink {
 		String creatorJson = gson.toJson(creator);
 		BasicDBObject creatorObject = (BasicDBObject) JSON.parse(creatorJson);
 		
-		return addNewProject(createNewEmptyProject(MongoUtils.generateCustomID(groups, name), name, creatorObject));
+		return addNewProject(MongoUtils.createNewEmptyProject(MongoUtils.generateCustomID(groups, name), name, creatorObject));
 	}
 	
 	/** Adds any amount of users to a given project. Any user who is already a
@@ -159,7 +161,7 @@ public class MongoLink {
 		
 		if(obj.containsField("localAccount") && !"{}".equals(obj.get("localAccount").toString().replaceAll("\\s+",""))) {
 			
-			if(users.findOne(QueryBuilder.start("localAccount.email").is(((DBObject) obj.get("localAccount")).get("email")).get()) == null)
+			if(users.findOne(MongoUtils.queryEmail(((DBObject) obj.get("localAccount")).get("email").toString())) == null)
 			{
 				int oldCount = (int) users.getCount();
 				
@@ -224,12 +226,12 @@ public class MongoLink {
 	 * @return True if there is an entry in the database with that exact email and password, False otherwise
 	 */
 	public boolean checkLoginWithEmail(String email, String password) {
-		DBObject user = users.findOne(QueryBuilder.start("localAccount.email").is(email).get());
+		DBObject user = users.findOne(MongoUtils.queryEmail(email));
 		return MongoUtils.checkCredentials(user, password);
 	}
 	
 	public void linkAccount(String userID, DBObject obj) {
-		users.update(QueryBuilder.start("_id").is(new ObjectId(userID)).get(), new BasicDBObject("$set",obj));
+		users.update(MongoUtils.queryID(userID), new BasicDBObject("$set",obj));
 		//TODO check if merge needed on database side
 	}
 	
@@ -239,7 +241,7 @@ public class MongoLink {
 	 * @return username
 	 */
 	public String getUsernameFromEmail(String email) {
-		return (users.findOne(QueryBuilder.start("localAccount.email").is(email).get()).toString());
+		return (users.findOne(MongoUtils.queryEmail(email)).toString());
 	}
 	
 	public UserModel getUserFromUsername(String userName){
@@ -274,8 +276,7 @@ public class MongoLink {
 	 * @throws ParseException
 	 */
 	public Session getSession(String token) throws ParseException {
-		ObjectId tokenID = new ObjectId(token);
-		DBObject query = QueryBuilder.start("_id").is(tokenID).get();
+		DBObject query = MongoUtils.queryID(token);
 		ArrayList<DBObject> list = (ArrayList<DBObject>) sessions.find(query).toArray();
  
 		return new Session(list.get(0).toString());
@@ -326,11 +327,11 @@ public class MongoLink {
 	public void updateStatusOrPriority(String customID, DBObject obj) throws MongoException {
 		if(obj.containsField("status"))
 		{
-			updateStatus(getGroupColl(customID), obj.get("id").toString(), obj.get("status").toString());
+			MongoMethods.updateStatus(getGroupColl(customID), obj.get("id").toString(), obj.get("status").toString());
 		}
 		else if(obj.containsField("priority"))
 		{
-			updatePriority(getGroupColl(customID), obj.get("id").toString(), (Integer) obj.get("priority"));
+			MongoMethods.updatePriority(getGroupColl(customID), obj.get("id").toString(), (Integer) obj.get("priority"));
 		}
 		else
 			throw new MongoException("Neither field status or priority exist. Update failed");
@@ -342,7 +343,7 @@ public class MongoLink {
 	 * @return List of the last 'postLimit' items from given collection with replies and references
 	 */
 	public ArrayList<ArrayList<String>> getNewsFeed(String customID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").get(), MongoUtils.reverseSort, postLimit);
+		return MongoMethods.dbFetch(getGroupColl(customID), MongoUtils.queryReply(""), MongoUtils.reverseSort, postLimit);
 		
 	}
 
@@ -586,7 +587,7 @@ public class MongoLink {
 	public String getDisplayName(String id) {
 		
 		String ret = null;
-		DBObject user = users.findOne(QueryBuilder.start("_id").is(new ObjectId(id)));
+		DBObject user = users.findOne(MongoUtils.queryID(id));
 		if(!"{}".equals(user.get("localAccount").toString().replaceAll("\\s+","")))
 		{
 			ret = ((DBObject) user.get("localAccount")).get("name").toString();
@@ -635,30 +636,15 @@ public class MongoLink {
 		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
 		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) collection.find(QueryBuilder.start("target.taskIDs").in(new String[]{id}).get()).sort(MongoUtils.reverseSort).toArray();
 		
+		
+		retList.add(MongoMethods.getEntireTopic(collection, collection.findOne(MongoUtils.queryID(id))));
+		
 		for(DBObject r : referencingItems)
 		{
 			retList.add(MongoMethods.getEntireTopic(collection, r));
 		}
 		
 		return new ArrayList<ArrayList<String>>(retList);
-	}
-	
-	/** Updates the status of the task with ID id
-	 * @param coll - Collection be used
-	 * @param id - ID of task to be updated
-	 * @param status - New status value to be set
-	 */
-	private void updateStatus(DBCollection coll, String id, String status) {
-		MongoUtils.updateObject(coll, id, new BasicDBObject("$set", new BasicDBObject("object.status", status)));
-	}
-
-	/** Updates the priority of the task with ID id
-	 * @param coll - Collection be used
-	 * @param id - ID of task to be updated
-	 * @param priority - New priority value to be set
-	 */
-	private void updatePriority(DBCollection coll, String id, int priority) {
-		MongoUtils.updateObject(coll, id, new BasicDBObject("$set", new BasicDBObject("object.priority", priority)));
 	}
 
 	/** Shortcut method to pass as a parameter to database methods,
@@ -677,19 +663,6 @@ public class MongoLink {
 	 */
 	private DBCollection getGroupColl(String customID) {
 		return db.getCollection(customID);
-	}
-	
-	/** Generates a DBObject representing a project with the given parameters
-	 * 
-	 * @param customID - ID of the project
-	 * @param name - name of the project
-	 * @param creatorObject - creator/owner of the project
-	 * @return DBObject containing the given parameters
-	 */
-	private DBObject createNewEmptyProject(String customID, String name, BasicDBObject creatorObject) {
-		return new BasicDBObject("customID", customID).append("name", name).append("members", new BasicDBObject[]{creatorObject});
-	}
-
-	
+	}	
 
 }

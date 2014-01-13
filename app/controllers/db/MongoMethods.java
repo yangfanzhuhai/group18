@@ -1,4 +1,4 @@
-package models.db;
+package controllers.db;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ class MongoMethods {
 	 * @throws ParseException
 	 */
 	private static ArrayList<String> getReplies(DBCollection coll, String id) throws ParseException {
-		return getItemsWithoutReferences(coll, QueryBuilder.start("target.messageID").is(id).get(), null);
+		return getItemsWithoutReferences(coll, MongoUtils.queryReply(id), null);
 	}
 	
 	
@@ -78,7 +78,7 @@ class MongoMethods {
 		}
 		else
 		{
-			tempPost = collection.findOne(QueryBuilder.start("_id").is(new ObjectId(targetPost)).get());
+			tempPost = collection.findOne(MongoUtils.queryID(targetPost));
 		}
 		
 		String id = tempPost.get("_id").toString();
@@ -138,7 +138,7 @@ class MongoMethods {
 	 * @param id - ID of the object which will have its replies deleted
 	 */
 	static void deleteReplies(DBCollection coll, String id) {
-		coll.remove(QueryBuilder.start("target.messageID").is(id).get());
+		coll.remove(MongoUtils.queryReply(id));
 	}
 
 	/** Generic method to find list of objects that satisfy the given query
@@ -180,6 +180,33 @@ class MongoMethods {
 		}
 		
 		return getItemsWithoutReferences(coll, QueryBuilder.start("_id").in(taskIDObjs).get(), null);
+	}
+	
+	/** Updates the status of the task with ID id
+	 * @param coll - Collection be used
+	 * @param id - ID of task to be updated
+	 * @param status - New status value to be set
+	 */
+	static void updateStatus(DBCollection coll, String id, String status) {
+		updateObject(coll, id, new BasicDBObject("$set", new BasicDBObject("object.status", status)));
+	}
+
+	/** Updates the priority of the task with ID id
+	 * @param coll - Collection be used
+	 * @param id - ID of task to be updated
+	 * @param priority - New priority value to be set
+	 */
+	static void updatePriority(DBCollection coll, String id, int priority) {
+		updateObject(coll, id, new BasicDBObject("$set", new BasicDBObject("object.priority", priority)));
+	}
+	
+	/** Generic method which updates object with ID 'id' using the parameters in 'updateWith'
+	 * @param collection - Collection be used
+	 * @param id - ID of object to be updated
+	 * @param updateWith - Information on what the update should change
+	 */
+	private static void updateObject(DBCollection collection, String id, DBObject updateWith) {
+		collection.update(MongoUtils.queryID(id), updateWith);
 	}
 
 }
