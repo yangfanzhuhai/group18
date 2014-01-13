@@ -1,0 +1,86 @@
+@(groupID : String, userName : String)
+<!DOCTYPE HTML>
+<!-- NOTE: You can remove html, head, body tags while deploying the Widget. More help is at https://filespin.io/docs/ -->
+<html>
+<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+<link href="https://app.filespin.io/uploadapp/css/jquery-ui-1.10.1.custom.min.css" rel="stylesheet">
+<link href="https://app.filespin.io/uploadapp/css/jquery.fileupload-ui.css" rel="stylesheet">
+<noscript><link href="https://app.filespin.io/uploadapp/css/jquery.fileupload-ui-noscript.css" rel="stylesheet"></noscript>
+<!--[if lt IE 9]><script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+<div id="upload-widget" class="span9" style = "display: none">
+<form class="form-horizontal fileupload" action="https://app.filespin.io/api/v1/upload?upload_key=7e77daab40284beab7851a163b6a3102"
+method="POST" enctype="multipart/form-data"
+data-debug_mode='N'
+data-auto_upload="N"
+data-filecount_max="25"
+data-filesize_max="4294967296"
+data-filesize_min="1"
+data-allowed_filetypes=".*"
+data-server="app.filespin.io"  data-widget_webhook="http://requestb.in/1g2ttmr1" 
+data-cors_redirect="http://group18-progress.herokuapp.com/result.html?%s"
+data-contact_msg="Please contact Support at group18-progress.herokuapp.com to resolve this problem!" >
+<input name="username" value="@userName" type="hidden">
+<input name="groupID" value="@groupID"type="hidden">
+<div class="control-group">
+<label class="control-label label label-default label-large" style="font-size: 15px; margin-top: 10px;">Step 1<br>Add tags (optional)</label>
+<div class="controls">
+<div>Add tags (seperate by comma)</div>
+<input type="text" class="input-xxlarge" value="" name="filespin_search_txt" placeholder="Example: london, marathon, wide-angle, festival, olympics-2013">
+</div>
+</div>
+<div class="control-group">
+<label class="control-label label label-default label-large" style="font-size: 15px; margin-top: 10px;">Step 2<br>Upload files</label>
+<div class="controls">
+<div class="fileupload-buttonbar">
+<div class="fileupload-buttons">
+<span class="btn btn-warning fileinput-button" style="font-size: 1.3em; padding-top: 10px;"><i class="icon-desktop icon-large"></i>
+<i class="icon-mobile-phone icon-large"></i>
+<br>Select from your computer
+<input type="file" name="files[]" multiple style="height: 100%; width: 100%;">
+</span>
+<!-- The loading indicator is shown during file processing -->
+<span class="fileupload-loading"></span>
+</div>
+<button type="submit" class="start btn btn-primary btn-large global-start" style="display: none;">Start upload</button>
+<button type="reset" class="cancel btn btn-danger global-cancel" style="display: none;">Cancel upload</button>
+<!-- The global progress bar -->
+<div class="fileupload-progress fade">
+<div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="margin-bottom: 5px;">
+<div class="bar" style="width:0%;"></div>
+</div>
+<div class="progress-extended"> </div>
+</div>
+<!-- The table listing the files available for upload/download -->
+<table role="presentation" class="table table-bordered">
+<thead>
+<tr>
+<th colspan="2">File</th>
+<th>Size</th>
+<th colspan="3">Upload Progress</th>
+</tr>
+</thead>
+<tbody class="files"><tr><td colspan="5" class="no-files-msg">No files selected yet</td></tr></tbody>
+</table>
+</div>
+</div>
+</div>
+</form>
+<br>
+<div class="well">
+<h3>Please note</h3>
+<ul>
+<li>For each file, maximum allowed size is <strong>4.29 GB</strong>,
+minimum allowed size is <strong>0 MB</strong>
+</li>
+<li>Maximum number of files per upload is <strong>25 files</strong>. You can visit upload page again to upload more files.</li>
+<li><strong>Image previews</strong> may not be shown for some large files (they'll be processed as usual, however)</li>
+<li>Some features such as upload progress information may not be available in <strong>older browsers</strong></li>
+</ul>
+</div>
+</div>
+<!-- FileSpin.io Cross Site Upload Widget App-->
+<script src="https://app.filespin.io/uploadapp/js/json2.min.js"></script>
+<script src="https://app.filespin.io/uploadapp/js/upload-lib-2.0.min.js?r=1.0"></script>
+<script src="https://app.filespin.io/uploadapp/js/apricot-2.0.min.js?r=1.0"></script>
+</html>
