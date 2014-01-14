@@ -601,7 +601,10 @@ public class MongoLink {
 	 * @return - (Mongo)ID of the task with the given alias
 	 */
 	public String getTaskIDFromAlias(String groupID, String alias) {
-		return getGroupColl(groupID).findOne(QueryBuilder.start("object.alias").is(alias).get()).get("_id").toString();
+		DBObject task = getGroupColl(groupID).findOne(QueryBuilder.start("object.alias").is(alias).get());
+		if(task != null)
+			return task.get("_id").toString();
+		return null;
 	}
 	
 	/**
