@@ -822,18 +822,6 @@
     		post_options.appendChild(priority_button);
     		post_options.appendChild(status_button);
 
-    		if (username == "@userName") {
-    			var assign_button = document.createElement("button");
-    			assign_button.innerHTML = "Assign members";
-    			post_options.appendChild(assign_button);
-
-    			assign_button.onclick = (function(post_id) {
-    				  return function() {
-    					// delete_post(post_id);
-    			 }
-    			}(post_id));
-    		}
-
         post_body.appendChild(task_heading);
         post_body.appendChild(task_details);
   			post_body.appendChild(task_data);	

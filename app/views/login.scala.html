@@ -140,6 +140,8 @@
           error: function (xhr, ajaxOptions, thrownError) {
             if (xhr.status == 400) {
               alert("Invalid login. Please register or try again");
+            } else if (xhr.status == 422) {
+                            alert("Invalid login. Please register or try again");
             }
           } 
           
