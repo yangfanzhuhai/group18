@@ -195,7 +195,7 @@ public class Rest extends Controller {
 				.toString());
 	}
 
-	public static Result getNewActivities(String groupID, String newest_post_id) {
+	public static Result getNewActivities(String groupID, String newest_post_id) throws ParseException {
 		return ok(MongoLink.MONGO_LINK.getNewNews(groupID, newest_post_id)
 				.toString());
 	}
