@@ -899,12 +899,13 @@
   		git_data.innerHTML = publisher.bold() + " pushed to branch " + $(branch_link).outerHTML() + " at repository " + $(repo_link).outerHTML();
   			
   		var commits = stream_array[i][0]['object']['commits'];
-  		var commit_total = commits.length; //stream_array[i][0]['object']['totalCommits'];
+  		var commit_total = stream_array[i][0]['object']['totalCommits'];
+		var commit_length = commits.length;
   		var commit_data = document.createElement("div");
   		var commit_list = document.createElement("ul");
   		commit_data.appendChild(commit_list);
 
-  		for(var k = commit_total-1; k>= Math.max(0, commit_total-3); k--) {
+  		for(var k = commit_length-1; k>= Math.max(0, commit_length-3); k--) {
   			var commit = commits[k];
   			var commit_url = commit["url"];
   			var commit_author = commit["author"];
@@ -921,7 +922,7 @@
   			commit_list.appendChild(commit_list_entry);
   				
   			}
-  			if (commit_total > 2){
+  			if (commit_total > 3){
   				var summary_link = document.createElement('a');
   				summary_link.href = branch_url;
   				summary_link.innerHTML = "... and " + (commit_total - 3) + " more commits";
