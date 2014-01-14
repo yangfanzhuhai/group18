@@ -514,7 +514,7 @@
         getUrl += "morebuild/";
         break;
       }
-    setInterval(function() {
+    /*setInterval(function() {
       $.ajax({    
       type: "GET",
       url: getUrl + first_post_id,
@@ -524,7 +524,7 @@
           addToFeed(data);
           autoRefreshing = false;
       }});
-    }, 5000);
+    }, 5000);*/
   }
 
   function loadMoreFeed() {
@@ -1248,16 +1248,13 @@
       var post = generateJSON(date_and_time_stamp, message_object,
       						"", references);
 
-     // alert(post);
-
         $.ajax({
             type: "POST",
             url: "/" + "@groupID" + "/rest/message",
             dataType: "json",
             data: {"activity":post},
-	    complete:autoRefresh
-  	        //complete: refreshFeed  COMMENTED OUT FOR AUTOREFRESH              
-        });
+	    //complete:autoRefresh
+            complete: refreshFeed        });
                     
       } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
 
@@ -1274,8 +1271,8 @@
             url: "/" + "@groupID" + "/rest/message",
             dataType: "json",
             data: {"activity":post},
-	    complete:autoRefresh
-            //complete: refreshFeed COMMENTED OUT FOR AUTOREFRESH
+	   // complete:autoRefresh
+            complete: refreshFeed
         });      
                     
 
