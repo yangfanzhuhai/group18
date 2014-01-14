@@ -7,7 +7,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import models.ActivityModel;
 import models.GroupMember;
 import models.UserModel;
 import models.authentication.Session;
