@@ -195,7 +195,8 @@ public class Rest extends Controller {
 				.toString());
 	}
 
-	public static Result getNewActivities(String groupID, String newest_post_id) throws ParseException {
+	public static Result getNewActivities(String groupID, String newest_post_id)
+			throws ParseException {
 		return ok(MongoLink.MONGO_LINK.getNewNews(groupID, newest_post_id)
 				.toString());
 	}
@@ -423,14 +424,15 @@ public class Rest extends Controller {
 				"user_name"), "", "");
 		String verb = "pushed";
 		ObjectModel object = createGitObject(json);
-		TargetModel target = new TargetModel("", findReferencedTasksInCommits(json, groupID));
+		TargetModel target = new TargetModel("", findReferencedTasksInCommits(
+				json, groupID));
 		ActivityModel activity = new ActivityModel(published, actor, verb,
 				object, target);
 		return activity;
 	}
 
-	private static List<String> findReferencedTasksInCommits(
-			JsonNode json, String groupID) {
+	private static List<String> findReferencedTasksInCommits(JsonNode json,
+			String groupID) {
 		Iterator<JsonNode> iterator = json.findValue("commits").iterator();
 		List<String> referencedTasks = new ArrayList<String>();
 		while (iterator.hasNext()) {
@@ -439,9 +441,12 @@ public class Rest extends Controller {
 			Pattern p = Pattern.compile("#[^#]*#");
 			Matcher m = p.matcher(message);
 			if (m.find()) {
-				String referenceTag = m.group().substring(1,
-						m.group().length() - 1);
-				
+				String alias = m.group().substring(1, m.group().length() - 1);
+				String taskID = MongoLink.MONGO_LINK.getTaskIDFromAlias(
+						groupID, alias);
+				if (taskID != null) {
+					referencedTasks.add(taskID);
+				}
 			}
 		}
 		return referencedTasks;
