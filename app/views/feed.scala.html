@@ -31,6 +31,9 @@
     
     <h1 id="groupNameTitle" align="center"><b></b></h1>
 
+	<br>
+	<br>
+
  @upload(groupID, userName)
     
     <form id="taskAliasForm" role="form" style="display:none">
@@ -742,29 +745,29 @@
 
 
       post.appendChild(user_image);
-
-  		post_options.style.padding = "10px";
+      
+      post_options.style.padding = "10px";
   		
-  		switch(message_type){
-  		case "MESSAGE":
-  			var user = document.createElement("h4");
-        user.setAttribute("class", "media-heading");
-  			user.innerHTML = publisher;
+      switch(message_type){
+      	case "MESSAGE":
+  		var user = document.createElement("h4");
+        	user.setAttribute("class", "media-heading");
+  		user.innerHTML = publisher;
   		
-  			var message_text = stream_array[i][0]['object']["message"];
+  		var message_text = stream_array[i][0]['object']["message"];
 
-  			var message = document.createElement("p");
-  			message_text = message_text.replace("\n", "<br>");
-        message.innerHTML = changeReferencesToLinks(message_text);
+  		var message = document.createElement("p");
+  		message_text = message_text.replace("\n", "<br>");
+        	message.innerHTML = changeReferencesToLinks(message_text);
   			
-  	    post_body.appendChild(user);
-  		  post_body.appendChild(message);
-        post_body.appendChild(date_and_time);
-  		  post_body.appendChild(reply_message_div);
-  		  post_body.appendChild(reply_button);
-        post.appendChild(post_body);
+  	    	post_body.appendChild(user);
+  		post_body.appendChild(message);
+        	post_body.appendChild(date_and_time);
+  		post_body.appendChild(reply_message_div);
+  		post_body.appendChild(reply_button);
+        	post.appendChild(post_body);
 
-        break;
+        		break;
       case "TASK":
   		var task_name = stream_array[i][0]['object']["name"];
 		var task_alias = stream_array[i][0]['object']["alias"];
@@ -821,18 +824,6 @@
 
     		post_options.appendChild(priority_button);
     		post_options.appendChild(status_button);
-
-    		if (username == "@userName") {
-    			var assign_button = document.createElement("button");
-    			assign_button.innerHTML = "Assign members";
-    			post_options.appendChild(assign_button);
-
-    			assign_button.onclick = (function(post_id) {
-    				  return function() {
-    					// delete_post(post_id);
-    			 }
-    			}(post_id));
-    		}
 
         post_body.appendChild(task_heading);
         post_body.appendChild(task_details);
@@ -944,12 +935,12 @@
   			}
   			
   			post.style.backgroundColor = "#fcf8e3";
-        //post_body.setAttribute("class", "alert, alert-info");
+       			 //post_body.setAttribute("class", "alert, alert-info");
   			
-        post_body.appendChild(git_heading);
+       			post_body.appendChild(git_heading);
   			post_body.appendChild(git_data);
   			post_body.appendChild(commit_data);
-        post_body.appendChild(date_and_time);
+        		post_body.appendChild(date_and_time);
   			post_body.appendChild(reply_message_div);
   			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
@@ -957,26 +948,26 @@
   			
   		case "IMAGE":
   			var user = document.createElement("h4");
-  	        user.setAttribute("class", "media-heading");
-  	  			user.innerHTML = publisher;
+  	        	user.setAttribute("class", "media-heading");
+  	  		user.innerHTML = publisher;
   	  		
   	  		var upload_image = document.createElement("image");
   			upload_image.style.height = "400px";
   			upload_image.style.width = "400px";
   			upload_image.src= stream_array[i][0]['object']['web_preview_url'];
   	  			
-  	  	    post_body.appendChild(user);
-  	  		  post_body.appendChild(upload_image);
-  	        post_body.appendChild(date_and_time);
-  	  		  post_body.appendChild(reply_message_div);
-  	  		  post_body.appendChild(reply_button);
-  	        post.appendChild(post_body);
-  	        break;
+  	  	    	post_body.appendChild(user);
+  	  		post_body.appendChild(upload_image);
+  	        	post_body.appendChild(date_and_time);
+  	  		post_body.appendChild(reply_message_div);
+  	  		post_body.appendChild(reply_button);
+  	        	post.appendChild(post_body);
+  	        	break;
   		}
 
-  		 reply_button.onclick = (function(post_id, reply_message) {
-              return function() {
-                  replyToPost(post_id, reply_message);
+  		 	reply_button.onclick = (function(post_id, reply_message) {
+              		return function() {
+                  	replyToPost(post_id, reply_message);
               }
           }(post_id, reply_message));
 
