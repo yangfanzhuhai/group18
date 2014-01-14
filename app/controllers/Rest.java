@@ -237,6 +237,14 @@ public class Rest extends Controller {
 	public static Result getGits(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getGitCommits(groupID).toString());
 	}
+	
+	public static Result getNewGits(String groupID, String newestID) {
+		try {
+			return ok(MongoLink.MONGO_LINK.getNewGits(groupID, newestID).toString());
+		} catch (ParseException e) {
+			return status(422);
+		}
+	}
 
 	public static Result getMoreGits(String groupID, String last_post_id) {
 		return ok(MongoLink.MONGO_LINK.getNextGitCommits(groupID, last_post_id)
