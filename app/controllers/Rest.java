@@ -446,6 +446,12 @@ public class Rest extends Controller {
 						groupID, alias);
 				if (taskID != null) {
 					referencedTasks.add(taskID);
+					Pattern p2 = Pattern.compile("@(TO_DO|DOING|DONE)@");
+					Matcher m2 = p2.matcher(message);
+					if (m2.find()) {
+						String status = m2.group().substring(1, m2.group().length() - 1);
+					}
+					
 				}
 			}
 		}
