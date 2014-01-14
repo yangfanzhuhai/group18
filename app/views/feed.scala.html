@@ -899,12 +899,12 @@
   		git_data.innerHTML = publisher.bold() + " pushed to branch " + $(branch_link).outerHTML() + " at repository " + $(repo_link).outerHTML();
   			
   		var commits = stream_array[i][0]['object']['commits'];
-  		var commit_total = stream_array[i][0]['object']['totalCommits'];
+  		var commit_total = commits.length; //stream_array[i][0]['object']['totalCommits'];
   		var commit_data = document.createElement("div");
   		var commit_list = document.createElement("ul");
   		commit_data.appendChild(commit_list);
 
-  		for(var k = 0; k < Math.min(2,commit_total); k++) {
+  		for(var k = commit_total-1; k>= Math.max(0, commit_total-3); k--) {
   			var commit = commits[k];
   			var commit_url = commit["url"];
   			var commit_author = commit["author"];
@@ -924,7 +924,7 @@
   			if (commit_total > 2){
   				var summary_link = document.createElement('a');
   				summary_link.href = branch_url;
-  				summary_link.innerHTML = "... and " + (commit_total - 2) + " more commits";
+  				summary_link.innerHTML = "... and " + (commit_total - 3) + " more commits";
   				var commit_summary = document.createElement("li");
   				commit_summary.appendChild(summary_link);
   				commit_summary.style.display="block";
@@ -1173,20 +1173,22 @@
     result = message;	
 
     if (tag != null) {
+	//alert(tag);
+	
 
-      var linked_tag = document.createElement('a');
+      	var linked_tag = document.createElement('a');
 
-      var tag_without_hashes = tag[0].substring(1, tag[0].length -1);
+      	var tag_without_hashes = tag[0].substring(1, tag[0].length -1);
 
-      var task_id = task_ids[tag_without_hashes];
+      	var task_id = task_ids[tag_without_hashes];
 
-      if(task_id != undefined){
-      	linked_tag.href = "/@groupID/ref/" + task_id;
+      	if(task_id != undefined){
+      		linked_tag.href = "/@groupID/ref/" + task_id;
     
-      	linked_tag.innerHTML = tag;
+      		linked_tag.innerHTML = tag;
 
-      	result = result.replace(tag, $(linked_tag).outerHTML());
-      }
+      		result = result.replace(tag, $(linked_tag).outerHTML());
+      	}
 	
     }
 	
