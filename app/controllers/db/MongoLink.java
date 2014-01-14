@@ -379,29 +379,11 @@ public class MongoLink {
 	 * 
 	 * @param customID - ID of current group/project
 	 * @param newestID - ID of the newest post on news feed
-	 * @param postLimit - Maximum number of posts to fetch
-	 * @return - An Array of posts (and their replies) that are newer than the post with 'newestID' 
+	 * @return - An Array of any news feed items that are newer than the post with 'newestID' 
+	 * @throws ParseException 
 	 */
-	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get(), MongoUtils.reverseSort, postLimit);
-	}
-	
-	/**
-	 * @param customID - ID of current group/project
-	 * @param newestID - ID of the newest post on news feed
-	 * @return - An Array of at most 20 posts (and their replies) that are newer than the post with 'newestID' 
-	 */
-	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID) {
-		return getNewNews(customID, newestID, 20);
-	}
-	
-	/**
-	 * @param customID - ID of current group/project
-	 * @param newestID - ID of the newest post on news feed
-	 * @return - An Array of ALL the posts (and their replies) that are newer than the post with 'newestID' 
-	 */
-	public ArrayList<ArrayList<String>> getNewNewsAll(String customID, String newestID) {
-		return getNewNews(customID, newestID, noLimit(customID));
+	public ArrayList<String> getNewNews(String customID, String newestID) throws ParseException {
+		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("_id").greaterThan(new ObjectId(newestID)).get(), MongoUtils.reverseSort);
 	}
 
 	/** 
@@ -611,6 +593,15 @@ public class MongoLink {
 	public void deletePost(String customID, DBObject obj) {
 		
 		MongoMethods.deletePost(getGroupColl(customID), obj.get("id").toString());
+	}
+	
+	/**
+	 * @param groupID - ID of collection to be used 
+	 * @param alias - Alias of the task to fetch
+	 * @return - (Mongo)ID of the task with the given alias
+	 */
+	public String getTaskIDFromAlias(String groupID, String alias) {
+		return getGroupColl(groupID).findOne(QueryBuilder.start("object.alias").is(alias).get()).get("_id").toString();
 	}
 	
 	/**
