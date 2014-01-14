@@ -19,8 +19,8 @@
   <body>
   
     @navbar(groupID, userName)
-    @upload(groupID, userName)
-  <div class="container col-md-offset-2 col-md-8">
+   
+  <div class="container">
     <a href="@routes.Application.feed(groupID,"feed")">
       <img src="@routes.Assets.at("images/title.jpg")" id ="title" alt="some_text"
     	width="200" >
@@ -30,12 +30,16 @@
     </a>
     
     <h1 id="groupNameTitle" align="center"><b></b></h1>
+
+ @upload(groupID, userName)
     
     <form id="taskAliasForm" role="form" style="display:none">
         <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
     	 maxlength="8" class="form-control" onKeyUp="illegalSpace()" placeholder="Task Alias" style = "resize: none" ></textarea>
         <p><b>Task Alias</b> - (Optional) Up to 8 characters to use when referencing this task.</p>
       </form>
+
+	
 
     <div id = "post_options" align="center">
     		
@@ -49,11 +53,11 @@
 
       </form>
    
-    <div class="container col-md-offset-2 col-md-4">
+    <div class="container">
     <select id="post_type" onchange="postTypeChange(this.value)" align = "center" style = "width: 50%" class="form-inline form-control">
       <option value="text_post">Text Post</option>
       <option value="task">Task</option>
-      <option value"upload">File Upload</option>
+      <option value="upload">File Upload</option>
     </select>
   </div>
      		
@@ -255,21 +259,21 @@
   		limitedtextfield.rows = 5
   		limitedtextfield.maxlength=msgTextLimit;
   		charCountdown.value = msgTextLimit;
-        limitedtextfield.placeholder="What's on you mind?";
-        taskAliasForm.style.display="none";
-        document.getElementById("upload-widget").style.display="none";
+       	 	limitedtextfield.placeholder="Press the hash key to reference a task";
+        	taskAliasForm.style.display="none";
+        	document.getElementById("upload-widget").style.display="none";
   	} else if (option == "task") {
   		document.getElementById("post_form").style.display="inline";
   		limitedtextfield.rows = 1;
   		limitedtextfield.maxlength=taskTextLimit;
-        charCountdown.value = taskTextLimit;
-        limitedtextfield.placeholder="Your Task";
-	    taskAliasForm.style.display="inline";
-	    document.getElementById("upload-widget").style.display="none";
+        	charCountdown.value = taskTextLimit;
+        	limitedtextfield.placeholder="Your Task";
+	  	taskAliasForm.style.display="inline";
+	    	document.getElementById("upload-widget").style.display="none";
     } else {
-    	document.getElementById("post_form").style.display="none";
-    	taskAliasForm.style.display="none";
-    	document.getElementById("upload-widget").style.display="inline";
+    		document.getElementById("post_form").style.display="none";
+    		taskAliasForm.style.display="none";
+    		document.getElementById("upload-widget").style.display="inline";
     	
     }
 
@@ -277,8 +281,8 @@
 
   function setTaskStatus(status) {
   localToggle="tasks";
-    document.getElementById("stream").innerHTML = "";
-    document.getElementById("task_status").innerHTML = status;
+  document.getElementById("stream").innerHTML = "";
+  document.getElementById("task_status").innerHTML = status;
     $.ajax({
         type: "GET",
         url: "/" + "@groupID" + "/rest/tasks/" + status,
