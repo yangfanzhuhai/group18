@@ -608,6 +608,15 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param groupID - ID of current group/project
+	 * @param taskID - ID of the task. This method assumes this to be a valid ID
+	 * @param newStatus - new status which should be set for the task
+	 */
+	public void changeTaskStatus(String groupID, String taskID, String newStatus) {
+		MongoMethods.updateStatus(getGroupColl(groupID), taskID, newStatus);
+	}
+	
+	/**
 	 * @param groupID - ID of group/project
 	 * @param id - ID of task
 	 * @return Array of posts and their replies which reference the task with the given id
