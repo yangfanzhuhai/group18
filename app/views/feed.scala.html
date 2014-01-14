@@ -202,6 +202,14 @@
   document.getElementById("preloader").style.marginTop = "100px";
 
 
+  function hideInputs() {
+
+    document.getElementById("post_options").style.display = 'none';
+    document.getElementById("post_type").style.display = 'none';
+
+  }
+
+
 
   function generateJSON(date_and_time_stamp, object, post_id, references) {
 
@@ -325,7 +333,7 @@
     var id = "@toggle";
     if (id.length == 24) {
 
-
+          hideInputs();
 
             $.ajax({    
            type: "GET",
@@ -640,6 +648,22 @@
       post_body.setAttribute("class", "media-body");
   	
   		var stream = document.getElementById("stream");
+
+      var id = "@toggle";
+      if (id.length == 24 && i == 0) {
+        var task_div = document.createElement("H2");
+        task_div.innerHTML = "Referenced task: ";
+        stream.appendChild(task_div);
+        
+      }
+
+      if (id.length == 24 && i == 1) {
+        var task_div = document.createElement("H2");
+        task_div.innerHTML = "References to task: ";
+        stream.appendChild(task_div);
+        
+      }
+
       //stream.insertBefore(post);
       if (autoRefreshing) {
         $("#stream").prepend(post);
@@ -653,6 +677,8 @@
   		} else {
         stream.insertBefore(post);
   		}*/
+
+
 
   		var date_and_time = document.createElement("small");
   		date_and_time.innerHTML = published + "<br>";
