@@ -305,6 +305,7 @@
       $('#loadMoreButton').hide();
       first_post_id = "";
       autoRefreshing = false;
+      tasksFetched = false;
 
       var getUrl = "/" + "@groupID" + "/rest/";
 
@@ -319,7 +320,15 @@
               addTasks(data);
           }});
 	
-		//if toggle is a reference, generate		
+
+  }
+
+  function generateAppropriateFeed() {
+	//if toggle is a reference, generate	
+
+      var getUrl = "/" + "@groupID" + "/rest/";
+
+		getUrl += "@toggle";	
 
     var id = "@toggle";
     if (id.length == 24) {
@@ -347,6 +356,7 @@
                
              }});
     }
+
   }
 
   $(document).ready(refreshFeed);	
@@ -371,6 +381,7 @@
       tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
       tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
+	generateAppropriateFeed();
   }
 
   function addPhotoForUser(username, photo_url) {
@@ -1168,8 +1179,7 @@
   }
 
 
-  function changeReferencesToLinks(message) {
-
+  function changeReferencesToLinks(message) {	
 
     var hashtagRegex = new RegExp("#[^#]*#");
     var tag = hashtagRegex.exec(message);
