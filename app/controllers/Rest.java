@@ -450,6 +450,7 @@ public class Rest extends Controller {
 					Matcher m2 = p2.matcher(message);
 					if (m2.find()) {
 						String status = m2.group().substring(1, m2.group().length() - 1);
+						MongoLink.MONGO_LINK.changeTaskStatus(groupID, taskID, status);
 					}
 					
 				}
