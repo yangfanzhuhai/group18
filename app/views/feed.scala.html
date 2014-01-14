@@ -505,14 +505,17 @@
         getUrl += "newfeed/";
         break;
       case "tasks":
-        getUrl += "moretask/";
+        getUrl += "newtasks/";
         break;
       case "gits":
         getUrl += "newgits/";
         break;
       case "builds":
-        getUrl += "morebuild/";
+        getUrl += "newbuilds/";
         break;
+      default :
+	getUrl += "@toggle/";
+	break;
       }
     setInterval(function() {
       $.ajax({    

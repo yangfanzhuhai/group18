@@ -386,8 +386,20 @@ public class MongoLink {
 		return getNewItems(getGroupColl(customID), QueryBuilder.start(), newestID);
 	}
 	
+	public ArrayList<ArrayList<String>> getNewTasks(String customID, String newestID) throws ParseException {
+		return getNewItems(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK"), newestID);
+	}
+	
+	public ArrayList<ArrayList<String>> getNewTasksWithStatus(String customID, String status, String newestID) throws ParseException {
+		return getNewItems(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status), newestID);
+	}
+	
 	public ArrayList<ArrayList<String>> getNewGits(String customID, String newestID) throws ParseException {
 		return getNewItems(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT"), newestID);
+	}
+	
+	public ArrayList<ArrayList<String>> getNewBuilds(String customID, String newestID) throws ParseException {
+		return getNewItems(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS"), newestID);
 	}
 	
 	private ArrayList<ArrayList<String>> getNewItems(DBCollection collection, QueryBuilder query, String newestID) throws ParseException {
