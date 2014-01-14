@@ -596,6 +596,15 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param groupID - ID of collection to be used 
+	 * @param alias - Alias of the task to fetch
+	 * @return - (Mongo)ID of the task with the given alias
+	 */
+	public String getTaskIDFromAlias(String groupID, String alias) {
+		return getGroupColl(groupID).findOne(QueryBuilder.start("object.alias").is(alias).get()).get("_id").toString();
+	}
+	
+	/**
 	 * @param groupID - ID of group/project
 	 * @param id - ID of task
 	 * @return Array of posts and their replies which reference the task with the given id
