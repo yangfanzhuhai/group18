@@ -8,7 +8,8 @@ body {
     border:2px solid;
     border-color:#66CCFF;
 	border-radius:25px;
-
+margin-left: auto;
+	margin-right: auto;
 	padding: 10px;
 }
 

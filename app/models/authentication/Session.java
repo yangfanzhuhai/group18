@@ -6,11 +6,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import controllers.db.MongoLink;
+
 import play.api.libs.json.JsValue;
 import play.api.libs.json.Json;
 
 import models.ActivityModel;
-import models.MongoLink;
 
 public class Session {
   

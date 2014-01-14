@@ -17,9 +17,10 @@
   </head>
 
   <body>
+  
     @navbar(groupID, userName)
-
-  <div class="container col-md-offset-2 col-md-8">
+   
+  <div class="container">
     <a href="@routes.Application.feed(groupID,"feed")">
       <img src="@routes.Assets.at("images/title.jpg")" id ="title" alt="some_text"
     	width="200" >
@@ -29,6 +30,11 @@
     </a>
     
     <h1 id="groupNameTitle" align="center"><b></b></h1>
+
+	<br>
+	<br>
+
+ @upload(groupID, userName)
     
     <form id="taskAliasForm" role="form" style="display:none">
         <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
@@ -36,23 +42,25 @@
         <p><b>Task Alias</b> - (Optional) Up to 8 characters to use when referencing this task.</p>
       </form>
 
+	
+
     <div id = "post_options" align="center">
     		
-      <form name="myform" role="form">
+      <form id ="post_form" name="myform" role="form">
         <textarea name="limitedtextarea" type="text" id="limitedtextfield" rows="5" cols="30"
         onKeyUp="postFormOnKeyDown()" class="form-control" 
-        placeholder="What's on your mind?" style="resize: none"></textarea>
+        placeholder="Press the hash key to reference a task" style="resize: none"></textarea>
         <br>
         <small align="right"> <!--(Maximum characters: 140)-->
         You have <input readonly type="text" id="charCountdown" name="countdown" size="3" > characters left.</small>
 
       </form>
-
    
-    <div class="container col-md-offset-2 col-md-4">
+    <div class="container">
     <select id="post_type" onchange="postTypeChange(this.value)" align = "center" style = "width: 50%" class="form-inline form-control">
       <option value="text_post">Text Post</option>
       <option value="task">Task</option>
+      <option value="upload">File Upload</option>
     </select>
   </div>
      		
@@ -69,10 +77,10 @@
     
 
     <ul id = "stream" class = "media-list" ></ul>
-    <div align="center" id = "seeMoreButton">
+    <div align="center" display = "none" id = "seeMoreButton">
       <button id = "loadMoreButton"class = "btn btn-info" style = "margin: 10px" onclick = "loadMoreFeed()">See more...</button>
     </div>
-    <div id="loader" align="center"><img src="@routes.Assets.at("images/482.GIF")" alt=
+    <div id="loader" align="center" display = "none"><img src="@routes.Assets.at("images/482.GIF")" alt=
         "AJAX loader" title="AJAX loader"  /></div>
   </div> <!-- /container -->  
 
@@ -201,6 +209,14 @@
   document.getElementById("preloader").style.marginTop = "100px";
 
 
+  function hideInputs() {
+
+    document.getElementById("post_options").style.display = 'none';
+    document.getElementById("post_type").style.display = 'none';
+
+  }
+
+
 
   function generateJSON(date_and_time_stamp, object, post_id, references) {
 
@@ -250,27 +266,34 @@
   	limitedtextfield.value = "";
   	
   	if (option == "text_post") {
-  	
+  		document.getElementById("post_form").style.display="inline";
   		limitedtextfield.rows = 5
   		limitedtextfield.maxlength=msgTextLimit;
   		charCountdown.value = msgTextLimit;
-        limitedtextfield.placeholder="What's on you mind?";
-        taskAliasForm.style.display="none";
-
-  	} else {
+       	 	limitedtextfield.placeholder="Press the hash key to reference a task";
+        	taskAliasForm.style.display="none";
+        	document.getElementById("upload-widget").style.display="none";
+  	} else if (option == "task") {
+  		document.getElementById("post_form").style.display="inline";
   		limitedtextfield.rows = 1;
   		limitedtextfield.maxlength=taskTextLimit;
-        charCountdown.value = taskTextLimit;
-        limitedtextfield.placeholder="Your Task";
-	    taskAliasForm.style.display="inline";
+        	charCountdown.value = taskTextLimit;
+        	limitedtextfield.placeholder="Your Task";
+	  	taskAliasForm.style.display="inline";
+	    	document.getElementById("upload-widget").style.display="none";
+    } else {
+    		document.getElementById("post_form").style.display="none";
+    		taskAliasForm.style.display="none";
+    		document.getElementById("upload-widget").style.display="inline";
+    	
     }
 
   }
 
   function setTaskStatus(status) {
   localToggle="tasks";
-    document.getElementById("stream").innerHTML = "";
-    document.getElementById("task_status").innerHTML = status;
+  document.getElementById("stream").innerHTML = "";
+  document.getElementById("task_status").innerHTML = status;
     $.ajax({
         type: "GET",
         url: "/" + "@groupID" + "/rest/tasks/" + status,
@@ -289,6 +312,7 @@
       $('#loadMoreButton').hide();
       first_post_id = "";
       autoRefreshing = false;
+      tasksFetched = false;
 
       var getUrl = "/" + "@groupID" + "/rest/";
 
@@ -303,34 +327,43 @@
               addTasks(data);
           }});
 	
-		//if toggle is a reference, generate		
 
-          $.ajax({    
+  }
+
+  function generateAppropriateFeed() {
+	//if toggle is a reference, generate	
+
+      var getUrl = "/" + "@groupID" + "/rest/";
+
+		getUrl += "@toggle";	
+
+    var id = "@toggle";
+    if (id.length == 24) {
+
+          hideInputs();
+
+            $.ajax({    
            type: "GET",
            url: "/" + "@groupID" + "/rest/ref/" + "@toggle",
             dataType: "json",
             success: function(data){ 
-	
-			if(data == "") {
-			
-			$.ajax({    
-           type: "GET",
-           url: getUrl,
-            dataType: "json",
-            success: function(data){   
-              generateFeed(data);
-              
-             }}); 
-			
-			} else {
 
               generateFeed(data);
-          
+          }});
+      
 
-		}
-		}});
-		
-          
+      
+      } else {
+          $.ajax({    
+            type: "GET",
+             url: getUrl,
+             dataType: "json",
+             success: function(data){   
+              generateFeed(data);
+               
+             }});
+    }
+
   }
 
   $(document).ready(refreshFeed);	
@@ -355,6 +388,7 @@
       tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
       tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
+	generateAppropriateFeed();
   }
 
   function addPhotoForUser(username, photo_url) {
@@ -480,7 +514,7 @@
         getUrl += "morebuild/";
         break;
       }
-    /*setInterval(function() {
+    setInterval(function() {
       $.ajax({    
       type: "GET",
       url: getUrl + first_post_id,
@@ -490,7 +524,7 @@
           addToFeed(data);
           autoRefreshing = false;
       }});
-    }, 500);*/
+    }, 5000);
   }
 
   function loadMoreFeed() {
@@ -532,10 +566,9 @@
 
   function addToFeed(stream_array) {
 
-
-
   	//document.getElementById("username").innerHTML="@userName";
 
+	//highlight nav bar
     if (localToggle == "feed") {
       document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
@@ -590,20 +623,17 @@
   		var post_no = 0;
 
   		var post_id = stream_array[i][0]['id'];
-  		/*if (i == (stream_array.length - 1)) {
-  			final_post_id = post_id; 
-  		}*/
-      final_post_id = post_id;  
-      if (first_post_id == "" || autoRefreshing) {
-        first_post_id = post_id;
-      } 
+      		final_post_id = post_id;  
+      		if (first_post_id == "" || autoRefreshing) {
+        		first_post_id = post_id;
+      		} 
 
   		var published = stream_array[i][0]['published'];
 
   		var publisher;
   		var displayName = stream_array[i][0]['actor']["displayName"];
   		var username = stream_array[i][0]['actor']["username"];
-      var photo_url = stream_array[i][0]['actor']["photo_url"];
+     		var photo_url = stream_array[i][0]['actor']["photo_url"];
 
   		if (displayName == "") {
   		  publisher = username;
@@ -615,20 +645,36 @@
   		var verb = stream_array[i][0]['verb'];
 
   		var post = document.createElement("li");
-      post.setAttribute("class", "media");
+      		post.setAttribute("class", "media");
   		post.id = post_id;
   		post.className = "post";
 
-      var post_body = document.createElement("div");
-      post_body.setAttribute("class", "media-body");
+      		var post_body = document.createElement("div");
+      		post_body.setAttribute("class", "media-body");
   	
   		var stream = document.getElementById("stream");
-      //stream.insertBefore(post);
-      if (autoRefreshing) {
-        $("#stream").prepend(post);
-      } else {
-        stream.appendChild(post);
-      }
+
+      		var id = "@toggle";
+      		if (id.length == 24 && i == 0) {
+        		var task_div = document.createElement("H2");
+        		task_div.innerHTML = "Referenced task: ";
+        		stream.appendChild(task_div);
+        
+      		}
+
+      		if (id.length == 24 && i == 1) {
+        	var task_div = document.createElement("H2");
+        	task_div.innerHTML = "References to task: ";
+        	stream.appendChild(task_div);
+        
+      		}
+
+      		//stream.insertBefore(post);
+      		if (autoRefreshing) {
+        		$("#stream").prepend(post);
+      		} else {
+        		stream.appendChild(post);
+     		}
      
 
   		/*if (post_count > 0) {
@@ -637,94 +683,102 @@
         stream.insertBefore(post);
   		}*/
 
+
+
   		var date_and_time = document.createElement("small");
   		date_and_time.innerHTML = published + "<br>";
 
-      var reply_message_div = document.createElement("div");
-      reply_message_div.setAttribute("class", "col-xs-8");
+      		var reply_message_div = document.createElement("div");
+      		reply_message_div.setAttribute("class", "col-xs-8");
 
   		var reply_message = document.createElement("input");
   		reply_message.placeholder = "Your message"
   		reply_message.type = "text";
-      reply_message.setAttribute("class", "form-control input-sm");
+      		reply_message.setAttribute("class", "form-control input-sm");
   					
   		var reply_button = document.createElement("button");
-      reply_button.setAttribute("class", "btn btn-default btn-sm");
+      		reply_button.setAttribute("class", "btn btn-default btn-sm");
   		reply_button.innerHTML = 'Reply';
-      reply_message_div.appendChild(reply_message);
+      		reply_message_div.appendChild(reply_message);
 
   		var post_options = document.createElement("div");
 
   		if (username == "@userName") {
   			var delete_button = document.createElement("button");
-        delete_button.setAttribute("class", "btn btn-danger btn-xs");
+        		delete_button.setAttribute("class", "btn btn-danger btn-xs");
   			delete_button.innerHTML = "Delete";
   			post_options.appendChild(delete_button);
-
   		 	delete_button.onclick = (function(post_id) {
-            	  return function() {
-                    var choice = confirm("Are you sure you want to delete this post?");
-                    if (choice == true) {
-            	         delete_post(post_id);
-                   }
-              }
-         	 }(post_id));
+            	  					return function() {
+                    					var choice = confirm("Are you sure you want to delete this post?");
+                    					if (choice == true) {
+            	         					delete_post(post_id);
+                   					}
+              						}
+         	 					}(post_id));
   		}
 
 
-  		 reply_button.onclick = (function(post_id, reply_message) {
-              return function() {
-                  replyToPost(post_id, reply_message);
-              }
-          }(post_id, reply_message));
+  		reply_button.onclick = (function(post_id, reply_message) {
+              	return function() {
+                replyToPost(post_id, reply_message);
+              	}
+          	}(post_id, reply_message));
 
-      var user_image = document.createElement("image");
-      user_image.style.width = "8%";
-      user_image.style.borderRadius = "50px";
-      user_image.style.float = "right";
-      user_image.style.margin = "5px";
-      user_image.style.marginLeft = "10px";
-      user_image.style.border = "3px solid white";
+      		var user_image = document.createElement("image");
+      		user_image.style.width = "8%";
+      		user_image.style.borderRadius = "50px";
+      		user_image.style.float = "right";
+      		user_image.style.margin = "5px";
+      		user_image.style.marginLeft = "10px";
+      		user_image.style.border = "3px solid white";
 
-      addPhotoForUser(username, photo_url);
-      user_image.src = user_images[username];
+      		addPhotoForUser(username, photo_url);
+      		if (user_images[username] != undefined) {
+      			user_image.src = user_images[username];
+      		}
 
-      post.appendChild(user_image);
-
-  		post_options.style.padding = "10px";
+      		post.appendChild(user_image);
+      
+      		post_options.style.padding = "10px";
   		
-  		switch(message_type){
-  		case "MESSAGE":
-  			var user = document.createElement("h4");
-        user.setAttribute("class", "media-heading");
-  			user.innerHTML = publisher;
-  		
-  			var message_text = stream_array[i][0]['object']["message"];
+      switch(message_type){
 
-  			var message = document.createElement("p");
-  			message_text = message_text.replace("\n", "<br>");
-        message.innerHTML = changeReferencesToLinks(message_text);
+      	case "MESSAGE":
+
+  		var user = document.createElement("h4");
+        	user.setAttribute("class", "media-heading");
+  		user.innerHTML = publisher;
+  		
+  		var message_text = stream_array[i][0]['object']["message"];
+
+  		var message = document.createElement("p");
+  		message_text = message_text.replace("\n", "<br>");
+        	message.innerHTML = changeReferencesToLinks(message_text);
   			
-  	    post_body.appendChild(user);
-  		  post_body.appendChild(message);
-        post_body.appendChild(date_and_time);
-  		  post_body.appendChild(reply_message_div);
-  		  post_body.appendChild(reply_button);
-        post.appendChild(post_body);
+  	    	post_body.appendChild(user);
+  		post_body.appendChild(message);
+        	post_body.appendChild(date_and_time);
+  		post_body.appendChild(reply_message_div);
+  		post_body.appendChild(reply_button);
+        	post.appendChild(post_body);
 
-        break;
-      case "TASK":
+        		break;
+
+      	case "TASK":
+
   		var task_name = stream_array[i][0]['object']["name"];
 		var task_alias = stream_array[i][0]['object']["alias"];
-        var task_heading = document.createElement("h4");
-        task_heading.setAttribute("class", "media-heading");
+        	var task_heading = document.createElement("h4");
+        	task_heading.setAttribute("class", "media-heading");
 
-        if (task_alias != "") {
-        task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_alias + "#");
-      }
-      else {
-        task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_name + "#");
-      }
+        	if (task_alias != "") {
+        	task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_alias + "#");
+     		}
+
+      		else {
+        	task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_name + "#");
+      		}
         
   		var task_data = document.createElement("p");
 
@@ -734,156 +788,145 @@
   		task_data.innerHTML = task_name + " BY " + publisher.bold();
   		var task_details = document.createElement("p");
   		task_details.style.cssFloat = "right";
-		  task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
+		task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
 
   		var priority_button = document.createElement("button");
   		priority_button.innerHTML= "Change Task Priority";
   		priority_button.type = "text";
   		priority_button.onclick = (function (post_id) {
-  			return function() {
-  				var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
-  				if (new_priority <  4 && new_priority > 0) {
-  					post_new_task_details(new_priority, "p", post_id);
-  				} else {
-  					alert("Value entered is not between 1 and 3");
-  				}
-  			}
-  		}(post_id));
+  						return function() {
+  						var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
+  						if (new_priority <  4 && new_priority > 0) {
+  						post_new_task_details(new_priority, "p", post_id);
+  						} else {
+  						alert("Value entered is not between 1 and 3");
+  						}
+  						}
+  					}(post_id));
 
 
   		var status_button = document.createElement("button");
   		status_button.innerHTML= "Change Task Status";
   		status_button.type = "text";
   		status_button.onclick = (function (post_id) {
-  			return function() {
-  				var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
-  				if((new_status == "TO_DO") || (new_status == "DOING") || (new_status == "DONE")) {
-  					post_new_task_details(new_status, "s", post_id);
-  				} else {
-  					alert("Not a valid status");
-  				}
+  						return function() {
+  						var new_status = window.prompt("Please enter a new task status from (TO_DO/DOING/DONE)");
+  						if((new_status == "TO_DO") || (new_status == "DOING") || (new_status == "DONE")) {
+  							post_new_task_details(new_status, "s", post_id);
+  						} else {
+  							alert("Not a valid status");
+  						}
   			
-  			}
-		  }(post_id));
+  						}
+		  			}(post_id));
 
 
     		post_options.appendChild(priority_button);
     		post_options.appendChild(status_button);
 
-    		if (username == "@userName") {
-    			var assign_button = document.createElement("button");
-    			assign_button.innerHTML = "Assign members";
-    			post_options.appendChild(assign_button);
+        	post_body.appendChild(task_heading);
+        	post_body.appendChild(task_details);
+  		post_body.appendChild(task_data);	
+        	post_body.appendChild(date_and_time);	
+  		post_body.appendChild(reply_message_div);
+  		post_body.appendChild(reply_button);
+        	post.appendChild(post_body);
+		break;
 
-    			assign_button.onclick = (function(post_id) {
-    				  return function() {
-    					// delete_post(post_id);
-    			 }
-    			}(post_id));
-    		}
+  	case "JENKINS" :
 
-        post_body.appendChild(task_heading);
-        post_body.appendChild(task_details);
-  			post_body.appendChild(task_data);	
-        post_body.appendChild(date_and_time);	
-  			post_body.appendChild(reply_message_div);
-  			post_body.appendChild(reply_button);
-        post.appendChild(post_body);
-  			//post.appendChild(post_options);
-			break;
-  		case "JENKINS" :
-  			var jenkins = document.createElement("h4");
-        jenkins.setAttribute("class", "media-heading");
-  			jenkins.innerHTML = publisher;
+  		var jenkins = document.createElement("h4");
+       		jenkins.setAttribute("class", "media-heading");
+  		jenkins.innerHTML = publisher;
 
-        user_image.src = "@routes.Assets.at("images/jenkins.png")";
-        user_image.style.width = "7%";
-        user_image.style.border = "";
+        	user_image.src = "@routes.Assets.at("images/jenkins.png")";
+        	user_image.style.width = "7%";
+        	user_image.style.border = "";
   			
-  			var build_data = document.createElement("p");
-  			var build_name = stream_array[i][0]['object']["name"];
-  			var build_number = stream_array[i][0]['object']["number"];
-  			var build_status = stream_array[i][0]['object']["status"];
-  			var build_url = stream_array[i][0]['object']["url"];
+  		var build_data = document.createElement("p");
+  		var build_name = stream_array[i][0]['object']["name"];
+  		var build_number = stream_array[i][0]['object']["number"];
+  		var build_status = stream_array[i][0]['object']["status"];
+  		var build_url = stream_array[i][0]['object']["url"];
   			
-  			var build_link = document.createElement('a');
-  			build_link.href = build_url;
-  			build_link.innerHTML = "See build";
+  		var build_link = document.createElement('a');
+  		build_link.href = build_url;
+  		build_link.innerHTML = "See build";
   			
-  			if (build_status == "SUCCESS") {
-  				post.style.backgroundColor = "#AFD772";	
-          //post_body.setAttribute("class", "alert alert-success");
-  			} else {
-  				post.style.backgroundColor = "#FF7A70";	
-          //post_body.setAttribute("class", "alert alert-danger");
-  			}
+  		if (build_status == "SUCCESS") {
+  			post.style.backgroundColor = "#AFD772";	
+  		} else {
+  			post.style.backgroundColor = "#FF7A70";	
+  		}
   			
-  			build_data.innerHTML = build_name + " build " + build_number + " finished with status: " + build_status + ". ";
-			  build_data.appendChild(build_link);
+  		build_data.innerHTML = build_name + " build " + build_number + " finished with status: " + build_status + ". ";
+		build_data.appendChild(build_link);
   			
-  			post_body.appendChild(jenkins);
-  			post_body.appendChild(build_data);
-        post_body.appendChild(date_and_time);
-  			post_body.appendChild(reply_message_div);
-  			post_body.appendChild(reply_button);
-        post.appendChild(post_body);
+  		post_body.appendChild(jenkins);
+  		post_body.appendChild(build_data);
+        	post_body.appendChild(date_and_time);
+  		post_body.appendChild(reply_message_div);
+  		post_body.appendChild(reply_button);
+        	post.appendChild(post_body);
   			break;
-  			
-  		case "GIT":
+	
+  	case "GIT":
   		
-  			var repo = stream_array[i][0]['object']['repository'];
-  			var repo_name = repo["name"];
-  			var repo_url = repo["url"];
-  			var branch = stream_array[i][0]['object']['branch'];
-  			var branch_name = branch["name"];
-  			var branch_url = branch["url"];
+  		var repo = stream_array[i][0]['object']['repository'];
+  		var repo_name = repo["name"];
+  		var repo_url = repo["url"];
+  		var branch = stream_array[i][0]['object']['branch'];
+  		var branch_name = branch["name"];
+  		var branch_url = branch["url"];
 
-        user_image.src = "@routes.Assets.at("images/git.png")";
-        user_image.style.width = "7%";
-        user_image.style.border = "";
+        	user_image.src = "@routes.Assets.at("images/git.png")";
+        	user_image.style.width = "7%";
+        	user_image.style.border = "";
 
-        var git_heading = document.createElement("h4");
-        git_heading.setAttribute("class", "media-heading");
-        git_heading.innerHTML = "GIT";
+       		var git_heading = document.createElement("h4");
+        	git_heading.setAttribute("class", "media-heading");
+        	git_heading.innerHTML = "GIT";
   			
-  			var branch_link = document.createElement('a');
-  			branch_link.href = branch_url;
-  			branch_link.innerHTML = branch_name.bold()
+  		var branch_link = document.createElement('a');
+  		branch_link.href = branch_url;
+  		branch_link.innerHTML = branch_name.bold()
   			
-  			var repo_link = document.createElement('a');
-  			repo_link.href = repo_url;
-  			repo_link.innerHTML = repo_name.bold()
+  		var repo_link = document.createElement('a');
+  		repo_link.href = repo_url;
+  		repo_link.innerHTML = repo_name.bold()
   			
   			
-  			var git_data = document.createElement("div");
-  			git_data.innerHTML = publisher.bold() + " pushed to branch " + $(branch_link).outerHTML() + " at repository " + $(repo_link).outerHTML();
+  		var git_data = document.createElement("div");
+  		git_data.innerHTML = publisher.bold() + " pushed to branch " + $(branch_link).outerHTML() + " at repository " + $(repo_link).outerHTML();
   			
-  			var commits = stream_array[i][0]['object']['commits'];
-  			var commit_total = stream_array[i][0]['object']['totalCommits'];
-  			var commit_data = document.createElement("div");
-  			var commit_list = document.createElement("ul");
-  			commit_data.appendChild(commit_list);
-  			for(var k = 0; k < Math.min(2,commit_total); k++) {
-  				var commit = commits[k];
-  				var commit_url = commit["url"];
-  				var commit_author = commit["author"];
-  				var commit_message = commit["message"];
-  				commit_message = changeReferencesToLinks(commit_message);
-  				var commit_link = document.createElement('a');
-  				commit_link.href = commit_url;
-  				commit_link.innerHTML = "See commit"
+  		var commits = stream_array[i][0]['object']['commits'];
+  		var commit_total = stream_array[i][0]['object']['totalCommits'];
+		var commit_length = commits.length;
+  		var commit_data = document.createElement("div");
+  		var commit_list = document.createElement("ul");
+  		commit_data.appendChild(commit_list);
+
+  		for(var k = commit_length-1; k>= Math.max(0, commit_length-3); k--) {
+  			var commit = commits[k];
+  			var commit_url = commit["url"];
+  			var commit_author = commit["author"];
+  			var commit_message = commit["message"];
+  			commit_message = changeReferencesToLinks(commit_message);
+  			var commit_link = document.createElement('a');
+  			commit_link.href = commit_url;
+  			commit_link.innerHTML = "See commit"
   				
   				
-  				var commit_list_entry = document.createElement("li");
-  				commit_list_entry.style.display="block";
-  				commit_list_entry.innerHTML = commit_author.bold() + ": " + commit_message + " " + $(commit_link).outerHTML();
-  				commit_list.appendChild(commit_list_entry);
+  			var commit_list_entry = document.createElement("li");
+  			commit_list_entry.style.display="block";
+  			commit_list_entry.innerHTML = commit_author.bold() + ": " + commit_message + " " + $(commit_link).outerHTML();
+  			commit_list.appendChild(commit_list_entry);
   				
   			}
-  			if (commit_total > 2){
+  			if (commit_total > 3){
   				var summary_link = document.createElement('a');
   				summary_link.href = branch_url;
-  				summary_link.innerHTML = "... and " + (commit_total - 2) + " more commits";
+  				summary_link.innerHTML = "... and " + (commit_total - 3) + " more commits";
   				var commit_summary = document.createElement("li");
   				commit_summary.appendChild(summary_link);
   				commit_summary.style.display="block";
@@ -892,31 +935,48 @@
   			}
   			
   			post.style.backgroundColor = "#fcf8e3";
-        //post_body.setAttribute("class", "alert, alert-info");
-  			
-        post_body.appendChild(git_heading);
+       			post_body.appendChild(git_heading);
   			post_body.appendChild(git_data);
   			post_body.appendChild(commit_data);
-        post_body.appendChild(date_and_time);
+        		post_body.appendChild(date_and_time);
   			post_body.appendChild(reply_message_div);
   			post_body.appendChild(reply_button);
   			post.appendChild(post_body);
   			break;
+  			
+  	case "IMAGE":
+
+  			var user = document.createElement("h4");
+  	        	user.setAttribute("class", "media-heading");
+  	  		user.innerHTML = publisher;
+  	  		
+  	  		var upload_image = document.createElement("image");
+  			upload_image.style.height = "400px";
+  			upload_image.style.width = "400px";
+  			upload_image.src= stream_array[i][0]['object']['web_preview_url'];
+  	  			
+  	  	    	post_body.appendChild(user);
+  	  		post_body.appendChild(upload_image);
+  	        	post_body.appendChild(date_and_time);
+  	  		post_body.appendChild(reply_message_div);
+  	  		post_body.appendChild(reply_button);
+  	        	post.appendChild(post_body);
+  	        	break;
   		}
 
-  		 reply_button.onclick = (function(post_id, reply_message) {
-              return function() {
-                  replyToPost(post_id, reply_message);
-              }
-          }(post_id, reply_message));
+  		 	reply_button.onclick = (function(post_id, reply_message) {
+              						return function() {
+                  					replyToPost(post_id, reply_message);
+             			 			}
+          					}(post_id, reply_message));
 
-  		 reply_message.onkeypress = (function(post_id, reply_message) { 
-  		 	return function() {
-  		 			if (event.keyCode == 13) {
-  		 				replyToPost(post_id, reply_message);
-  		 			}
-  		 	}
-  		 }(post_id, reply_message));
+  			 reply_message.onkeypress = (function(post_id, reply_message) { 
+  		 					return function() {
+  		 					if (event.keyCode == 13) {
+  		 						replyToPost(post_id, reply_message);
+  		 					}
+  		 					}
+  		 				}(post_id, reply_message));
 
   		var j = 1;
   		while (j < stream_array[i].length) {
@@ -936,40 +996,42 @@
   				var reply_div = document.createElement("div");
   				//reply_div.className = "reply_post";
   				reply_div.setAttribute("class", "media");
-      	  reply_div.style.paddingLeft = "10%";
+      	  			reply_div.style.paddingLeft = "10%";
 
-          var user_image = document.createElement("image");
-          user_image.style.width = "6%";
-          user_image.style.borderRadius = "50px";
-          user_image.style.float = "left";
-          user_image.style.marginRight = "10px";
-          user_image.style.marginTop = "10px";
-          user_image.style.border = "2px solid white";
+          			var user_image = document.createElement("image");
+          			user_image.style.width = "6%";
+         			user_image.style.borderRadius = "50px";
+          			user_image.style.float = "left";
+          			user_image.style.marginRight = "10px";
+          			user_image.style.marginTop = "10px";
+          			user_image.style.border = "2px solid white";
 
-          reply_div.appendChild(user_image);
+          			reply_div.appendChild(user_image);
 
-          var reply_div_body = document.createElement("div");
-          reply_div_body.setAttribute("class", "media-body");
+          			var reply_div_body = document.createElement("div");
+          			reply_div_body.setAttribute("class", "media-body");
   				
   				var reply_published = document.createElement("small");
   				reply_published.innerHTML = stream_array[i][j]['published'];
 
   				var reply_publisher = document.createElement("h4");
-          reply_publisher.setAttribute("class", "media-heading");
+          			reply_publisher.setAttribute("class", "media-heading");
 
-          var reply_username = stream_array[i][j]['actor']["username"];
-          var reply_displayName = stream_array[i][j]['actor']["displayName"];
-          var reply_photo_url = stream_array[i][j]['actor']["photo_url"];
+          			var reply_username = stream_array[i][j]['actor']["username"];
+         			var reply_displayName = stream_array[i][j]['actor']["displayName"];
+          			var reply_photo_url = stream_array[i][j]['actor']["photo_url"];
 
-          reply_publisher.innerHTML = reply_username;
+          			reply_publisher.innerHTML = reply_username;
 
-          if (reply_displayName != "") {
-              reply_publisher.innerHTML = reply_displayName;
-          }
+			        if (reply_displayName != "") {
+	              			reply_publisher.innerHTML = reply_displayName;
+          			}
 
-          addPhotoForUser(reply_displayName, reply_photo_url);
+          			addPhotoForUser(reply_username, reply_photo_url);
 
-          user_image.src= user_images[reply_displayName];
+          			if (user_images[reply_username] != undefined) {
+           			user_image.src= user_images[reply_username];
+          			}
 
   				var reply_message_text = document.createElement("p");
   				reply_message_text.innerHTML = changeReferencesToLinks(stream_array[i][j]['object']["message"]);
@@ -980,23 +1042,20 @@
   		
   				var reply_message_type = stream_array[i][j]['object']["objectType"];
 
-          post_body.appendChild(reply_div);
-          reply_div.appendChild(reply_div_body);
-          reply_div_body.appendChild(reply_publisher);
-          reply_div_body.appendChild(reply_published);
-          reply_div_body.appendChild(reply_message_text);    
-  			j++;
+          			post_body.appendChild(reply_div);
+          			reply_div.appendChild(reply_div_body);
+          			reply_div_body.appendChild(reply_publisher);
+          			reply_div_body.appendChild(reply_published);
+          			reply_div_body.appendChild(reply_message_text);    
+  				j++;
 
-  		  }
+  		  	}
 
   		}
 
-      post_body.appendChild(reply_message_div);
-      post_body.appendChild(reply_button);
-  	  post.appendChild(post_options);
-
-
-
+      		post_body.appendChild(reply_message_div);
+      		post_body.appendChild(reply_button);
+  	  	post.appendChild(post_options);
   		post_no = post_no + 1;
   	}
 
@@ -1107,31 +1166,39 @@
   }
 
 
-  function changeReferencesToLinks(message) {
-
+  function changeReferencesToLinks(message) {	
 
     var hashtagRegex = new RegExp("#[^#]*#");
+
     var tag = hashtagRegex.exec(message);
 
+    result = message;	
+
     if (tag != null) {
+	//alert(tag);
+	
 
-      var linked_tag = document.createElement('a');
+      	var linked_tag = document.createElement('a');
 
-      var tag_without_hashes = tag[0].substring(1, tag[0].length -1);
+      	var tag_without_hashes = tag[0].substring(1, tag[0].length -1);
 
-      var task_id = task_ids[tag_without_hashes];
+      	var task_id = task_ids[tag_without_hashes];
 
-	if(task_id != undefined){
-      linked_tag.href = "/@groupID/ref/" + task_id;
+      	if(task_id != undefined){
+      		linked_tag.href = "/@groupID/ref/" + task_id;
     
-      linked_tag.innerHTML = tag;
+      		linked_tag.innerHTML = tag;
 
-      return message.replace(tag, $(linked_tag).outerHTML());
-	}
+      		result = result.replace(tag, $(linked_tag).outerHTML());
+      	}
 	
     }
-
-    return message;
+	
+    //Change urls into links
+    var urlRegex = /(https?:\/\/[^\s]+)/g;
+    return result.replace(urlRegex, function(url) {
+        return '<a href="' + url + '">' + url + '</a>';
+    })
 
   }
 
@@ -1185,15 +1252,14 @@
       var post = generateJSON(date_and_time_stamp, message_object,
       						"", references);
 
-     // alert(post);
-
         $.ajax({
             type: "POST",
             url: "/" + "@groupID" + "/rest/message",
             dataType: "json",
             data: {"activity":post},
-  	        complete: refreshFeed                
-        });
+	    complete:autoRefresh
+            //complete: refreshFeed        
+	});
                     
       } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
 
@@ -1210,7 +1276,8 @@
             url: "/" + "@groupID" + "/rest/message",
             dataType: "json",
             data: {"activity":post},
-            complete: refreshFeed
+	    complete:autoRefresh
+            //complete: refreshFeed
         });      
                     
 
@@ -1223,10 +1290,20 @@
   }
 
   </script>
+  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-16869805-2', 'group18-progress.herokuapp.com');
+  ga('send', 'pageview');
+
+</script>
       <!-- Bootstrap core JavaScript
       ================================================== -->
       <!-- Placed at the end of the document so the pages load faster -->
       <script src="@routes.Assets.at("javascripts/bootstrap.min.js")"></script>
   </body>
 </html>
-

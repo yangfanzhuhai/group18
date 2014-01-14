@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -15,10 +17,10 @@ import models.FBAccount;
 import models.FBImage;
 import models.GHAccount;
 import models.GitObject;
+import models.ImageObject;
 import models.JenkinsActor;
 import models.JenkinsObject;
 import models.LocalAccount;
-import models.MongoLink;
 import models.ObjectModel;
 import models.PersonActor;
 import models.TargetModel;
@@ -42,6 +44,8 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
+import controllers.db.MongoLink;
+
 public class Rest extends Controller {
 
 	public static Result createMessage(String groupID) {
@@ -63,7 +67,8 @@ public class Rest extends Controller {
 			String Json = getValueFromRequest("activity");
 
 			Gson gson = new Gson();
-			GroupWithCreator project = gson.fromJson(Json, GroupWithCreator.class);
+			GroupWithCreator project = gson.fromJson(Json,
+					GroupWithCreator.class);
 
 			MongoLink.MONGO_LINK.addNewProject(project.name, project.creator);
 			return ok();
@@ -80,7 +85,8 @@ public class Rest extends Controller {
 			Gson gson = new Gson();
 			GroupWithUser userGroup = gson.fromJson(Json, GroupWithUser.class);
 
-			MongoLink.MONGO_LINK.addUsersToProject(userGroup.id, userGroup.username);
+			MongoLink.MONGO_LINK.addUsersToProject(userGroup.id,
+					userGroup.username);
 			return ok();
 		} catch (JsonSyntaxException e) {
 			return status(422);
@@ -189,7 +195,8 @@ public class Rest extends Controller {
 				.toString());
 	}
 
-	public static Result getNewActivities(String groupID, String newest_post_id) {
+	public static Result getNewActivities(String groupID, String newest_post_id)
+			throws ParseException {
 		return ok(MongoLink.MONGO_LINK.getNewNews(groupID, newest_post_id)
 				.toString());
 	}
@@ -200,9 +207,10 @@ public class Rest extends Controller {
 
 	public static Result getTaskDetails(String groupID, String ref) {
 		try {
-			/*Gson gson = new Gson();
-			TaskID task = gson.fromJson(getValueFromRequest("activity"),
-					TaskID.class);*/
+			/*
+			 * Gson gson = new Gson(); TaskID task =
+			 * gson.fromJson(getValueFromRequest("activity"), TaskID.class);
+			 */
 			return ok(MongoLink.MONGO_LINK.getTaskDetails(groupID, ref)
 					.toString());
 		} catch (JsonSyntaxException e) {
@@ -251,7 +259,7 @@ public class Rest extends Controller {
 		LocalAccount localAccount = userModel.getLocalAccount();
 		String password = localAccount.getPassword();
 		localAccount.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-		//localAccount.setPassword(password);
+		// localAccount.setPassword(password);
 		String credentialsJson = userModel.toJSON();
 
 		try {
@@ -297,9 +305,60 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getUsers().toString());
 	}
 
+	public static Result handleUserUpload() {
+		JsonNode json = request().body().asJson();
+		String event = getStringValueFromJson(json, "event");
+		if (event.equals("file-processed")) {
+			JsonNode userData = json.findValue("data");
+			ActivityModel activity = createActvityModelFromImageUpload(json,
+					userData);
+			activity.save(getStringValueFromJson(userData, "groupID"));
+		}
+		return ok();
+	}
+
+	private static ActivityModel createActvityModelFromImageUpload(
+			JsonNode json, JsonNode userData) {
+		String published = createDate();
+		ActorModel actor = createPersonActorFromUser(getStringValueFromJson(
+				userData, "username"));
+		String verb = "uploaded";
+		ObjectModel object = createImageObject(json);
+		TargetModel target = new TargetModel("", new ArrayList<String>());
+		ActivityModel activity = new ActivityModel(published, actor, verb,
+				object, target);
+		return activity;
+	}
+
+	private static ActorModel createPersonActorFromUser(String username) {
+		UserModel user = MongoLink.MONGO_LINK.getUserFromUsername(username);
+		LocalAccount local_user = user.getLocalAccount();
+
+		ActorModel actor = new PersonActor(local_user.getName(),
+				user.getUsername(), local_user.getPhoto_url());
+		return actor;
+	}
+
+	private static ObjectModel createImageObject(JsonNode json) {
+		JsonNode derivatives = json.findValue("derivatives");
+		String conversions_root = getStringValueFromJson(derivatives,
+				"conversions_root");
+		String web_preview = getStringValueFromJson(derivatives, "WEB_PREVIEW");
+		String web_preview_url = createS3URL(conversions_root, web_preview);
+		String original_root = getStringValueFromJson(json, "original_root");
+		String original = getStringValueFromJson(json, "original");
+		String original_url = createS3URL(original_root, original);
+		ObjectModel object = new ImageObject(original_url, web_preview_url);
+		return object;
+	}
+
+	private static String createS3URL(String root, String path) {
+		return "http://" + root + ".s3.amazonaws.com" + path;
+	}
+
 	public static Result parseGitHook(String groupID) {
 		JsonNode json = request().body().asJson();
-		ActivityModel activity = createActivityModelFromGitHook(json);
+		ActivityModel activity = createActivityModelFromGitHook(json, groupID);
 		activity.save(groupID);
 		return ok();
 
@@ -357,17 +416,47 @@ public class Rest extends Controller {
 		return new JenkinsObject(name, number, status, url);
 	}
 
-	private static ActivityModel createActivityModelFromGitHook(JsonNode json) {
+	private static ActivityModel createActivityModelFromGitHook(JsonNode json,
+			String groupID) {
 		String published = createDate();
 
 		ActorModel actor = new PersonActor(getStringValueFromJson(json,
 				"user_name"), "", "");
 		String verb = "pushed";
 		ObjectModel object = createGitObject(json);
-		TargetModel target = new TargetModel("", new ArrayList<String>());
+		TargetModel target = new TargetModel("", findReferencedTasksInCommits(
+				json, groupID));
 		ActivityModel activity = new ActivityModel(published, actor, verb,
 				object, target);
 		return activity;
+	}
+
+	private static List<String> findReferencedTasksInCommits(JsonNode json,
+			String groupID) {
+		Iterator<JsonNode> iterator = json.findValue("commits").iterator();
+		List<String> referencedTasks = new ArrayList<String>();
+		while (iterator.hasNext()) {
+			JsonNode commitNode = iterator.next();
+			String message = getStringValueFromJson(commitNode, "message");
+			Pattern p = Pattern.compile("#[^#]*#");
+			Matcher m = p.matcher(message);
+			if (m.find()) {
+				String alias = m.group().substring(1, m.group().length() - 1);
+				String taskID = MongoLink.MONGO_LINK.getTaskIDFromAlias(
+						groupID, alias);
+				if (taskID != null) {
+					referencedTasks.add(taskID);
+					Pattern p2 = Pattern.compile("@(TO_DO|DOING|DONE)@");
+					Matcher m2 = p2.matcher(message);
+					if (m2.find()) {
+						String status = m2.group().substring(1, m2.group().length() - 1);
+						MongoLink.MONGO_LINK.changeTaskStatus(groupID, taskID, status);
+					}
+					
+				}
+			}
+		}
+		return referencedTasks;
 	}
 
 	private static GitObject createGitObject(JsonNode json) {

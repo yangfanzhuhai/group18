@@ -1,7 +1,7 @@
 package controllers;
 
+import controllers.db.MongoLink;
 import models.LocalAccount;
-import models.MongoLink;
 import models.UserModel;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -21,7 +21,6 @@ public class Application extends Controller {
 	 * @return News Feed/Task View if logged in.
 	 * 		   Else render login screen.
 	 */
-
 	public static Result feed(String groupID, String toggle) {
 		
 		if (loggedIn() && isValidToggle(toggle)) {
@@ -31,6 +30,7 @@ public class Application extends Controller {
 				LocalAccount localAccount = user.getLocalAccount();
 				String displayName = localAccount.getName();
 				String photo_url = localAccount.getPhoto_url();
+				session("groupid", groupID);
 				return ok(feed.render(groupID, toggle, userName, displayName, photo_url));
 			} else {
 				return redirect(controllers.routes.Application.profile());

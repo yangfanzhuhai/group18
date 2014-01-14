@@ -1,23 +1,24 @@
 package models;
 
+
 public abstract class Model {
 	
-	private String ID;
+	private MongoID _id;
 	
 	public Model() {
-		ID = null;
+		_id = null;
 	}
 	
-	public String getID() {
-		return ID;
+	public MongoID getID() {
+		return _id;
 	}
 	
-	public void setID(String id) {
-		ID = id;
+	public void setID(MongoID id) {
+		_id = id;
 	}
 	
 	public String toJSON() {
-		return getID() == null ? "" : "\"id\" : \"" + getID() + "\", ";
+		return getID() == null ? "" : "\"id\" : \"" + getID().get$oid() + "\", ";
 	}
 
 }
