@@ -382,8 +382,18 @@ public class MongoLink {
 	 * @return - An Array of any news feed items that are newer than the post with 'newestID' 
 	 * @throws ParseException 
 	 */
-	public ArrayList<String> getNewNews(String customID, String newestID) throws ParseException {
-		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("_id").greaterThan(new ObjectId(newestID)).get(), MongoUtils.reverseSort);
+	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID) throws ParseException {
+		
+		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
+		DBCollection coll = getGroupColl(customID);
+		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) coll.find(QueryBuilder.start("_id").greaterThan(new ObjectId(newestID)).get()).sort(MongoUtils.reverseSort).toArray();
+		
+		for(DBObject obj : referencingItems)
+		{
+			retList.add(MongoMethods.getEntireTopic(coll, obj));
+		}
+		
+		return new ArrayList<ArrayList<String>>(retList);
 	}
 
 	/** 
