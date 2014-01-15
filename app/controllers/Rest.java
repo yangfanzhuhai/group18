@@ -244,6 +244,10 @@ public class Rest extends Controller {
 		return ok(MongoLink.MONGO_LINK.getNextTasks(groupID, last_post_id)
 				.toString());
 	}
+	
+	public static Result getMoreTasksWithStatus(String groupID, String status, String oldestID) {
+		return ok(MongoLink.MONGO_LINK.getNextTasksWithStatus(groupID, status, oldestID).toString());
+	}
 
 	public static Result getTasksWithStatus(String groupID, String status) {
 		return ok(MongoLink.MONGO_LINK.getTasksWithStatus(groupID, status)

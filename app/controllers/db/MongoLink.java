@@ -394,6 +394,14 @@ public class MongoLink {
 		return getNewItems(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status), newestID);
 	}
 	
+	public ArrayList<ArrayList<String>> getNextTasksWithStatus(String customID, String status, String lastID, int postLimit) {
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).and("_id").lessThan(new ObjectId(lastID)).get(), MongoUtils.reverseSort, postLimit);
+	}
+	
+	public ArrayList<ArrayList<String>> getNextTasksWithStatus(String customID, String status, String lastID) {
+		return getNextTasksWithStatus(customID, status, lastID, 20);
+	}
+	
 	public ArrayList<ArrayList<String>> getNewGits(String customID, String newestID) throws ParseException {
 		return getNewItems(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT"), newestID);
 	}
@@ -496,7 +504,7 @@ public class MongoLink {
 	 * @return List of all the tasks with the given status, sorted from newest to oldest, with replies and associated objects
 	 */
 	public ArrayList<ArrayList<String>> getTasksWithStatus(String customID, String status) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), MongoUtils.reverseSort, noLimit(customID));
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), MongoUtils.reverseSort, 20);
 	}
 	
 	/**

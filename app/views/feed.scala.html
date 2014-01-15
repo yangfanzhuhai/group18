@@ -551,6 +551,9 @@
       case "builds":
         getUrl += "morebuild/";
         break;
+      default :
+	getUrl += "morestatuses/@toggle/";
+	break;
       }
     $.ajax({    
       type: "GET",
