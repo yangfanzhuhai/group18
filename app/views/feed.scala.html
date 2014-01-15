@@ -505,16 +505,19 @@
         getUrl += "newfeed/";
         break;
       case "tasks":
-        getUrl += "moretask/";
+        getUrl += "newtasks/";
         break;
       case "gits":
-        getUrl += "moregit/";
+        getUrl += "newgits/";
         break;
       case "builds":
-        getUrl += "morebuild/";
+        getUrl += "newbuilds/";
         break;
+      default :
+	getUrl += "newstatuses/@toggle/";
+	break;
       }
-    /*setInterval(function() {
+    setInterval(function() {
       $.ajax({    
       type: "GET",
       url: getUrl + first_post_id,
@@ -524,7 +527,7 @@
           addToFeed(data);
           autoRefreshing = false;
       }});
-    }, 5000);*/
+    }, 5000);
   }
 
   function loadMoreFeed() {
@@ -548,6 +551,9 @@
       case "builds":
         getUrl += "morebuild/";
         break;
+      default :
+	getUrl += "morestatuses/@toggle/";
+	break;
       }
     $.ajax({    
       type: "GET",
@@ -568,6 +574,7 @@
 
   	//document.getElementById("username").innerHTML="@userName";
 
+	//highlight nav bar
     if (localToggle == "feed") {
       document.title = "News Feed";
       document.getElementById("newsfeed_nav").setAttribute("class","active");
@@ -1256,8 +1263,9 @@
             url: "/" + "@groupID" + "/rest/message",
             dataType: "json",
             data: {"activity":post},
-	    //complete:autoRefresh
-            complete: refreshFeed        });
+	    complete:autoRefresh
+            //complete: refreshFeed        
+	});
                     
       } else if (name_text != "" && message_text != "" && dropdown_value == "task") {
 
@@ -1274,8 +1282,8 @@
             url: "/" + "@groupID" + "/rest/message",
             dataType: "json",
             data: {"activity":post},
-	   // complete:autoRefresh
-            complete: refreshFeed
+	    complete:autoRefresh
+            //complete: refreshFeed
         });      
                     
 
