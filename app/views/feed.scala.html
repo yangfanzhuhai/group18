@@ -117,7 +117,7 @@
   				newsDrop.appendChild(li);
   				if(currGroupID == "@groupID"){
   					document.getElementById("groupNameTitle").innerHTML=groupName;
-  					statuses = data[i]['statuses'];
+  					statuses = ["TO DO", "DOING", "DONE"]//data[i]['statuses'];
   				}
   			}
   			//set Tasks dropdown to display statuses
@@ -1161,7 +1161,7 @@
       	url: "/" + "@groupID" + "/rest/message",
       	dataType: "json",
       	data: {"activity":reply},
-      	complete: refreshFeed 
+      	complete: autoRefresh//refreshFeed 
       });
 
   	}
