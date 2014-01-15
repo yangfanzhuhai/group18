@@ -412,7 +412,7 @@ public class MongoLink {
 	
 	private ArrayList<ArrayList<String>> getNewItems(DBCollection collection, QueryBuilder query, String newestID) throws ParseException {
 		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
-		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) collection.find(query.and("_id").greaterThan(new ObjectId(newestID)).get()).sort(MongoUtils.reverseSort).toArray();
+		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) collection.find(query.and("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get()).sort(MongoUtils.reverseSort).toArray();
 		
 		for(DBObject obj : referencingItems)
 		{
