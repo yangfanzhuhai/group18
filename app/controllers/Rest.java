@@ -223,10 +223,30 @@ public class Rest extends Controller {
 	public static Result getAllTasks(String groupID) throws ParseException {
 		return ok(MongoLink.MONGO_LINK.getAllTasksByName(groupID).toString());
 	}
+	
+	public static Result getNewTasks(String groupID, String newestID) {
+		try {
+			return ok(MongoLink.MONGO_LINK.getNewTasks(groupID, newestID).toString());
+		} catch (ParseException e) {
+			return status(422);
+		}
+	}
+	
+	public static Result getNewTasksWithStatus(String groupID, String status, String newestID) {
+		try {
+			return ok(MongoLink.MONGO_LINK.getNewTasksWithStatus(groupID, status, newestID).toString());
+		} catch (ParseException e) {
+			return status(422);
+		}
+	}
 
 	public static Result getMoreTasks(String groupID, String last_post_id) {
 		return ok(MongoLink.MONGO_LINK.getNextTasks(groupID, last_post_id)
 				.toString());
+	}
+	
+	public static Result getMoreTasksWithStatus(String groupID, String status, String oldestID) {
+		return ok(MongoLink.MONGO_LINK.getNextTasksWithStatus(groupID, status, oldestID).toString());
 	}
 
 	public static Result getTasksWithStatus(String groupID, String status) {
@@ -237,6 +257,14 @@ public class Rest extends Controller {
 	public static Result getGits(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getGitCommits(groupID).toString());
 	}
+	
+	public static Result getNewGits(String groupID, String newestID) {
+		try {
+			return ok(MongoLink.MONGO_LINK.getNewGits(groupID, newestID).toString());
+		} catch (ParseException e) {
+			return status(422);
+		}
+	}
 
 	public static Result getMoreGits(String groupID, String last_post_id) {
 		return ok(MongoLink.MONGO_LINK.getNextGitCommits(groupID, last_post_id)
@@ -245,6 +273,14 @@ public class Rest extends Controller {
 
 	public static Result getBuilds(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getJenkinsBuilds(groupID).toString());
+	}
+	
+	public static Result getNewBuilds(String groupID, String newestID) {
+		try {
+			return ok(MongoLink.MONGO_LINK.getNewBuilds(groupID, newestID).toString());
+		} catch (ParseException e) {
+			return status(422);
+		}
 	}
 
 	public static Result getMoreBuilds(String groupID, String last_post_id) {
