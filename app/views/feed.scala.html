@@ -40,7 +40,7 @@
         <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
     	 maxlength="8" class="form-control" onKeyUp="illegalSpace()" placeholder="Task Alias" style = "resize: none" ></textarea>
         <p><b>Task Alias</b> - (Optional) Up to 8 characters to use when referencing this task.</p>
-      </form>
+    </form>
 
 	
 
@@ -50,22 +50,28 @@
         <textarea name="limitedtextarea" type="text" id="limitedtextfield" rows="5" cols="30"
         onKeyUp="postFormOnKeyDown()" class="form-control" 
         placeholder="Press the hash key to reference a task" style="resize: none"></textarea>
-        <br>
-        <small align="right"> <!--(Maximum characters: 140)-->
-        You have <input readonly type="text" id="charCountdown" name="countdown" size="3" > characters left.</small>
-
       </form>
-   
-    <div class="container">
-    <select id="post_type" onchange="postTypeChange(this.value)" align = "center" style = "width: 50%" class="form-inline form-control">
-      <option value="text_post">Text Post</option>
-      <option value="task">Task</option>
-      <option value="upload">File Upload</option>
-    </select>
-  </div>
-     		
-    	<button type="button" class="btn btn-success" onclick="postToFeed()">Post</button>
+
+      <div class="row">
+        <div id = "countDown"class="col-md-4">
+           <!--(Maximum characters: 140)-->
+              <input readonly type="text" id="charCountdown" name="countdown" > characters left.
+          
+       </div>
+       <div class="col-md-4">
+        <select id="post_type" onchange="postTypeChange(this.value)" class="form-inline form-control">
+          <option value="text_post">Text Post</option>
+          <option value="task">Task</option>
+          <option value="upload">File Upload</option>
+        </select>
+        </div>
+        <div class="col-md-4">
+        	<button type="button" class="btn btn-success btn-block" onclick="postToFeed()">Post</button>
+        </div>
+      </div>
+
     </div>
+
     <h4 id = "task_status"></h4>
 
     <div id = "posts" class = "float">
@@ -267,6 +273,7 @@
   	
   	if (option == "text_post") {
   		document.getElementById("post_form").style.display="inline";
+      document.getElementById("countDown").style.display="inline";
   		limitedtextfield.rows = 5
   		limitedtextfield.maxlength=msgTextLimit;
   		charCountdown.value = msgTextLimit;
@@ -275,6 +282,7 @@
         	document.getElementById("upload-widget").style.display="none";
   	} else if (option == "task") {
   		document.getElementById("post_form").style.display="inline";
+      document.getElementById("countDown").style.display="inline";
   		limitedtextfield.rows = 1;
   		limitedtextfield.maxlength=taskTextLimit;
         	charCountdown.value = taskTextLimit;
@@ -284,8 +292,8 @@
     } else {
     		document.getElementById("post_form").style.display="none";
     		taskAliasForm.style.display="none";
-    		document.getElementById("upload-widget").style.display="inline";
-    	
+        document.getElementById("countDown").style.display="none";
+    		document.getElementById("upload-widget").style.display="inline"; 	
     }
 
   }
