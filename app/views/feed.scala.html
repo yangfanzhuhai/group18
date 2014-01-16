@@ -66,7 +66,7 @@
           <option value="upload">File Upload</option>
         </select>
         </div>
-        <div class="col-md-2 col-md-offset-1">
+        <div id="postButton" class="col-md-2 col-md-offset-1">
         	<button type="button" class="btn btn-success btn-block btn-lg" onclick="postToFeed()">Post</button>
         </div>
       </div>
@@ -275,6 +275,7 @@
   	if (option == "text_post") {
   		document.getElementById("post_form").style.display="inline";
       document.getElementById("countDown").style.display="inline";
+      document.getElementById("postButton").style.display="inline";
   		limitedtextfield.rows = 5
   		limitedtextfield.maxlength=msgTextLimit;
   		charCountdown.value = msgTextLimit;
@@ -284,16 +285,18 @@
   	} else if (option == "task") {
   		document.getElementById("post_form").style.display="inline";
       document.getElementById("countDown").style.display="inline";
+      document.getElementById("postButton").style.display="inline";
   		limitedtextfield.rows = 1;
   		limitedtextfield.maxlength=taskTextLimit;
         	charCountdown.value = taskTextLimit;
         	limitedtextfield.placeholder="Your Task";
 	  	taskAliasForm.style.display="inline";
-	    	document.getElementById("upload-widget").style.display="none";
+	    document.getElementById("upload-widget").style.display="none";
     } else {
     		document.getElementById("post_form").style.display="none";
     		taskAliasForm.style.display="none";
         document.getElementById("countDown").style.display="none";
+        document.getElementById("postButton").style.display="none";
     		document.getElementById("upload-widget").style.display="inline"; 	
     }
 
