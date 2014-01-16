@@ -52,21 +52,22 @@
         placeholder="Press the hash key to reference a task" style="resize: none"></textarea>
       </form>
 
+
       <div class="row">
-        <div id = "countDown"class="col-md-4">
+        <div id = "countDown" class="col-md-1 col-md-offset-2">
            <!--(Maximum characters: 140)-->
-              <input readonly type="text" id="charCountdown" name="countdown" > characters left.
+        <input type="text" class = "form-control" id="charCountdown" name="countdown" disabled> 
           
        </div>
-       <div class="col-md-4">
+       <div class="col-md-3 col-md-offset-1">
         <select id="post_type" onchange="postTypeChange(this.value)" class="form-inline form-control">
           <option value="text_post">Text Post</option>
           <option value="task">Task</option>
           <option value="upload">File Upload</option>
         </select>
         </div>
-        <div class="col-md-4">
-        	<button type="button" class="btn btn-success btn-block" onclick="postToFeed()">Post</button>
+        <div class="col-md-2 col-md-offset-1">
+        	<button type="button" class="btn btn-success btn-block btn-lg" onclick="postToFeed()">Post</button>
         </div>
       </div>
 
@@ -209,7 +210,7 @@
   document.getElementById("title").style.marginBottom = "10px";
   document.getElementById("logo").style.float = "right";
   document.getElementById("logo").style.marginTop = "25px";
-  document.getElementById("charCountdown").style.marginBottom = "10px";
+  //document.getElementById("charCountdown").style.marginBottom = "10px";
   document.getElementById("post_type").style.marginBottom = "10px";
   document.getElementById("preloader").style.textAlign = "center";
   document.getElementById("preloader").style.marginTop = "100px";
