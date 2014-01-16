@@ -40,7 +40,7 @@
         <textarea name="taskAliasText" type="text" id = "taskAliasText" rows ="1" cols = "8"
     	 maxlength="8" class="form-control" onKeyUp="illegalSpace()" placeholder="Task Alias" style = "resize: none" ></textarea>
         <p><b>Task Alias</b> - (Optional) Up to 8 characters to use when referencing this task.</p>
-      </form>
+    </form>
 
 	
 
@@ -50,22 +50,29 @@
         <textarea name="limitedtextarea" type="text" id="limitedtextfield" rows="5" cols="30"
         onKeyUp="postFormOnKeyDown()" class="form-control" 
         placeholder="Press the hash key to reference a task" style="resize: none"></textarea>
-        <br>
-        <small align="right"> <!--(Maximum characters: 140)-->
-        You have <input readonly type="text" id="charCountdown" name="countdown" size="3" > characters left.</small>
-
       </form>
-   
-    <div class="container">
-    <select id="post_type" onchange="postTypeChange(this.value)" align = "center" style = "width: 50%" class="form-inline form-control">
-      <option value="text_post">Text Post</option>
-      <option value="task">Task</option>
-      <option value="upload">File Upload</option>
-    </select>
-  </div>
-     		
-    	<button type="button" class="btn btn-success" onclick="postToFeed()">Post</button>
+
+
+      <div class="row">
+        <div id = "countDown" class="col-md-1 col-md-offset-2">
+           <!--(Maximum characters: 140)-->
+        <input type="text" class = "form-control" id="charCountdown" name="countdown" disabled> 
+          
+       </div>
+       <div class="col-md-3 col-md-offset-1">
+        <select id="post_type" onchange="postTypeChange(this.value)" class="form-inline form-control">
+          <option value="text_post">Text Post</option>
+          <option value="task">Task</option>
+          <option value="upload">File Upload</option>
+        </select>
+        </div>
+        <div class="col-md-2 col-md-offset-1">
+        	<button type="button" class="btn btn-success btn-block btn-lg" onclick="postToFeed()">Post</button>
+        </div>
+      </div>
+
     </div>
+
     <h4 id = "task_status"></h4>
 
     <div id = "posts" class = "float">
@@ -203,7 +210,7 @@
   document.getElementById("title").style.marginBottom = "10px";
   document.getElementById("logo").style.float = "right";
   document.getElementById("logo").style.marginTop = "25px";
-  document.getElementById("charCountdown").style.marginBottom = "10px";
+  //document.getElementById("charCountdown").style.marginBottom = "10px";
   document.getElementById("post_type").style.marginBottom = "10px";
   document.getElementById("preloader").style.textAlign = "center";
   document.getElementById("preloader").style.marginTop = "100px";
@@ -267,6 +274,7 @@
   	
   	if (option == "text_post") {
   		document.getElementById("post_form").style.display="inline";
+      document.getElementById("countDown").style.display="inline";
   		limitedtextfield.rows = 5
   		limitedtextfield.maxlength=msgTextLimit;
   		charCountdown.value = msgTextLimit;
@@ -275,6 +283,7 @@
         	document.getElementById("upload-widget").style.display="none";
   	} else if (option == "task") {
   		document.getElementById("post_form").style.display="inline";
+      document.getElementById("countDown").style.display="inline";
   		limitedtextfield.rows = 1;
   		limitedtextfield.maxlength=taskTextLimit;
         	charCountdown.value = taskTextLimit;
@@ -284,8 +293,8 @@
     } else {
     		document.getElementById("post_form").style.display="none";
     		taskAliasForm.style.display="none";
-    		document.getElementById("upload-widget").style.display="inline";
-    	
+        document.getElementById("countDown").style.display="none";
+    		document.getElementById("upload-widget").style.display="inline"; 	
     }
 
   }
@@ -501,7 +510,10 @@
       }
   });*/
   var autoRefreshing;
-  function autoRefresh() {    
+  function autoRefresh() {
+    if(first_post_id == "") {
+	first_post_id = "507f191e810c19729de860ea";
+    }
     var getUrl = "/" + "@groupID" + "/rest/";
     switch("@toggle")
       {
