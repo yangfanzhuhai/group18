@@ -71,16 +71,16 @@
     <div id = "posts" class = "float">
     </div>
 
-              <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
+    <div id="preloader"><img src="@routes.Assets.at("images/482.GIF")" alt=
 "AJAX loader" title="AJAX loader" align="center" /></div>
 
     
 
     <ul id = "stream" class = "media-list" ></ul>
     <div align="center" display = "none" id = "seeMoreButton">
-      <button id = "loadMoreButton"class = "btn btn-info" style = "margin: 10px" onclick = "loadMoreFeed()">See more...</button>
+      <button id = "loadMoreButton"class = "btn btn-info" display = "none" style = "margin: 10px" onclick = "loadMoreFeed()">See more...</button>
     </div>
-    <div id="loader" align="center" display = "none"><img src="@routes.Assets.at("images/482.GIF")" alt=
+    <div id="loader" align="center" display = "none"><img display = "none" src="@routes.Assets.at("images/482.GIF")" alt=
         "AJAX loader" title="AJAX loader"  /></div>
   </div> <!-- /container -->  
 
@@ -308,8 +308,10 @@
   
   function refreshFeed() {
       document.getElementById("stream").innerHTML = "";
-      $('#loader').hide();
-      $('#loadMoreButton').hide();
+      //$('#loader').hide();
+      //$('#loadMoreButton').hide();
+      document.getElementById("loader").style.display="none";
+      document.getElementById("loadMoreButton").style.display="none";
       first_post_id = "";
       autoRefreshing = false;
       tasksFetched = false;
