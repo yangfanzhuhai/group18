@@ -324,7 +324,7 @@
       //$('#loadMoreButton').hide();
       document.getElementById("loader").style.display="none";
       document.getElementById("loadMoreButton").style.display="none";
-      first_post_id = "";
+    ///  first_post_id = "";
       autoRefreshing = false;
       tasksFetched = false;
 
@@ -339,6 +339,7 @@
           dataType: "json",
           success: function(data){   
               addTasks(data);
+	      generateAppropriateFeed();
           }});
 	
 
@@ -388,21 +389,22 @@
   	for (var i=0; i < task_array.length; i++) {
   		var task_id = task_array[i]['id'];
   		var task_alias = task_name = task_array[i]['object']["alias"];
-      var task_details = task_array[i]['object']["name"];
-      var task_name;
+      		var task_details = task_array[i]['object']["name"];
+      		var task_name;
 
   		if(task_alias != "") {
   			task_name = task_alias;
   		} else {
-  			task_name = task_details;
+			task_name = task_details;
   		}
+      	
+	task_ids[task_name] = task_id;
 
-      task_ids[task_name] = task_id;
+	var task_display = task_name + " " + task_details;
 
-      tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
-      tasks[i] = jQuery.parseJSON(tasks[i]);
+      	tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
+      	tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
-	generateAppropriateFeed();
   }
 
   function addPhotoForUser(username, photo_url) {
@@ -535,7 +537,15 @@
 	break;
       }
     setInterval(function() {
-      $.ajax({    
+
+	$.ajax({
+          type: "GET",
+          url: "/" + "@groupID" + "/rest/alltasks",
+          dataType: "json",
+          success: function(data){   
+              addTasks(data);
+		
+		$.ajax({    
       type: "GET",
       url: getUrl + first_post_id,
       dataType: "json",
@@ -544,6 +554,10 @@
           addToFeed(data);
           autoRefreshing = false;
       }});
+
+          }});	
+
+      
     }, 5000);
   }
 
@@ -568,9 +582,6 @@
       case "builds":
         getUrl += "morebuild/";
         break;
-      default :
-	getUrl += "morestatuses/@toggle/";
-	break;
       }
     $.ajax({    
       type: "GET",
@@ -1181,7 +1192,7 @@
       	url: "/" + "@groupID" + "/rest/message",
       	dataType: "json",
       	data: {"activity":reply},
-      	complete: refreshFeed 
+      	complete: refreshFeed//refreshFeed 
       });
 
   	}
