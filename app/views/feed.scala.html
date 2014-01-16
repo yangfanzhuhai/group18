@@ -196,7 +196,7 @@
   var task_names = [];
   var user_images = new Array();
   var final_post_id;
-  var first_post_id;
+  var first_post_id = "";
 
 
   document.getElementById("title").style.marginTop = "20px";
@@ -499,7 +499,10 @@
       }
   });*/
   var autoRefreshing;
-  function autoRefresh() {    
+  function autoRefresh() {
+    if(first_post_id == "") {
+	first_post_id = "507f191e810c19729de860ea";
+    }
     var getUrl = "/" + "@groupID" + "/rest/";
     switch("@toggle")
       {
