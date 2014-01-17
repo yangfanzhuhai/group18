@@ -283,7 +283,7 @@
         	document.getElementById("upload-widget").style.display="none";
   	} else if (option == "task") {
   		document.getElementById("post_form").style.display="inline";
-      document.getElementById("countDown").style.display="inline";
+     		document.getElementById("countDown").style.display="inline";
   		limitedtextfield.rows = 1;
   		limitedtextfield.maxlength=taskTextLimit;
         	charCountdown.value = taskTextLimit;
@@ -293,7 +293,7 @@
     } else {
     		document.getElementById("post_form").style.display="none";
     		taskAliasForm.style.display="none";
-        document.getElementById("countDown").style.display="none";
+        	document.getElementById("countDown").style.display="none";
     		document.getElementById("upload-widget").style.display="inline"; 	
     }
 
@@ -801,14 +801,17 @@
   		var task_name = stream_array[i][0]['object']["name"];
 		var task_alias = stream_array[i][0]['object']["alias"];
         	var task_heading = document.createElement("h4");
+		var task_span = document.createElement("span");
+		task_heading.appendChild(task_span);
+		
         	task_heading.setAttribute("class", "media-heading");
 
         	if (task_alias != "") {
-        	task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_alias + "#");
+        	task_span.innerHTML = changeReferencesToLinks("Task" + " - #" + task_alias + "#");
      		}
 
       		else {
-        	task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_name + "#");
+        	task_span.innerHTML = changeReferencesToLinks("Task" + " - #" + task_name + "#");
       		}
         
   		var task_data = document.createElement("p");
@@ -819,6 +822,29 @@
   		task_data.innerHTML = task_name + " BY " + publisher.bold();
   		var task_details = document.createElement("p");
   		task_details.style.cssFloat = "right";
+		task_details.style.borderRadius = "5px";
+		var task_details_color;
+		
+		switch(task_status){
+
+			case "TO_DO":
+				task_details_color = "#FF6F69";
+				break;
+			case "DOING":
+				task_details_color = "#FFCC5C";
+				break;
+			case "DONE":
+				task_details_color = "#AAD8B0";
+				break;
+		}
+
+		task_details.style.backgroundColor = task_details_color;
+		task_details.style.border = "solid " + task_details_color;
+		//task_heading.style.width = "17";
+		//task_span.style.backgroundColor = task_details_color;
+		//task_span.style.border = "solid " + task_details_color;
+		//task_span.style.borderRadius = "5px";
+
 		task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
 
   		var priority_button = document.createElement("button");
@@ -1225,9 +1251,35 @@
 	
     }
 	
-    //Change urls into links
-    var urlRegex = /(https?:\/\/[^\s]+)/g;
-    return result.replace(urlRegex, function(url) {
+    
+
+	//change status colour
+	var atSym = String.fromCharCode(64);
+	var statusRegEx = new RegExp("" + atSym + "[^" + atSym + "]*" + atSym);
+	var statusTag = statusRegEx.exec(message);
+	if(statusTag != null) {
+		var status_without_ats = statusTag[0].substring(1, statusTag[0].length -1);
+	}
+      	
+	var statusColor;
+	switch(status_without_ats){
+
+			case ("TO_DO"):
+				statusColor = "#FF6F69";
+				break;
+			case ("DOING"):
+				statusColor = "#FFCC5C";
+				break;
+			case ("DONE"):
+				statusColor = "#AAD8B0";
+				break;
+		}
+	result = result.replace(statusTag, '<span style="color:' + statusColor +  ';">'+ statusTag + '</span>');
+
+
+	//Change urls into links
+    	var urlRegex = /(https?:\/\/[^\s]+)/g;
+    	return result.replace(urlRegex, function(url) {
         return '<a href="' + url + '">' + url + '</a>';
     })
 
