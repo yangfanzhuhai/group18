@@ -66,7 +66,7 @@
           <option value="upload">File Upload</option>
         </select>
         </div>
-        <div class="col-md-2 col-md-offset-1">
+        <div id="postButton" class="col-md-2 col-md-offset-1">
         	<button type="button" class="btn btn-success btn-block btn-lg" onclick="postToFeed()">Post</button>
         </div>
       </div>
@@ -275,6 +275,7 @@
   	if (option == "text_post") {
   		document.getElementById("post_form").style.display="inline";
       document.getElementById("countDown").style.display="inline";
+      document.getElementById("postButton").style.display="inline";
   		limitedtextfield.rows = 5
   		limitedtextfield.maxlength=msgTextLimit;
   		charCountdown.value = msgTextLimit;
@@ -283,17 +284,19 @@
         	document.getElementById("upload-widget").style.display="none";
   	} else if (option == "task") {
   		document.getElementById("post_form").style.display="inline";
-     		document.getElementById("countDown").style.display="inline";
+      document.getElementById("countDown").style.display="inline";
+      document.getElementById("postButton").style.display="inline";
   		limitedtextfield.rows = 1;
   		limitedtextfield.maxlength=taskTextLimit;
         	charCountdown.value = taskTextLimit;
         	limitedtextfield.placeholder="Your Task";
 	  	taskAliasForm.style.display="inline";
-	    	document.getElementById("upload-widget").style.display="none";
+	    document.getElementById("upload-widget").style.display="none";
     } else {
     		document.getElementById("post_form").style.display="none";
     		taskAliasForm.style.display="none";
-        	document.getElementById("countDown").style.display="none";
+        document.getElementById("countDown").style.display="none";
+        document.getElementById("postButton").style.display="none";
     		document.getElementById("upload-widget").style.display="inline"; 	
     }
 
@@ -402,6 +405,7 @@
       	tasks[i] = "{ \"value\": \"" + task_name + "\" , \"data\":\"" + task_id + "\" }";
       	tasks[i] = jQuery.parseJSON(tasks[i]);
   	}
+    autocomplete_setup();
   }
 
   function addPhotoForUser(username, photo_url) {
@@ -433,12 +437,12 @@
              return false;
          },
          select: function (event, ui) {
-             var terms = this.value.split();
+             var terms = this.value.split("#");
              terms.pop();
-             terms.push(ui.item.value);
-            // terms.push("");
-             this.value = this.value.substr(0,lastHash + 1);
-             this.value += terms.join("");
+             var hashtag = ui.item.value;
+             this.value = terms.join("");
+             this.value += "#";
+             this.value += hashtag;
              this.value += "#";
              return false;
          },
@@ -801,17 +805,14 @@
   		var task_name = stream_array[i][0]['object']["name"];
 		var task_alias = stream_array[i][0]['object']["alias"];
         	var task_heading = document.createElement("h4");
-		var task_span = document.createElement("span");
-		task_heading.appendChild(task_span);
-		
         	task_heading.setAttribute("class", "media-heading");
 
         	if (task_alias != "") {
-        	task_span.innerHTML = changeReferencesToLinks("Task" + " - #" + task_alias + "#");
+        	task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_alias + "#");
      		}
 
       		else {
-        	task_span.innerHTML = changeReferencesToLinks("Task" + " - #" + task_name + "#");
+        	task_heading.innerHTML = changeReferencesToLinks("Task" + " - #" + task_name + "#");
       		}
         
   		var task_data = document.createElement("p");

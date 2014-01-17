@@ -277,6 +277,24 @@ class MongoTestingUtils {
 	}
 	
 	/**
+	 * Deletes 'number' of the newest posts (and their replies) in a specific collection
+	 * @param collection - Collection to delete from
+	 * @param number - Number of posts to delete
+	 */
+	private void deletePosts(DBCollection collection, int number) {
+		List<DBObject> list = collection.find(QueryBuilder.start("target.messageID").is("").get()).sort(MongoUtils.reverseSort).limit(number).toArray();
+		
+		
+		for (DBObject obj : list) {
+			MongoMethods.deletePost(collection, obj.get("_id").toString());
+		}
+	}
+	
+	private void deleteAllPosts(DBCollection collection) {
+		deletePosts(collection, (int) collection.getCount());
+	}
+	
+	/**
 	 * @param customID - ID of the current project/group
 	 * @return Database collection belonging to that project/group
 	 */
