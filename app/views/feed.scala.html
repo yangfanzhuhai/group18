@@ -823,6 +823,29 @@
   		task_data.innerHTML = task_name + " BY " + publisher.bold();
   		var task_details = document.createElement("p");
   		task_details.style.cssFloat = "right";
+		task_details.style.borderRadius = "5px";
+		var task_details_color;
+		
+		switch(task_status){
+
+			case "TO_DO":
+				task_details_color = "#FF6F69";
+				break;
+			case "DOING":
+				task_details_color = "#FFCC5C";
+				break;
+			case "DONE":
+				task_details_color = "#AAD8B0";
+				break;
+		}
+
+		task_details.style.backgroundColor = task_details_color;
+		task_details.style.border = "solid " + task_details_color;
+		//task_heading.style.width = "17";
+		//task_span.style.backgroundColor = task_details_color;
+		//task_span.style.border = "solid " + task_details_color;
+		//task_span.style.borderRadius = "5px";
+
 		task_details.innerHTML = "Status: ".bold() + task_status + "<br> Priority: ".bold() + task_priority;
 
   		var priority_button = document.createElement("button");
@@ -831,7 +854,7 @@
   		priority_button.onclick = (function (post_id) {
   						return function() {
   						var new_priority = window.prompt("Please enter a priority between 1 and 3: ");
-  						if (new_priority <  4 && new_priority > 0) {
+  						if (new_priority <  4 && new_priority > 0 && new_priority != null) {
   						post_new_task_details(new_priority, "p", post_id);
   						} else {
   						alert("Value entered is not between 1 and 3");
@@ -1229,9 +1252,35 @@
 	
     }
 	
-    //Change urls into links
-    var urlRegex = /(https?:\/\/[^\s]+)/g;
-    return result.replace(urlRegex, function(url) {
+    
+
+	//change status colour
+	var atSym = String.fromCharCode(64);
+	var statusRegEx = new RegExp("" + atSym + "[^" + atSym + "]*" + atSym);
+	var statusTag = statusRegEx.exec(message);
+	if(statusTag != null) {
+		var status_without_ats = statusTag[0].substring(1, statusTag[0].length -1);
+	}
+      	
+	var statusColor;
+	switch(status_without_ats){
+
+			case ("TO_DO"):
+				statusColor = "#FF6F69";
+				break;
+			case ("DOING"):
+				statusColor = "#FFCC5C";
+				break;
+			case ("DONE"):
+				statusColor = "#AAD8B0";
+				break;
+		}
+	result = result.replace(statusTag, '<span style="color:' + statusColor +  ';">'+ statusTag + '</span>');
+
+
+	//Change urls into links
+    	var urlRegex = /(https?:\/\/[^\s]+)/g;
+    	return result.replace(urlRegex, function(url) {
         return '<a href="' + url + '">' + url + '</a>';
     })
 
