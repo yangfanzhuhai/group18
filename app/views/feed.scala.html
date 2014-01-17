@@ -417,12 +417,12 @@
              return false;
          },
          select: function (event, ui) {
-             var terms = this.value.split();
+             var terms = this.value.split("#");
              terms.pop();
-             terms.push(ui.item.value);
-            // terms.push("");
-             this.value = this.value.substr(0,lastHash + 1);
-             this.value += terms.join("");
+             var hashtag = ui.item.value;
+             this.value = terms.join("");
+             this.value += "#";
+             this.value += hashtag;
              this.value += "#";
              return false;
          },
