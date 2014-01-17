@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -193,7 +195,8 @@ public class Rest extends Controller {
 				.toString());
 	}
 
-	public static Result getNewActivities(String groupID, String newest_post_id) {
+	public static Result getNewActivities(String groupID, String newest_post_id)
+			throws ParseException {
 		return ok(MongoLink.MONGO_LINK.getNewNews(groupID, newest_post_id)
 				.toString());
 	}
@@ -220,10 +223,30 @@ public class Rest extends Controller {
 	public static Result getAllTasks(String groupID) throws ParseException {
 		return ok(MongoLink.MONGO_LINK.getAllTasksByName(groupID).toString());
 	}
+	
+	public static Result getNewTasks(String groupID, String newestID) {
+		try {
+			return ok(MongoLink.MONGO_LINK.getNewTasks(groupID, newestID).toString());
+		} catch (ParseException e) {
+			return status(422);
+		}
+	}
+	
+	public static Result getNewTasksWithStatus(String groupID, String status, String newestID) {
+		try {
+			return ok(MongoLink.MONGO_LINK.getNewTasksWithStatus(groupID, status, newestID).toString());
+		} catch (ParseException e) {
+			return status(422);
+		}
+	}
 
 	public static Result getMoreTasks(String groupID, String last_post_id) {
 		return ok(MongoLink.MONGO_LINK.getNextTasks(groupID, last_post_id)
 				.toString());
+	}
+	
+	public static Result getMoreTasksWithStatus(String groupID, String status, String oldestID) {
+		return ok(MongoLink.MONGO_LINK.getNextTasksWithStatus(groupID, status, oldestID).toString());
 	}
 
 	public static Result getTasksWithStatus(String groupID, String status) {
@@ -234,6 +257,14 @@ public class Rest extends Controller {
 	public static Result getGits(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getGitCommits(groupID).toString());
 	}
+	
+	public static Result getNewGits(String groupID, String newestID) {
+		try {
+			return ok(MongoLink.MONGO_LINK.getNewGits(groupID, newestID).toString());
+		} catch (ParseException e) {
+			return status(422);
+		}
+	}
 
 	public static Result getMoreGits(String groupID, String last_post_id) {
 		return ok(MongoLink.MONGO_LINK.getNextGitCommits(groupID, last_post_id)
@@ -242,6 +273,14 @@ public class Rest extends Controller {
 
 	public static Result getBuilds(String groupID) {
 		return ok(MongoLink.MONGO_LINK.getJenkinsBuilds(groupID).toString());
+	}
+	
+	public static Result getNewBuilds(String groupID, String newestID) {
+		try {
+			return ok(MongoLink.MONGO_LINK.getNewBuilds(groupID, newestID).toString());
+		} catch (ParseException e) {
+			return status(422);
+		}
 	}
 
 	public static Result getMoreBuilds(String groupID, String last_post_id) {
@@ -307,15 +346,18 @@ public class Rest extends Controller {
 		String event = getStringValueFromJson(json, "event");
 		if (event.equals("file-processed")) {
 			JsonNode userData = json.findValue("data");
-			ActivityModel activity = createActvityModelFromImageUpload(json, userData);
+			ActivityModel activity = createActvityModelFromImageUpload(json,
+					userData);
 			activity.save(getStringValueFromJson(userData, "groupID"));
 		}
 		return ok();
 	}
 
-	private static ActivityModel createActvityModelFromImageUpload(JsonNode json, JsonNode userData) {
+	private static ActivityModel createActvityModelFromImageUpload(
+			JsonNode json, JsonNode userData) {
 		String published = createDate();
-		ActorModel actor = createPersonActorFromUser(getStringValueFromJson(userData, "username"));
+		ActorModel actor = createPersonActorFromUser(getStringValueFromJson(
+				userData, "username"));
 		String verb = "uploaded";
 		ObjectModel object = createImageObject(json);
 		TargetModel target = new TargetModel("", new ArrayList<String>());
@@ -325,21 +367,19 @@ public class Rest extends Controller {
 	}
 
 	private static ActorModel createPersonActorFromUser(String username) {
-		UserModel user = MongoLink.MONGO_LINK
-				.getUserFromUsername(username);
+		UserModel user = MongoLink.MONGO_LINK.getUserFromUsername(username);
 		LocalAccount local_user = user.getLocalAccount();
 
 		ActorModel actor = new PersonActor(local_user.getName(),
 				user.getUsername(), local_user.getPhoto_url());
 		return actor;
 	}
-	
+
 	private static ObjectModel createImageObject(JsonNode json) {
 		JsonNode derivatives = json.findValue("derivatives");
 		String conversions_root = getStringValueFromJson(derivatives,
 				"conversions_root");
-		String web_preview = getStringValueFromJson(derivatives,
-				"WEB_PREVIEW");
+		String web_preview = getStringValueFromJson(derivatives, "WEB_PREVIEW");
 		String web_preview_url = createS3URL(conversions_root, web_preview);
 		String original_root = getStringValueFromJson(json, "original_root");
 		String original = getStringValueFromJson(json, "original");
@@ -354,7 +394,7 @@ public class Rest extends Controller {
 
 	public static Result parseGitHook(String groupID) {
 		JsonNode json = request().body().asJson();
-		ActivityModel activity = createActivityModelFromGitHook(json);
+		ActivityModel activity = createActivityModelFromGitHook(json, groupID);
 		activity.save(groupID);
 		return ok();
 
@@ -412,17 +452,47 @@ public class Rest extends Controller {
 		return new JenkinsObject(name, number, status, url);
 	}
 
-	private static ActivityModel createActivityModelFromGitHook(JsonNode json) {
+	private static ActivityModel createActivityModelFromGitHook(JsonNode json,
+			String groupID) {
 		String published = createDate();
 
 		ActorModel actor = new PersonActor(getStringValueFromJson(json,
 				"user_name"), "", "");
 		String verb = "pushed";
 		ObjectModel object = createGitObject(json);
-		TargetModel target = new TargetModel("", new ArrayList<String>());
+		TargetModel target = new TargetModel("", findReferencedTasksInCommits(
+				json, groupID));
 		ActivityModel activity = new ActivityModel(published, actor, verb,
 				object, target);
 		return activity;
+	}
+
+	private static List<String> findReferencedTasksInCommits(JsonNode json,
+			String groupID) {
+		Iterator<JsonNode> iterator = json.findValue("commits").iterator();
+		List<String> referencedTasks = new ArrayList<String>();
+		while (iterator.hasNext()) {
+			JsonNode commitNode = iterator.next();
+			String message = getStringValueFromJson(commitNode, "message");
+			Pattern p = Pattern.compile("#[^#]*#");
+			Matcher m = p.matcher(message);
+			if (m.find()) {
+				String alias = m.group().substring(1, m.group().length() - 1);
+				String taskID = MongoLink.MONGO_LINK.getTaskIDFromAlias(
+						groupID, alias);
+				if (taskID != null) {
+					referencedTasks.add(taskID);
+					Pattern p2 = Pattern.compile("@(TO_DO|DOING|DONE)@");
+					Matcher m2 = p2.matcher(message);
+					if (m2.find()) {
+						String status = m2.group().substring(1, m2.group().length() - 1);
+						MongoLink.MONGO_LINK.changeTaskStatus(groupID, taskID, status);
+					}
+					
+				}
+			}
+		}
+		return referencedTasks;
 	}
 
 	private static GitObject createGitObject(JsonNode json) {

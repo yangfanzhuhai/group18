@@ -354,6 +354,103 @@ public class MongoLink {
 		return getNewsFeed(customID, 20);
 	}
 	
+	/** 
+	 * @param customID - ID of collection to be used
+	 * @param postLimit - Maximum number of items to be fetched
+	 * @return List of the last 'postLimit' items from given collection with replies and references
+	 */
+	public ArrayList<ArrayList<String>> getTasks(String customID, int postLimit) {
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), MongoUtils.reverseSort, postLimit);
+		
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @return List of the last 20 items from given collection with replies and references
+	 */
+	public ArrayList<ArrayList<String>> getTasks(String customID){
+		return getTasks(customID, 20);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @return A list of all tasks (only the tasks, no replies or associated objects)
+	 *  in order from newest to oldest 
+	 * @throws ParseException **/
+	private ArrayList<String> getAllTasksWithoutReplies(String customID) throws ParseException{
+		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), MongoUtils.reverseSort);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @return A list of all tasks (only the tasks, no replies or associated objects)
+	 *  in alphabetical order (CASE SENSITIVE)
+	 * @throws ParseException
+	 */
+	public ArrayList<String> getAllTasksByName(String customID) throws ParseException {
+		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.name").is(1).get());
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param postLimit - Number of tasks to fetch from the database
+	 * @return List of tasks (with replies and associated objects) sorted by priority in descending order
+	 */
+	public ArrayList<ArrayList<String>> getTasksByPriority(String customID, int postLimit) {
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(-1).get(), postLimit);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @return List of 20 tasks (with replies and associated objects) sorted by priority in descending order
+	 */
+	public ArrayList<ArrayList<String>> getTasksByPriority(String customID) {
+		return getTasksByPriority(customID, 20);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param status - Status of task
+	 * @return List of all the tasks with the given status, sorted from newest to oldest, with replies and associated objects
+	 */
+	public ArrayList<ArrayList<String>> getTasksWithStatus(String customID, String status) {
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), MongoUtils.reverseSort, 20);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param postLimit - Maximum number of git commits to fetch
+	 * @return List of git commits (with replies and associated objects) sorted from newest to oldest
+	 */
+	public ArrayList<ArrayList<String>> getGitCommits(String customID, int postLimit) {
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").get(), MongoUtils.reverseSort, postLimit);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @return List of (at most) 20 git commits (with replies and associated objects) sorted from newest to oldest
+	 */
+	public ArrayList<ArrayList<String>> getGitCommits(String customID) {
+		return getGitCommits(customID, 20);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @param postLimit - Maximum number of builds to fetch
+	 * @return List of Jenkins builds (with replies and associated objects) sorted from newest to oldest
+	 */
+	public ArrayList<ArrayList<String>> getJenkinsBuilds(String customID, int postLimit) {
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").get(), MongoUtils.reverseSort, postLimit);
+	}
+
+	/**
+	 * @param customID - ID of collection to be used
+	 * @return List of (at most) 20 jenkins builds (with replies and associated objects) sorted from newest to oldest
+	 */
+	public ArrayList<ArrayList<String>> getJenkinsBuilds(String customID) {
+		return getJenkinsBuilds(customID, 20);
+	}
+
 	/**
 	 * @param customID - ID of collection to be used
 	 * @param lastID - String ID of the last post currently in news feed
@@ -376,53 +473,6 @@ public class MongoLink {
 	}
 	
 	/**
-	 * 
-	 * @param customID - ID of current group/project
-	 * @param newestID - ID of the newest post on news feed
-	 * @param postLimit - Maximum number of posts to fetch
-	 * @return - An Array of posts (and their replies) that are newer than the post with 'newestID' 
-	 */
-	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get(), MongoUtils.reverseSort, postLimit);
-	}
-	
-	/**
-	 * @param customID - ID of current group/project
-	 * @param newestID - ID of the newest post on news feed
-	 * @return - An Array of at most 20 posts (and their replies) that are newer than the post with 'newestID' 
-	 */
-	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID) {
-		return getNewNews(customID, newestID, 20);
-	}
-	
-	/**
-	 * @param customID - ID of current group/project
-	 * @param newestID - ID of the newest post on news feed
-	 * @return - An Array of ALL the posts (and their replies) that are newer than the post with 'newestID' 
-	 */
-	public ArrayList<ArrayList<String>> getNewNewsAll(String customID, String newestID) {
-		return getNewNews(customID, newestID, noLimit(customID));
-	}
-
-	/** 
-	 * @param customID - ID of collection to be used
-	 * @param postLimit - Maximum number of items to be fetched
-	 * @return List of the last 'postLimit' items from given collection with replies and references
-	 */
-	public ArrayList<ArrayList<String>> getTasks(String customID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), MongoUtils.reverseSort, postLimit);
-		
-	}
-
-	/**
-	 * @param customID - ID of collection to be used
-	 * @return List of the last 20 items from given collection with replies and references
-	 */
-	public ArrayList<ArrayList<String>> getTasks(String customID){
-		return getTasks(customID, 20);
-	}
-
-	/**
 	 * @param customID - ID of collection to be used
 	 * @param lastID - String ID of the last post currently in task list
 	 * @param postLimit - Maximum number of tasks to fetch
@@ -432,7 +482,7 @@ public class MongoLink {
 	public ArrayList<ArrayList<String>> getNextTasks(String customID, String lastID, int postLimit) {
 		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("_id").lessThan(new ObjectId(lastID)).get(), MongoUtils.reverseSort, postLimit);
 	}
-	
+
 	/**
 	 * @param customID - ID of collection to be used
 	 * @param lastID - String ID of the last post currently in task list
@@ -443,67 +493,28 @@ public class MongoLink {
 		return getNextTasks(customID, lastID, 20);
 	}
 
+	/**
+	 * 
+	 * @param customID - ID of collection to be used
+	 * @param status - Status of tasks to fetch
+	 * @param lastID - String ID of the last task currently on the page
+	 * @param postLimit - Maximum number of tasks to fetch
+	 * @return An array of postLimit task posts (with replies)
+	 * 			that were posted after the task with the given ID
+	 */
+	public ArrayList<ArrayList<String>> getNextTasksWithStatus(String customID, String status, String lastID, int postLimit) {
+		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).and("_id").lessThan(new ObjectId(lastID)).get(), MongoUtils.reverseSort, postLimit);
+	}
 
 	/**
 	 * @param customID - ID of collection to be used
-	 * @return A list of all tasks (only the tasks, no replies or associated objects)
-	 *  in order from newest to oldest 
-	 * @throws ParseException **/
-	public ArrayList<String> getAllTasksWithoutReplies(String customID) throws ParseException{
-		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), MongoUtils.reverseSort);
-	}
-	
-	/**
-	 * @param customID - ID of collection to be used
-	 * @return A list of all tasks (only the tasks, no replies or associated objects)
-	 *  in alphabetical order (CASE SENSITIVE)
-	 * @throws ParseException
+	 * @param status - Status of tasks to fetch
+	 * @param lastID - String ID of the last task currently on the page
+	 * @return An array of (at most 20) task posts (and their replies) with 
+	 * 			the given status that were posted after the task with the given ID
 	 */
-	public ArrayList<String> getAllTasksByName(String customID) throws ParseException {
-		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.name").is(1).get());
-	}
-	
-	/**
-	 * @param customID - ID of collection to be used
-	 * @param postLimit - Number of tasks to fetch from the database
-	 * @return List of tasks (with replies and associated objects) sorted by priority in descending order
-	 */
-	public ArrayList<ArrayList<String>> getTasksByPriority(String customID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), QueryBuilder.start("object.priority").is(-1).get(), postLimit);
-	}
-	
-	/**
-	 * @param customID - ID of collection to be used
-	 * @return List of 20 tasks (with replies and associated objects) sorted by priority in descending order
-	 */
-	public ArrayList<ArrayList<String>> getTasksByPriority(String customID) {
-		return getTasksByPriority(customID, 20);
-	}
-	
-	/**
-	 * @param customID - ID of collection to be used
-	 * @param status - Status of task
-	 * @return List of all the tasks with the given status, sorted from newest to oldest, with replies and associated objects
-	 */
-	public ArrayList<ArrayList<String>> getTasksWithStatus(String customID, String status) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status).get(), MongoUtils.reverseSort, noLimit(customID));
-	}
-	
-	/**
-	 * @param customID - ID of collection to be used
-	 * @param postLimit - Maximum number of git commits to fetch
-	 * @return List of git commits (with replies and associated objects) sorted from newest to oldest
-	 */
-	public ArrayList<ArrayList<String>> getGitCommits(String customID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").get(), MongoUtils.reverseSort, postLimit);
-	}
-	
-	/**
-	 * @param customID - ID of collection to be used
-	 * @return List of (at most) 20 git commits (with replies and associated objects) sorted from newest to oldest
-	 */
-	public ArrayList<ArrayList<String>> getGitCommits(String customID) {
-		return getGitCommits(customID, 20);
+	public ArrayList<ArrayList<String>> getNextTasksWithStatus(String customID, String status, String lastID) {
+		return getNextTasksWithStatus(customID, status, lastID, 20);
 	}
 
 	/**
@@ -516,7 +527,7 @@ public class MongoLink {
 	public ArrayList<ArrayList<String>> getNextGitCommits(String customID, String lastID, int postLimit) {
 		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT").and("_id").lessThan(new ObjectId(lastID)).get(), MongoUtils.reverseSort, postLimit);
 	}
-	
+
 	/**
 	 * @param customID - ID of collection to be used
 	 * @param lastID - String ID of the last commit currently in git commits page
@@ -525,23 +536,6 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getNextGitCommits(String customID, String lastID) {
 		return getNextGitCommits(customID, lastID, 20);
-	}
-	
-	/**
-	 * @param customID - ID of collection to be used
-	 * @param postLimit - Maximum number of builds to fetch
-	 * @return List of Jenkins builds (with replies and associated objects) sorted from newest to oldest
-	 */
-	public ArrayList<ArrayList<String>> getJenkinsBuilds(String customID, int postLimit) {
-		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").get(), MongoUtils.reverseSort, postLimit);
-	}
-	
-	/**
-	 * @param customID - ID of collection to be used
-	 * @return List of (at most) 20 jenkins builds (with replies and associated objects) sorted from newest to oldest
-	 */
-	public ArrayList<ArrayList<String>> getJenkinsBuilds(String customID) {
-		return getJenkinsBuilds(customID, 20);
 	}
 
 	/**
@@ -554,7 +548,7 @@ public class MongoLink {
 	public ArrayList<ArrayList<String>> getNextJenkinsBuilds(String customID, String lastID, int postLimit) {
 		return MongoMethods.dbFetch(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS").and("_id").lessThan(new ObjectId(lastID)).get(), MongoUtils.reverseSort, postLimit);
 	}
-	
+
 	/**
 	 * @param customID - ID of collection to be used
 	 * @param lastID - String ID of the last build currently in builds page
@@ -563,6 +557,58 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getNextJenkinsBuilds(String customID, String lastID) {
 		return getNextJenkinsBuilds(customID, lastID, 20);
+	}
+
+	/**
+	 * 
+	 * @param customID - ID of current group/project
+	 * @param newestID - ID of the newest post on news feed
+	 * @return - An Array of any news feed items that are newer than the post with 'newestID' 
+	 * @throws ParseException 
+	 */
+	public ArrayList<ArrayList<String>> getNewNews(String customID, String newestID) throws ParseException {		
+		return getNewItems(getGroupColl(customID), QueryBuilder.start(), newestID);
+	}
+	
+	/**
+	 * @param customID - ID of current group/project
+	 * @param newestID - ID of the newest task on task page
+	 * @return - An Array of any tasks that are newer than the task with 'newestID' 
+	 * @throws ParseException 
+	 */
+	public ArrayList<ArrayList<String>> getNewTasks(String customID, String newestID) throws ParseException {
+		return getNewItems(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK"), newestID);
+	}
+	
+	/**
+	 * @param customID - ID of current group/project
+	 * @param status - Status of task to get
+	 * @param newestID - ID of the newest task on specified task page
+	 * @return - An Array of any tasks with the given status that are newer than the task with 'newestID' 
+	 * @throws ParseException 
+	 */
+	public ArrayList<ArrayList<String>> getNewTasksWithStatus(String customID, String status, String newestID) throws ParseException {
+		return getNewItems(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").and("object.status").is(status), newestID);
+	}
+	
+	/**
+	 * @param customID - ID of current group/project
+	 * @param newestID - ID of the newest git on git page
+	 * @return - An Array of any git commits that are newer than the git commit with 'newestID' 
+	 * @throws ParseException 
+	 */
+	public ArrayList<ArrayList<String>> getNewGits(String customID, String newestID) throws ParseException {
+		return getNewItems(getGroupColl(customID), QueryBuilder.start("object.objectType").is("GIT"), newestID);
+	}
+	
+	/**
+	 * @param customID - ID of current group/project
+	 * @param newestID - ID of the newest jenkins build on jenkins build page
+	 * @return - An Array of any jenkins builds that are newer than the jenkins build with 'newestID' 
+	 * @throws ParseException 
+	 */
+	public ArrayList<ArrayList<String>> getNewBuilds(String customID, String newestID) throws ParseException {
+		return getNewItems(getGroupColl(customID), QueryBuilder.start("object.objectType").is("JENKINS"), newestID);
 	}
 	
 	/**
@@ -614,6 +660,27 @@ public class MongoLink {
 	}
 	
 	/**
+	 * @param groupID - ID of collection to be used 
+	 * @param alias - Alias of the task to fetch
+	 * @return - (Mongo)ID of the task with the given alias
+	 */
+	public String getTaskIDFromAlias(String groupID, String alias) {
+		DBObject task = getGroupColl(groupID).findOne(QueryBuilder.start("object.alias").is(alias).get());
+		if(task != null)
+			return task.get("_id").toString();
+		return null;
+	}
+	
+	/**
+	 * @param groupID - ID of current group/project
+	 * @param taskID - ID of the task. This method assumes this to be a valid ID
+	 * @param newStatus - new status which should be set for the task
+	 */
+	public void changeTaskStatus(String groupID, String taskID, String newStatus) {
+		MongoMethods.updateStatus(getGroupColl(groupID), taskID, newStatus);
+	}
+	
+	/**
 	 * @param groupID - ID of group/project
 	 * @param id - ID of task
 	 * @return Array of posts and their replies which reference the task with the given id
@@ -641,6 +708,26 @@ public class MongoLink {
 		for(DBObject r : referencingItems)
 		{
 			retList.add(MongoMethods.getEntireTopic(collection, r));
+		}
+		
+		return new ArrayList<ArrayList<String>>(retList);
+	}
+
+	/**
+	 * 
+	 * @param collection - Collection to use
+	 * @param query - Query which identifies which type of items are to be fetched
+	 * @param newestID - ID of the current newest post, so all fetched posts need to be newer than this post
+	 * @return - List of lists containing the new posts and their replies
+	 * @throws ParseException
+	 */
+	private ArrayList<ArrayList<String>> getNewItems(DBCollection collection, QueryBuilder query, String newestID) throws ParseException {
+		Set<ArrayList<String>> retList = new LinkedHashSet<ArrayList<String>>();
+		ArrayList<DBObject> referencingItems = (ArrayList<DBObject>) collection.find(query.and("target.messageID").is("").and("_id").greaterThan(new ObjectId(newestID)).get()).sort(MongoUtils.reverseSort).toArray();
+		
+		for(DBObject obj : referencingItems)
+		{
+			retList.add(MongoMethods.getEntireTopic(collection, obj));
 		}
 		
 		return new ArrayList<ArrayList<String>>(retList);
