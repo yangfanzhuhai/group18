@@ -10,6 +10,11 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 
+/** Class containing simpler, utility methods used by the back-end.
+ *  Acts as a helper for the MongoLink class.
+ * 
+ * @author Piotr Tokaj
+ */
 class MongoUtils {
 	
 	/** DBObject which specifies that objects are to be returned in reverse chronological order */

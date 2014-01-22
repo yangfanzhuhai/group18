@@ -24,6 +24,14 @@ import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
 import com.mongodb.util.JSON;
 
+/** Main class which handles calls to the database. Contains public methods
+ *  called by the REST-layer which make appropriate call to MongoDB in order
+ *  to process and return the correct data.
+ *  Uses first of all, the Mongo Java Drivers, as well as the MongoMethods
+ *  and MongoUtils classes which have helper methods
+ * 
+ * @author Piotr Tokaj
+ */
 public class MongoLink {
 	
 	/** Public singleton instance of the MongoLink class*/
@@ -61,7 +69,7 @@ public class MongoLink {
 	 * 
 	 * @param customID - ID of group collection
 	 * @param obj - Object to be inserted
-	 * @return TODO DO WE NEED A RETURN?
+	 * @return ID of the newly created object
 	 */
 	public String insertNews(String customID, DBObject obj) {
 		
@@ -370,15 +378,6 @@ public class MongoLink {
 	 */
 	public ArrayList<ArrayList<String>> getTasks(String customID){
 		return getTasks(customID, 20);
-	}
-
-	/**
-	 * @param customID - ID of collection to be used
-	 * @return A list of all tasks (only the tasks, no replies or associated objects)
-	 *  in order from newest to oldest 
-	 * @throws ParseException **/
-	private ArrayList<String> getAllTasksWithoutReplies(String customID) throws ParseException{
-		return MongoMethods.getItemsWithoutReferences(getGroupColl(customID), QueryBuilder.start("object.objectType").is("TASK").get(), MongoUtils.reverseSort);
 	}
 
 	/**

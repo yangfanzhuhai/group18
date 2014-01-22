@@ -13,6 +13,11 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 
+/** Class containing some more generic methods used by the back-end.
+ *  It acts as a helper for the MongoLink class.
+ * 
+ * @author Piotr Tokaj
+ */
 class MongoMethods {
 	
 	/**
@@ -29,7 +34,6 @@ class MongoMethods {
 		
 		try {
 			int i = 0;
-			//TODO change to for loop and completely revise this method
 			while(i < posts.size())
 			{
 				ArrayList<String> tempList = getReplies(newsFeed, posts.get(i).get("_id").toString());
@@ -41,7 +45,6 @@ class MongoMethods {
 				i++;
 			}
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -87,41 +90,6 @@ class MongoMethods {
 		retList.addAll(getReplies(collection, id));
 		
 		return retList;
-	}
-	
-	//TODO DELETE?
-	/** Generic method to find list of objects that satisfy the given query
-	 * and any task they reference
-	 * @param collection - Collection to be used
-	 * @param query - DBObject containing the information about the query
-	 * 
-	 * @return ArrayList of objects
-	 * @throws ParseException
-	 */
-	private static ArrayList<String> getItemsWithReferences(DBCollection collection, DBObject query) throws ParseException {
-		
-		ArrayList<DBObject> list = (ArrayList<DBObject>) collection.find(query).toArray();
-		ArrayList<String> retList = new ArrayList<String>();		
-		
-		
-		for(DBObject o : list) {
-			
-			retList.add(ActivityModel.activityModelGson.fromJson(o.toString(), ActivityModel.class).toJSON());
-			retList.addAll(getReferences(collection, o));
-		}
-		
-		return retList;
-	}
-	// TODO DELETE?
-	/**
-	 * @param coll - Collection to be used
-	 * @param id - ID string of the task
-	 * @return ArrayList of all the news feed items that reference the given task
-	 * @throws ParseException
-	 */
-	private ArrayList<String> getReferencedBy(DBCollection coll, String id) throws ParseException {
-		
-		return getItemsWithoutReferences(coll, QueryBuilder.start("target.taskIDs").in(new String[]{id}).get(), MongoUtils.reverseSort);
 	}
 
 	/**
